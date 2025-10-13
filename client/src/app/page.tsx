@@ -5,8 +5,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 
-// Animated intro screen for Pawnd — serene pond theme
-export default function PawndIntro() {
+export default function App() {
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[var(--background)]">
       <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
@@ -17,7 +16,7 @@ export default function PawndIntro() {
           className="text-7xl sm:text-8xl font-extrabold text-primary drop-shadow-lg"
           initial={{ y: -200, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
           Pawnd
         </motion.h1>
@@ -25,7 +24,7 @@ export default function PawndIntro() {
           className="mt-3 text-lg text-muted-foreground"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.8 }}
+          transition={{ delay: 0.8, duration: 0.8 }}
         >
           Buy • Sell • Connect — The UO Student Marketplace
         </motion.p>
@@ -35,12 +34,26 @@ export default function PawndIntro() {
           className="mt-8 flex gap-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.8, duration: 0.6 }}
+          transition={{ delay: 1.6, duration: 0.6 }}
         >
-          <Button style={{ ...styles.button, backgroundColor: 'var(--uo-green)', color: 'white' }} className="px-6 py-3 text-lg rounded-full shadow-md">Get Started</Button>
-          <Button style={{ ...styles.button, backgroundColor: 'var(--uo-yellow)', color: 'black' }} onClick={() => {
-            window.location.href = "/login";
-          }} className="px-6 py-3 text-lg rounded-full shadow-md">Login</Button>
+          <Button
+            style={{ ...styles.button, backgroundColor: 'var(--uo-green)', color: 'white' }}
+            onClick={() => { window.location.href = "/register"; }}
+            className="px-6 py-3 text-lg rounded-full shadow-md text-white 
+             hover:-translate-y-1 hover:shadow-[0_0_15px_var(--uo-green)] 
+             transition-all duration-300 ease-in-out"
+          >
+            Get Started
+          </Button>
+          <Button
+            style={{ ...styles.button, backgroundColor: 'var(--uo-yellow)', color: 'var(--background)' }}
+            onClick={() => { window.location.href = "/login"; }}
+            className="px-6 py-3 text-lg rounded-full shadow-md text-white 
+             hover:-translate-y-1 hover:shadow-[0_0_15px_var(--uo-yellow)] 
+             transition-all duration-300 ease-in-out"
+          >
+            Login
+          </Button>
         </motion.div>
       </div>
     </div>

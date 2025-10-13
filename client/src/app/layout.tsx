@@ -1,7 +1,7 @@
 //Next and React
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
-import { ThemeInit } from "./providers/ThemeInit";
+import { ThemeInit } from "../providers/ThemeInit";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pond",
+  title: "Pawnd",
   description: "UO Student Marketplace",
 };
 
