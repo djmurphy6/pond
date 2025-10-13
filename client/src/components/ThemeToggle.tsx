@@ -38,23 +38,23 @@ export default function ThemeToggle() {
             <AnimatePresence mode="wait" initial={false}>
                 {theme === "light" ? (
                     <motion.div
-                        key="moon"
+                        key="sun"
                         initial={{ rotate: -90, opacity: 0 }}
                         animate={{ rotate: 0, opacity: 1 }}
                         exit={{ rotate: 90, opacity: 0 }}
                         transition={{ duration: 0.15 }}
                     >
-                        <Moon />
+                        <Sun />
                     </motion.div>
                 ) : (
                     <motion.div
-                        key="sun"
+                        key="moon"
                         initial={{ rotate: 90, opacity: 0 }}
                         animate={{ rotate: 0, opacity: 1 }}
                         exit={{ rotate: -90, opacity: 0 }}
                         transition={{ duration: 0.15 }}
                     >
-                        <Sun />
+                        <Moon />
                     </motion.div>
                 )}
             </AnimatePresence>

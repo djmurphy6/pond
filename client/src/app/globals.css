@@ -41,6 +41,10 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* UO Colors */
+  --color-uo-green: var(--uo-green);
+  --color-uo-yellow: var(--uo-yellow);
 }
 
 :root {
@@ -76,6 +80,10 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* UO Colors */
+  --uo-green: oklch(0.5325 0.1697 139.52);
+  --uo-yellow: oklch(0.9647 0.1586 108);
 }
 
 .dark {
@@ -110,6 +118,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* UO Colors */
+  --uo-green: oklch(0.5325 0.1697 139.52);
+  --uo-yellow: oklch(0.9647 0.1586 108);
 }
 
 @layer base {
@@ -117,7 +129,7 @@
     @apply border-border outline-ring/50;
     transition:
       background-color 0.3s ease-in-out,
-      color 0.3s ease-in-out,
+      /* color 0.15s ease-in-out, */
       border-color 0.3s ease-in-out,
       fill 0.3s ease-in-out,
       stroke 0.3s ease-in-out;
