@@ -2,6 +2,7 @@
 
 //Next
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 //React and Other
 import { CSSProperties, useState } from "react";
@@ -21,6 +22,7 @@ import { ErrorResponse } from "@/api/WebTypes";
 
 
 export default function Register() {
+    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -34,7 +36,8 @@ export default function Register() {
         if (res instanceof ErrorResponse) {
             alert(JSON.stringify(res));
         } else {
-
+            console.log(JSON.stringify(res))
+            router.push("/login");
         }
 
         setIsLoading(false);

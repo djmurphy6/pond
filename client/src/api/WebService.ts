@@ -49,12 +49,12 @@ class API {
         if (headerArgs?.["Accept"] === "text/csv") {
             return response.blob() as Promise<T>;
         } else {
-            let text = await response.text();
-            console.log("Cookie Body" + text);
-            if (!text){
+            const responseText = await response.text();
+            console.log(responseText);
+            if (!responseText) {
                 return response as unknown as Promise<T>;
             }
-            return response.json() as Promise<T>;
+            return JSON.parse(responseText) as Promise<T>;
         }
     }
 

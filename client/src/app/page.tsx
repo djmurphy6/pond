@@ -40,7 +40,7 @@ export default function App() {
             style={{ ...styles.button, backgroundColor: 'var(--uo-green)', color: 'white' }}
             onClick={() => { window.location.href = "/register"; }}
             className="px-6 py-3 text-lg rounded-full shadow-md text-white 
-             hover:-translate-y-1 hover:shadow-[0_0_15px_var(--uo-green)] 
+             hover:-translate-y-1 hover:shadow-[0_0_10px_var(--uo-green)] 
              transition-all duration-300 ease-in-out"
           >
             Get Started
@@ -49,7 +49,7 @@ export default function App() {
             style={{ ...styles.button, backgroundColor: 'var(--uo-yellow)', color: 'var(--background)' }}
             onClick={() => { window.location.href = "/login"; }}
             className="px-6 py-3 text-lg rounded-full shadow-md text-white 
-             hover:-translate-y-1 hover:shadow-[0_0_15px_var(--uo-yellow)] 
+             hover:-translate-y-1 hover:shadow-[0_0_10px_var(--uo-yellow)] 
              transition-all duration-300 ease-in-out"
           >
             Login
