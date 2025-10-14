@@ -24,7 +24,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class User implements UserDetails {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -40,7 +40,7 @@ public class User implements UserDetails {
 
     @Column(nullable = true)
     private String avatar_url;
-;
+
     private boolean enabled;
 
     @Column(name = "verification_code")
