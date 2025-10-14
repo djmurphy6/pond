@@ -35,6 +35,7 @@ class API {
         const response = await fetch(url, {
             method,
             headers,
+            credentials: 'include',
             body: method !== "GET"
                 ? (isFormData ? (options.body as FormData) : JSON.stringify(options.body))
                 : undefined,
@@ -48,6 +49,11 @@ class API {
         if (headerArgs?.["Accept"] === "text/csv") {
             return response.blob() as Promise<T>;
         } else {
+            let text = await response.text();
+            console.log("Cookie Body" + text);
+            if (!text){
+                return response as unknown as Promise<T>;
+            }
             return response.json() as Promise<T>;
         }
     }

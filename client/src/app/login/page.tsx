@@ -38,6 +38,7 @@ export default function LoginPage() {
         if (res instanceof ErrorResponse) {
             alert(res.statusText);
         } else {
+            console.log(JSON.stringify(res));
             router.push("/dashboard");
         }
 

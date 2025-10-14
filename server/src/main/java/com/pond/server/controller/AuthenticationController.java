@@ -1,5 +1,9 @@
 package com.pond.server.controller;
 
+import java.util.Map;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,8 +51,17 @@ public class AuthenticationController {
 
             
             String jwtToken = jwtService.generateToken(authenticatedUser);
-            LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
-            return ResponseEntity.ok(loginResponse);
+            ResponseCookie cookie = ResponseCookie.from("accessToken", jwtToken)
+            .httpOnly(true)
+            .secure(true) // for local HTTP dev, you can temporarily set false
+            .path("/")
+            .maxAge(jwtService.getExpirationTime())
+            .sameSite("None") // for same-site local HTTP, use "Lax" instead
+            .build();
+
+            return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(Map.of("message", "Logged in"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e);
         }
