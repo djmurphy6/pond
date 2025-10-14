@@ -11,25 +11,37 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
+// API
+import api from "@/api/WebService";
+
+
 //Internal
 import ThemeToggle from "@/components/ThemeToggle";
+import { ErrorResponse } from "@/api/WebTypes";
 
 
 export default function Register() {
     const [isLoading, setIsLoading] = useState(false);
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Replace with API call
-        await new Promise((r) => setTimeout(r, 1000));
+        let res = await api.Register({ email, password, username: name, });
+        if (res instanceof ErrorResponse) {
+            alert(JSON.stringify(res));
+        } else {
+
+        }
 
         setIsLoading(false);
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-muted/20">
+        <div className="min-h-[100dvh] flex items-center justify-center bg-muted/20">
             <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
                 <ThemeToggle />
             </div>
@@ -45,17 +57,38 @@ export default function Register() {
                     <form onSubmit={handleRegister} className="space-y-4">
                         <div>
                             <Label style={styles.label} htmlFor="name">Full Name</Label>
-                            <Input id="name" type="text" placeholder="Your Name" required />
+                            <Input
+                                id="name"
+                                type="text"
+                                placeholder="Your Name"
+                                required
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                            />
                         </div>
 
                         <div>
                             <Label style={styles.label} htmlFor="email">UO Email</Label>
-                            <Input id="email" type="email" placeholder="you@uoregon.edu" required />
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="you@uoregon.edu"
+                                required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
                         </div>
 
                         <div>
                             <Label style={styles.label} htmlFor="password">Password</Label>
-                            <Input id="password" type="password" placeholder="••••••••" required />
+                            <Input
+                                id="password"
+                                type="password"
+                                placeholder="••••••••"
+                                required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
                         </div>
 
                         <Button style={{ marginTop: 10, color: 'white', cursor: 'pointer' }} type="submit" className="w-full bg-[var(--uo-green)] hover:bg-[var(--uo-green)]/70" disabled={isLoading}>

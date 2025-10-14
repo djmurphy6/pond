@@ -8,8 +8,8 @@
 
 export default function Dashboard() {
     return (
-        <div>
-            <h1>Dashboard</h1>
+        <div className="min-h-[100dvh] flex items-center justify-center bg-muted/20">
+            <h1 className="text-4xl font-bold text-primary drop-shadow-lg">Dashboard</h1>
         </div>
     )
 }

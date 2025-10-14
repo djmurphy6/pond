@@ -7,7 +7,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 export default function App() {
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[var(--background)]">
+    <div className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-[var(--background)]">
       <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
         <ThemeToggle />
       </div>
@@ -21,7 +21,7 @@ export default function App() {
           Pawnd
         </motion.h1>
         <motion.p
-          className="mt-3 text-lg text-muted-foreground"
+          className="mt-3 text-lg text-muted-foreground text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.8 }}
@@ -57,17 +57,6 @@ export default function App() {
         </motion.div>
       </div>
     </div>
-  );
-}
-
-function Cloud({ className, delay = 0 }: { className?: string; delay?: number }) {
-  return (
-    <motion.div
-      className={`absolute w-24 h-12 bg-white rounded-full blur-sm ${className}`}
-      initial={{ x: -100, opacity: 0 }}
-      animate={{ x: 1000, opacity: [0.8, 1, 0.8] }}
-      transition={{ repeat: Infinity, duration: 30, delay, ease: "linear" }}
-    />
   );
 }
 

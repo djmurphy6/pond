@@ -13,6 +13,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 
+//API
+import { ErrorResponse } from "@/api/WebTypes";
+import api from "@/api/WebService";
+
 //Internal
 import ThemeToggle from "@/components/ThemeToggle"
 
@@ -27,15 +31,21 @@ export default function LoginPage() {
         e.preventDefault();
         setIsLoading(true);
 
-        //replace with your real API call
-        await new Promise((r) => setTimeout(r, 1000));
+        console.log(email, password);
+
+        let res = await api.Login({ email, password });
+
+        if (res instanceof ErrorResponse) {
+            alert(res.statusText);
+        } else {
+            router.push("/dashboard");
+        }
 
         setIsLoading(false);
-        router.push("/dashboard");
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-muted/20">
+        <div className="min-h-[100dvh] flex items-center justify-center bg-muted/20">
             <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
                 <ThemeToggle />
             </div>

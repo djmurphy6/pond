@@ -17,52 +17,60 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-    
-    //Validates credentials and builds the authentication object
+
+    // Validates credentials and builds the authentication object
     private final AuthenticationProvider authenticationProvider;
-    //Extracts a JWT from the request and validates it, then sets the security context
+    // Extracts a JWT from the request and validates it, then sets the security
+    // context
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    //Constructor
-    public SecurityConfiguration(AuthenticationProvider authenticationProvider, JwtAuthenticationFilter jwtAuthenticationFilter){
+    // Constructor
+    public SecurityConfiguration(AuthenticationProvider authenticationProvider,
+            JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.authenticationProvider = authenticationProvider;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
-    
-    /*Defines the security filter chain:
-     1. Disables CSRF protection
-     2. Makes sure all requests under /auth are permitted, while any other request is authenticated
-     3. Sets the session creation policy to STATELESS, meaning no session is created or used, request must carry its own credentials(JWT)
-     4. Registers the authentication provider so the chain knows how to authenticate the request
-     5. Inserts the JWT filter early in the chain so the token validation runs on every request
-    */
+
+    /*
+     * Defines the security filter chain:
+     * 1. Disables CSRF protection
+     * 2. Makes sure all requests under /auth are permitted, while any other request
+     * is authenticated
+     * 3. Sets the session creation policy to STATELESS, meaning no session is
+     * created or used, request must carry its own credentials(JWT)
+     * 4. Registers the authentication provider so the chain knows how to
+     * authenticate the request
+     * 5. Inserts the JWT filter early in the chain so the token validation runs on
+     * every request
+     */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> {})
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/auth/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session ->session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .cors(cors -> {
+                })
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/auth/**").permitAll()
+                        .anyRequest().authenticated())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    //Configures CORS to allow requests from the frontend
+    // Configures CORS to allow requests from the frontend
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(){
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("CHANGE TO HOSTED BACKEND URL", "http://localhost:8080", "http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of("CHANGE TO HOSTED BACKEND URL", "http://localhost:8080",
+                "http://localhost:5173", "http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        //Registers the CORS configuration for all paths
+        // Registers the CORS configuration for all paths
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
