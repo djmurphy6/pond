@@ -20,18 +20,13 @@ import com.pond.server.service.JwtService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-
-
-
 @RequestMapping("/auth")
 @RestController
 public class AuthenticationController {
     private final JwtService jwtService;
     private final AuthenticationService authenticationService;
 
-
-
-    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService){
+    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
     }
@@ -41,75 +36,72 @@ public class AuthenticationController {
         try {
             User registeredUser = authenticationService.signup(registerUserDTO);
             return ResponseEntity.ok()
-                    .header("Success-message","Account created successfully")
+                    .header("Success-message", "Account created successfully")
                     .body(registeredUser);
-        } catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    //TODO: Refresh the refresh Token when refresh is called
+    // TODO: Refresh the refresh Token when refresh is called
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshAccessToken(HttpServletRequest request){
+    public ResponseEntity<?> refreshAccessToken(HttpServletRequest request) {
         try {
             String accessToken = jwtService.extractRefreshTokenFromRequest(request)
-                .orElseThrow(() -> new RuntimeException("Refresh token not found"));
+                    .orElseThrow(() -> new RuntimeException("Refresh token not found"));
             String userEmail = jwtService.extractUsername(accessToken);
             LoginUserDTO loginUserDTO = new LoginUserDTO();
             loginUserDTO.setEmail(userEmail);
             User user = authenticationService.authentication(loginUserDTO);
-            
-            if (!jwtService.isRefreshTokenValid(accessToken, user)){
+
+            if (!jwtService.isRefreshTokenValid(accessToken, user)) {
                 throw new RuntimeException("Invalid refresh token");
             }
 
             String newAccessToken = jwtService.generateAccessToken(user);
             return ResponseEntity.ok(Map.of(
-                "accessToken", newAccessToken
-            ));
+                    "accessToken", newAccessToken));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-
     @PostMapping("/login")
-    public ResponseEntity<?> Authenticate(@RequestBody LoginUserDTO loginUserDTO){
+    public ResponseEntity<?> Authenticate(@RequestBody LoginUserDTO loginUserDTO) {
         try {
             User authenticatedUser = authenticationService.authentication(loginUserDTO);
 
             String refreshToken = jwtService.generateToken(authenticatedUser);
             ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-            .httpOnly(true)
-            .secure(true) // for local HTTP dev, you can temporarily set false
-            .path("/")
-            .maxAge(jwtService.getExpirationTime())
-            .sameSite("None") // for same-site local HTTP, use "Lax" instead
-            .build();
+                    .httpOnly(true)
+                    .secure(true) // for local HTTP dev, you can temporarily set false
+                    .path("/")
+                    .maxAge(jwtService.getExpirationTime())
+                    .sameSite("None") // for same-site local HTTP, use "Lax" instead
+                    .build();
 
             String accessToken = jwtService.generateAccessToken(authenticatedUser);
-            LoginResponse loginResponse = new LoginResponse(refreshToken, accessToken);
+            LoginResponse loginResponse = new LoginResponse(accessToken);
 
             return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(loginResponse
-            );
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .body(loginResponse);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
 
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDTO verifyUserDTO){
-        try{
+    public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDTO verifyUserDTO) {
+        try {
             authenticationService.verifyUser(verifyUserDTO);
             return ResponseEntity.ok("Account verified successfully.");
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-// TODO: add the email resend code functionality here and in all areas
-//    @PostMapping("/resend")
-//    public ResponseEntity
+    // TODO: add the email resend code functionality here and in all areas
+    // @PostMapping("/resend")
+    // public ResponseEntity
 }

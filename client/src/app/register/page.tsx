@@ -37,7 +37,7 @@ export default function Register() {
             alert(JSON.stringify(res));
         } else {
             console.log(JSON.stringify(res))
-            router.push("/login");
+            router.replace("/login?from=register");
         }
 
         setIsLoading(false);
@@ -109,7 +109,7 @@ export default function Register() {
 
                 <CardFooter className="text-sm text-center">
                     Already have an account?
-                    <Link style={{ paddingLeft: 5 }} href="/login" className="text-[var(--uo-yellow)]  hover:underline">
+                    <Link style={{ paddingLeft: 5 }} replace href="/login?from=register" className="text-[var(--uo-yellow)]  hover:underline">
                         Sign in
                     </Link>
                 </CardFooter>

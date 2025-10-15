@@ -9,11 +9,9 @@ import lombok.Setter;
 
 @NoArgsConstructor
 public class LoginResponse {
-    private String refreshToken;
     private String accessToken;
 
-   public LoginResponse(String refreshToken, String accessToken){
-       this.refreshToken = refreshToken;
-       this.accessToken = accessToken;
-   }
+    public LoginResponse(String accessToken) {
+        this.accessToken = accessToken;
+    }
 }

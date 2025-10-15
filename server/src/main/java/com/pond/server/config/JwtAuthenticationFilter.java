@@ -21,20 +21,29 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter{
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtService jwtService,UserDetailsService userDetailsService,HandlerExceptionResolver handlerExceptionResolver){
+    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService,
+            HandlerExceptionResolver handlerExceptionResolver) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
     @Override
-    protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response,
+            @Nonnull FilterChain filterChain) throws ServletException, IOException {
+
+        String path = request.getServletPath();
+
+        if (path.startsWith("/auth/login") || path.startsWith("/auth/signup")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String jwt = null;
 
@@ -54,8 +63,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
                 if (userEmail != null && authentication == null) {
                     UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
                     if (jwtService.isAccessTokenValid(jwt, userDetails)) {
-                        UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                         authenticated = true;
@@ -63,7 +72,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
                 }
             }
 
-            // 2) If not authenticated via access token, try refresh cookie, mint a new access token
+            // 2) If not authenticated via access token, try refresh cookie, mint a new
+            // access token
             if (!authenticated) {
                 var refreshOpt = jwtService.extractRefreshTokenFromRequest(request);
                 if (refreshOpt.isPresent()) {
@@ -74,8 +84,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
                         if (jwtService.isRefreshTokenValid(refresh, userDetails)) {
                             // Mint new access token and authenticate request
                             String newAccess = jwtService.generateAccessToken(userDetails);
-                            UsernamePasswordAuthenticationToken authToken =
-                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
                             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                             SecurityContextHolder.getContext().setAuthentication(authToken);
 
