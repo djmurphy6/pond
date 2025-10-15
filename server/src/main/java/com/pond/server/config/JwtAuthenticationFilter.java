@@ -11,26 +11,20 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.util.WebUtils;
 
 import com.pond.server.service.JwtService;
 
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-//Runs on every request, validates the JWT token and sets the authenticated user in the security context
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
-    //Resolves any exceptions that occur during the request
     private final HandlerExceptionResolver handlerExceptionResolver;
-    //Validates the JWT token
     private final JwtService jwtService;
-    //Loads the user details from the database
     private final UserDetailsService userDetailsService;
 
     public JwtAuthenticationFilter(JwtService jwtService,UserDetailsService userDetailsService,HandlerExceptionResolver handlerExceptionResolver){
@@ -39,49 +33,63 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
         this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
-
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain) throws ServletException, IOException {
 
         String jwt = null;
-    
-        // 1) Try Authorization header (optional)
+
+        // 1) Try Authorization header (access token)
         final String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
         }
-    
-        // 2) Fallback to cookie "accessToken"
-        if (jwt == null) {
-            Cookie cookie = WebUtils.getCookie(request, "accessToken");
-            if (cookie != null) {
-                jwt = cookie.getValue();
-            }
-        }
-    
-        if (jwt == null || jwt.isEmpty()) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-    
+
         try {
-            final String userEmail = jwtService.extractUsername(jwt);
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    
-            if (userEmail != null && authentication == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-    
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+            boolean authenticated = false;
+
+            if (jwt != null) {
+                final String userEmail = jwtService.extractUsername(jwt);
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+                if (userEmail != null && authentication == null) {
+                    UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                    if (jwtService.isAccessTokenValid(jwt, userDetails)) {
+                        UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                        authenticated = true;
+                    }
                 }
             }
+
+            // 2) If not authenticated via access token, try refresh cookie, mint a new access token
+            if (!authenticated) {
+                var refreshOpt = jwtService.extractRefreshTokenFromRequest(request);
+                if (refreshOpt.isPresent()) {
+                    String refresh = refreshOpt.get();
+                    final String userEmail = jwtService.extractUsername(refresh);
+                    if (userEmail != null) {
+                        UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                        if (jwtService.isRefreshTokenValid(refresh, userDetails)) {
+                            // Mint new access token and authenticate request
+                            String newAccess = jwtService.generateAccessToken(userDetails);
+                            UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                            // Expose the new access token to the client
+                            response.setHeader("X-Access-Token", newAccess);
+                            authenticated = true;
+                        }
+                    }
+                }
+            }
+
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
             handlerExceptionResolver.resolveException(request, response, null, exception);
         }
-
     }
 }

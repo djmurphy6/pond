@@ -40,7 +40,7 @@ public class AuthenticationService {
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiration(LocalDateTime.now().plusMinutes(15));
-        user.setEnabled(true);
+        user.setEnabled(false);
         return userRepository.save(user);
     }
 

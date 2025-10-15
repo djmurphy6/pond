@@ -18,6 +18,10 @@ import com.pond.server.responses.LoginResponse;
 import com.pond.server.service.AuthenticationService;
 import com.pond.server.service.JwtService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
+
+
 
 @RequestMapping("/auth")
 @RestController
@@ -26,10 +30,10 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
 
+
     public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService){
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
-
     }
 
     @PostMapping("/signup")
@@ -44,14 +48,38 @@ public class AuthenticationController {
         }
     }
 
+    //TODO: Refresh the refresh Token when refresh is called
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshAccessToken(HttpServletRequest request){
+        try {
+            String accessToken = jwtService.extractRefreshTokenFromRequest(request)
+                .orElseThrow(() -> new RuntimeException("Refresh token not found"));
+            String userEmail = jwtService.extractUsername(accessToken);
+            LoginUserDTO loginUserDTO = new LoginUserDTO();
+            loginUserDTO.setEmail(userEmail);
+            User user = authenticationService.authentication(loginUserDTO);
+            
+            if (!jwtService.isRefreshTokenValid(accessToken, user)){
+                throw new RuntimeException("Invalid refresh token");
+            }
+
+            String newAccessToken = jwtService.generateAccessToken(user);
+            return ResponseEntity.ok(Map.of(
+                "accessToken", newAccessToken
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody LoginUserDTO loginUserDTO){
+    public ResponseEntity<?> Authenticate(@RequestBody LoginUserDTO loginUserDTO){
         try {
             User authenticatedUser = authenticationService.authentication(loginUserDTO);
 
-            
-            String jwtToken = jwtService.generateToken(authenticatedUser);
-            ResponseCookie cookie = ResponseCookie.from("accessToken", jwtToken)
+            String refreshToken = jwtService.generateToken(authenticatedUser);
+            ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
             .httpOnly(true)
             .secure(true) // for local HTTP dev, you can temporarily set false
             .path("/")
@@ -59,9 +87,13 @@ public class AuthenticationController {
             .sameSite("None") // for same-site local HTTP, use "Lax" instead
             .build();
 
+            String accessToken = jwtService.generateAccessToken(authenticatedUser);
+            LoginResponse loginResponse = new LoginResponse(refreshToken, accessToken);
+
             return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(Map.of("message", "Logged in"));
+                .body(loginResponse
+            );
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e);
         }

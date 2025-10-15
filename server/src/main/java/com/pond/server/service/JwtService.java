@@ -4,17 +4,21 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.WebUtils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 //Claims are part of the JWT token's payload
  //Claims::getSubject: the subject of the token, which is the username(equivalent to Claims c -> c.getSubject() in Java)
@@ -27,6 +31,9 @@ public class JwtService {
 
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
+
+    @Value("${security.jwt.access-expiration-time}")
+    private long accessExpiration;
 
    
     //Pass in a token and the function extracts the username from the token payload
@@ -51,8 +58,16 @@ public class JwtService {
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
+    public String generateAccessToken(UserDetails userDetails){
+        return buildToken(new HashMap<>(), userDetails, accessExpiration);
+    }
+
     public long getExpirationTime(){
         return jwtExpiration;
+    }
+
+    public long getAccessExpirationTime(){
+        return accessExpiration;
     }
 
     //Build token builds a hashmap of the extra claims and the user details, and then builds the token
@@ -68,10 +83,19 @@ public class JwtService {
             .compact();
     }
 
+
     //Makes sure the token username matches the userDetails username and that the token is not expired
     public boolean isTokenValid(String token, UserDetails userDetails){
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public boolean isRefreshTokenValid(String token, UserDetails userDetails){
+        return isTokenValid(token, userDetails);
+    }
+
+    public boolean isAccessTokenValid(String token, UserDetails userDetails){
+        return isTokenValid(token, userDetails);
     }
 
     //Makes sure the token is not expired
@@ -99,6 +123,11 @@ public class JwtService {
     private Key getSignInKey(){
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public Optional<String> extractRefreshTokenFromRequest(HttpServletRequest request){
+        Cookie cookie = WebUtils.getCookie(request, "refreshToken");
+        return cookie == null ? Optional.empty() : Optional.ofNullable(cookie.getValue());
     }
 
 }
