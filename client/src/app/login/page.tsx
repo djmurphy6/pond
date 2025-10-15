@@ -15,7 +15,7 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 
 //API
 import { ErrorResponse } from "@/api/WebTypes";
-import api from "@/api/WebService";
+import api, { appConfig, SaveAppConfig } from "@/api/WebService";
 
 //Internal
 import ThemeToggle from "@/components/ThemeToggle"
@@ -31,15 +31,20 @@ export default function LoginPage() {
         e.preventDefault();
         setIsLoading(true);
 
-        console.log(email, password);
-
         let res = await api.Login({ email, password });
 
         if (res instanceof ErrorResponse) {
-            alert(res.statusText);
+            // alert(JSON.stringify(res));
+            alert(res.body?.error);
         } else {
-            console.log(JSON.stringify(res));
-            router.push("/dashboard");
+            if (res.accessToken) {
+                console.log(JSON.stringify(res));
+                appConfig.access_token = res.accessToken;
+                SaveAppConfig();
+                router.replace("/dashboard");
+            } else {
+                alert("Login failed: " + JSON.stringify(res));
+            }
         }
 
         setIsLoading(false);

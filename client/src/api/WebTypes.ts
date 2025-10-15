@@ -2,9 +2,9 @@ export class ErrorResponse {
     name?: string;
     code?: number;
     statusText?: string;
-    body?: string;
+    body?: { error: string };
 
-    constructor(name: string, code: number, statusText: string, body?: string) {
+    constructor(name: string, code: number, statusText: string, body?: { error: string }) {
         this.name = name;
         this.code = code;
         this.statusText = statusText;
@@ -29,6 +29,5 @@ export type LoginRequest = {
     password: string;
 }
 export type LoginResponse = {
-    token: string;
-    expiresIn: number;
+    accessToken: string;
 }
