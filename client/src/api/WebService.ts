@@ -1,4 +1,5 @@
-import { ErrorResponse, RegisterUserRequest, RegisterUserResponse, type LoginRequest, type LoginResponse } from "./WebTypes";
+import { UserInfo } from "@/stores/UserInfoStore";
+import { ErrorResponse, GetUserInfoRequest, RegisterUserRequest, RegisterUserResponse, type LoginRequest, type LoginResponse } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -55,6 +56,8 @@ class API {
                     : undefined,
             });
 
+            console.log("Response:", JSON.stringify(response));
+
             if (response.status === 401 && appConfig.access_token) {
                 await sendRefreshToken();
                 continue;
@@ -72,7 +75,7 @@ class API {
                 if (contentType?.includes('application/json')) {
                     return response.json() as Promise<T>;
                 } else {
-                    return response as any;
+                    return new ErrorResponse(internalMethod, -1, "Unknown Endpoint", { error: "Unknown content type" });
                 }
             }
         }
@@ -86,6 +89,10 @@ class API {
 
     async Login(body: LoginRequest): Promise<LoginResponse | ErrorResponse> {
         return this.Request<LoginResponse>("/auth/login", "POST", { body }, 'Login');
+    }
+
+    async GetUserInfo(body: GetUserInfoRequest): Promise<UserInfo | ErrorResponse> {
+        return this.Request<UserInfo>("/auth/info", "POST", { body }, 'GetUserInfo');
     }
 }
 

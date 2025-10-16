@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pawnd",
+  title: "Pond",
   description: "UO Student Marketplace",
 };
 

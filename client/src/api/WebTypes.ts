@@ -31,3 +31,8 @@ export type LoginRequest = {
 export type LoginResponse = {
     accessToken: string;
 }
+
+//GET USER INFO
+export type GetUserInfoRequest = {
+    email: string;
+}
