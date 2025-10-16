@@ -12,11 +12,21 @@ export function middleware(request: NextRequest) {
         request.nextUrl.pathname.startsWith(path)
     );
 
-    const isLogin = request.nextUrl.pathname.startsWith("/login") && (request.nextUrl.searchParams.get("from") !== "register");
+    const fromRegister = (request.nextUrl.searchParams.get("from") === "register")
+    const unAuthorized = (request.nextUrl.searchParams.get("error") === "unauthorized");
+
+    const isLogin = request.nextUrl.pathname.startsWith("/login") && !unAuthorized && !fromRegister;
 
     if (isProtected && !token) {
         const loginUrl = new URL("/login", request.url);
-        loginUrl.searchParams.set("from", request.nextUrl.pathname);
+
+        if (unAuthorized) {
+            loginUrl.searchParams.set("error", "unauthorized");
+        }
+        if (fromRegister) {
+            loginUrl.searchParams.set("from", "register");
+        }
+
         return NextResponse.redirect(loginUrl);
     } else if (isLogin && token) {
         return NextResponse.redirect(new URL("/dashboard", request.url));

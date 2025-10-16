@@ -18,7 +18,7 @@ export default function App() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          Pawnd
+          Pond
         </motion.h1>
         <motion.p
           className="mt-3 text-lg text-muted-foreground text-center"
