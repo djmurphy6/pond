@@ -6,12 +6,15 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 //Internal
 import ThemeToggle from "@/components/ThemeToggle";
-import Duck from "./duck";
-import "./duck.css";
+import Duck from "../components/LandingPage/duck/duck";
+import Moon from "@/components/LandingPage/moon/moon";
 
 export default function App() {
   return (
-    <div style={{ zIndex: 0 }} className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-[var(--background)]">
+    <div style={{ zIndex: 0 }} className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-[var(--landing-page-bg)]">
+
+      <Moon />
+
       <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
         <ThemeToggle />
       </div>
