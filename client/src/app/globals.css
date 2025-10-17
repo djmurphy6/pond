@@ -84,6 +84,9 @@
   /* UO Colors */
   --uo-green: oklch(0.5325 0.1697 139.52);
   --uo-yellow: oklch(0.6824 0.1554 91.94);
+
+  /* Landing Page */
+  --landing-page-bg: oklch(0.8353 0.0789 221.29);
 }
 
 .dark {
@@ -122,6 +125,9 @@
   /* UO Colors */
   --uo-green: oklch(0.5325 0.1697 139.52);
   --uo-yellow: oklch(0.9647 0.1586 108);
+
+  /* Landing Page */
+  --landing-page-bg: oklch(0.2033 0.0123 256.8);
 }
 
 @layer base {
