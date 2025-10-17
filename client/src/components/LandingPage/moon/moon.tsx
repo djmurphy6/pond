@@ -11,6 +11,9 @@ export default function Duck() {
             <div className="hole"></div>
             <div className="hole"></div>
             <div className="hole"></div>
+            <div className="hole"></div>
+            <div className="hole"></div>
+            <div className="hole"></div>
         </div>
     )
 }
