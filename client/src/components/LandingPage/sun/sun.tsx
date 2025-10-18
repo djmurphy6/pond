@@ -3,11 +3,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import "./moon.css";
+import "./sun.css";
 
 const THEME_KEY = "theme-storage";
 
-export default function Moon() {
+export default function Sun() {
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
@@ -24,25 +24,17 @@ export default function Moon() {
 
     return (
         <AnimatePresence mode="wait">
-            {theme === "dark" && (
+            {theme === "light" && (
                 <motion.div
                     onClick={toggleTheme}
-                    className="moon"
+                    className="sun"
                     style={{ transform: "scale(1.5)", cursor: "pointer" }}
                     initial={{ x: -200, y: -200, scale: 0.8, }}
                     animate={{ x: 0, y: 0, scale: 1, }}
                     exit={{ x: 200, y: 200, scale: 0.8, }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
-                >
-                    {/* moon craters */}
-                    {[...Array(11)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="hole"
-                            style={i === 3 ? { transform: "scale(0.75)" } : {}}
-                        />
-                    ))}
-                </motion.div>
+                />
+
             )}
         </AnimatePresence>
     );

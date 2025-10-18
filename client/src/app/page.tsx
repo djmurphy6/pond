@@ -7,17 +7,17 @@ import { Button } from "@/components/ui/button";
 //Internal
 import ThemeToggle from "@/components/ThemeToggle";
 import Duck from "../components/LandingPage/duck/duck";
+
 import Moon from "@/components/LandingPage/moon/moon";
+import Sun from "@/components/LandingPage/sun/sun";
 
 export default function App() {
   return (
     <div style={{ zIndex: 0 }} className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-[var(--landing-page-bg)]">
 
       <Moon />
+      <Sun />
 
-      {/* <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-        <ThemeToggle />
-      </div>
       <div className="relative z-10 flex flex-col items-center">
         <motion.h1
           className="text-7xl sm:text-8xl font-extrabold text-primary drop-shadow-lg"
@@ -61,7 +61,7 @@ export default function App() {
             Login
           </Button>
         </motion.div>
-      </div> */}
+      </div>
 
       <Duck />
       {/* <motion.img
