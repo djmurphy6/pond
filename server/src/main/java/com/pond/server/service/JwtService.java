@@ -72,11 +72,18 @@ public class JwtService {
 
     //Build token builds a hashmap of the extra claims and the user details, and then builds the token
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration){
-        //Initializes the builder, then sets the claims, subject, issued at, expiration, and sign with the sign in key, and finally compacts the token
+        // Prefer email as subject to match UserDetailsService lookup; fallback to username
+        String subject;
+        try {
+            subject = (String) userDetails.getClass().getMethod("getEmail").invoke(userDetails);
+        } catch (Exception ignored) {
+            subject = userDetails.getUsername();
+        }
+
         return Jwts
             .builder()
             .setClaims(extraClaims)
-            .setSubject(userDetails.getUsername())
+            .setSubject(subject)
             .setIssuedAt(new Date(System.currentTimeMillis()))
             .setExpiration(new Date(System.currentTimeMillis() + expiration))
             .signWith(getSignInKey(), SignatureAlgorithm.HS256)

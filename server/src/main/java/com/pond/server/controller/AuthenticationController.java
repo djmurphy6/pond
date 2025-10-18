@@ -98,7 +98,7 @@ public class AuthenticationController {
             authenticationService.verifyUser(verifyUserDTO);
             return ResponseEntity.ok("Account verified successfully.");
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
     // TODO: add the email resend code functionality here and in all areas
