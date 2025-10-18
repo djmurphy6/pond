@@ -1,16 +1,37 @@
 "use client"
 
+//React
 import React, { CSSProperties, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+//Internal
 import ThemeToggle from "@/components/ThemeToggle";
+import Duck from "../components/LandingPage/duck/duck";
+
+import Moon from "@/components/LandingPage/moon/moon";
+import Sun from "@/components/LandingPage/sun/sun";
+import Stars from "@/components/LandingPage/stars/stars";
+import Ground from "@/components/LandingPage/ground/ground";
+
+/* 
+  Z LAYOUT
+-------------
+Duck - 3
+Ground - 2
+Moon/Sun - 1
+Stars/Clouds - 0
+BG - 0
+-------------
+*/
 
 export default function App() {
   return (
-    <div className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-[var(--background)]">
-      <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-        <ThemeToggle />
-      </div>
+    <div style={{ zIndex: 0 }} className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-[var(--landing-page-bg)]">
+
+      <Moon />
+      <Sun />
+      <Stars />
+
       <div className="relative z-10 flex flex-col items-center">
         <motion.h1
           className="text-7xl sm:text-8xl font-extrabold text-primary drop-shadow-lg"
@@ -29,7 +50,6 @@ export default function App() {
           Buy • Sell • Connect — The UO Student Marketplace
         </motion.p>
 
-        {/* Buttons */}
         <motion.div
           className="mt-8 flex gap-4"
           initial={{ opacity: 0, y: 20 }}
@@ -56,6 +76,11 @@ export default function App() {
           </Button>
         </motion.div>
       </div>
+
+      <Duck />
+
+      <Ground />
+
     </div>
   );
 }

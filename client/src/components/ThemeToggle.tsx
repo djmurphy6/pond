@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const THEME_KEY = "theme-storage";
+export const THEME_KEY = "theme-storage";
+export const MOBILE_RATIO = 0.8;
 
 export default function ThemeToggle() {
     const { theme, setTheme } = useTheme();

@@ -92,7 +92,7 @@ class API {
     }
 
     async GetUserInfo(body: GetUserInfoRequest): Promise<UserInfo | ErrorResponse> {
-        return this.Request<UserInfo>("/auth/info", "POST", { body }, 'GetUserInfo');
+        return this.Request<UserInfo>("/auth/all", "POST", { body }, 'GetUserInfo');
     }
 }
 

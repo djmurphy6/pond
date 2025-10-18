@@ -34,5 +34,5 @@ export type LoginResponse = {
 
 //GET USER INFO
 export type GetUserInfoRequest = {
-    email: string;
+    // email: string;
 }

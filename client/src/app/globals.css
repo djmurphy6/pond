@@ -45,6 +45,11 @@
   /* UO Colors */
   --color-uo-green: var(--uo-green);
   --color-uo-yellow: var(--uo-yellow);
+
+  /* Grass */
+  --color-grass-dark: var(--grass-dark);
+  --color-grass-med: var(--grass-med);
+  --color-grass-light: var(--grass-light);
 }
 
 :root {
@@ -84,6 +89,14 @@
   /* UO Colors */
   --uo-green: oklch(0.5325 0.1697 139.52);
   --uo-yellow: oklch(0.6824 0.1554 91.94);
+
+  /* Grass */
+  --grass-dark: oklch(0.2831 0.0782 144.22);
+  --grass-med: oklch(0.5734 0.1718 139.94);
+  --grass-light: oklch(0.8824 0.26 136.3);
+
+  /* Landing Page */
+  --landing-page-bg: oklch(0.8353 0.0789 221.29);
 }
 
 .dark {
@@ -122,6 +135,14 @@
   /* UO Colors */
   --uo-green: oklch(0.5325 0.1697 139.52);
   --uo-yellow: oklch(0.9647 0.1586 108);
+
+  /* Grass */
+  --grass-dark: oklch(0.2925 0.0444 187.98);
+  --grass-med: oklch(0.4638 0.0847 168.13);
+  --grass-light: oklch(0.6619 0.1423 162.35);
+
+  /* Landing Page */
+  --landing-page-bg: oklch(0.2033 0.0123 256.8);
 }
 
 @layer base {
