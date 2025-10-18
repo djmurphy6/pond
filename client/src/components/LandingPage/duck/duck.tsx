@@ -2,15 +2,32 @@
 
 import { motion } from "framer-motion";
 import "./duck.css";
+import { useEffect, useState } from "react";
+import { MOBILE_RATIO } from "@/components/ThemeToggle";
 
 export default function Duck() {
+
+    const [scale, setScale] = useState(1);
+
+    useEffect(() => {
+        const updateScale = () => {
+            const zoom = window.devicePixelRatio;
+            const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+            setScale(isMobile ? MOBILE_RATIO : 1 / zoom);
+        };
+        updateScale();
+        window.addEventListener("resize", updateScale);
+        return () => window.removeEventListener("resize", updateScale);
+    }, []);
+
     return (
 
         <motion.div
             className="duck"
-            style={{ scaleX: -0.75, scaleY: 0.75, position: "absolute", translateY: "100%" }}
+            style={{ scaleX: -0.75 * scale, scaleY: 0.75 * scale, position: "absolute" }}
             animate={{
-                x: ["-70vw", "50vw"],
+                x: [`-${550 * scale}px`, `${550 * scale}px`],
+                y: [`${250 * scale}px`],
             }}
             transition={{
                 duration: 25,

@@ -73,6 +73,17 @@ export default function App() {
           transition={{ duration: 0, repeat: Infinity, ease: "easeInOut" }}
         /> */}
 
+      <div style={{
+        position: 'absolute',
+        top: '90%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '100%',
+        height: '20%',
+        backgroundColor: 'var(--uo-green)',
+        zIndex: 1
+      }} />
+
     </div>
   );
 }
