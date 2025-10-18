@@ -65,8 +65,6 @@ public class User implements UserDetails {
 
     
 
-    
-
     //TODO: implement 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){

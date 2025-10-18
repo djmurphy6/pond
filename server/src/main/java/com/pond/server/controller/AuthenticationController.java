@@ -101,6 +101,22 @@ public class AuthenticationController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        // Expire the refresh cookie
+        ResponseCookie expired = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true) // for localhost over HTTP use false and sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, expired.toString())
+                .body(Map.of("message", "Logged out"));
+    }
     // TODO: add the email resend code functionality here and in all areas
     // @PostMapping("/resend")
     // public ResponseEntity
