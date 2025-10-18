@@ -15,7 +15,7 @@ export default function App() {
 
       <Moon />
 
-      <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+      {/* <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
         <ThemeToggle />
       </div>
       <div className="relative z-10 flex flex-col items-center">
@@ -36,7 +36,6 @@ export default function App() {
           Buy • Sell • Connect — The UO Student Marketplace
         </motion.p>
 
-        {/* Buttons */}
         <motion.div
           className="mt-8 flex gap-4"
           initial={{ opacity: 0, y: 20 }}
@@ -62,7 +61,7 @@ export default function App() {
             Login
           </Button>
         </motion.div>
-      </div>
+      </div> */}
 
       <Duck />
       {/* <motion.img
