@@ -1,0 +1,121 @@
+.star1 {
+    position: absolute;
+    transform-origin: center center;
+    --size: 10px;
+    --thick: 8%;
+    --color: #fefefe;
+    rotate: 45deg;
+    width: var(--size);
+    aspect-ratio: 1;
+    background:
+        linear-gradient(45deg,
+            transparent calc(50% - var(--thick)),
+            var(--color) 0 calc(50% + var(--thick)),
+            transparent 0),
+        linear-gradient(-45deg,
+            transparent calc(50% - var(--thick)),
+            var(--color) 0 calc(50% + var(--thick)),
+            transparent 0);
+
+}
+
+.star1:before {
+    position: absolute;
+    content: "";
+    background-color: #fefefe;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    filter: blur(1px);
+    opacity: 0.25;
+}
+
+.star2 {
+    pointer-events: none;
+    will-change: opacity, transform;
+    position: absolute;
+    content: "";
+    background-color: #fefefe;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    transform-origin: center center;
+}
+
+.star2::before {
+    position: absolute;
+    content: "";
+    background-color: #fefefe;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: 0.5;
+}
+
+.star3 {
+    position: absolute;
+    transform-origin: center center;
+    --size: 10px;
+    --thick: 8%;
+    --color: #fefefe;
+
+    width: var(--size);
+    aspect-ratio: 1;
+    background:
+        linear-gradient(45deg,
+            transparent calc(50% - var(--thick)),
+            var(--color) 0 calc(50% + var(--thick)),
+            transparent 0),
+        linear-gradient(-45deg,
+            transparent calc(50% - var(--thick)),
+            var(--color) 0 calc(50% + var(--thick)),
+            transparent 0);
+}
+
+.star3:before {
+    position: absolute;
+    content: "";
+    rotate: 45deg;
+    width: var(--size);
+    aspect-ratio: 1;
+    background:
+        linear-gradient(45deg,
+            transparent calc(50% - var(--thick)),
+            var(--color) 0 calc(50% + var(--thick)),
+            transparent 0),
+        linear-gradient(-45deg,
+            transparent calc(50% - var(--thick)),
+            var(--color) 0 calc(50% + var(--thick)),
+            transparent 0);
+}
+
+.star3:after {
+    position: absolute;
+    content: "";
+    width: var(--size);
+    aspect-ratio: 1;
+    background-color: var(--color);
+    filter: blur(1px);
+    opacity: 0.25;
+}
+
+@keyframes twinkle {
+
+    0%,
+    100% {
+        opacity: 0.9;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.95);
+    }
+}
+
+.star1,
+.star2,
+.star3 {
+    animation: twinkle 3s ease-in-out infinite;
+}

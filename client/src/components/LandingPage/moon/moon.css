@@ -6,7 +6,7 @@
     background-color: #ffffff;
     /* top: 50px; */
     /* right: 50px; */
-    z-index: 0;
+    z-index: 1;
 }
 
 .moon:before {

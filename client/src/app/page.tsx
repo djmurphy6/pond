@@ -10,6 +10,19 @@ import Duck from "../components/LandingPage/duck/duck";
 
 import Moon from "@/components/LandingPage/moon/moon";
 import Sun from "@/components/LandingPage/sun/sun";
+import Stars from "@/components/LandingPage/stars/stars";
+import Ground from "@/components/LandingPage/ground/ground";
+
+/* 
+  Z LAYOUT
+-------------
+Duck - 3
+Ground - 2
+Moon/Sun - 1
+Stars/Clouds - 0
+BG - 0
+-------------
+*/
 
 export default function App() {
   return (
@@ -17,6 +30,7 @@ export default function App() {
 
       <Moon />
       <Sun />
+      <Stars />
 
       <div className="relative z-10 flex flex-col items-center">
         <motion.h1
@@ -64,25 +78,8 @@ export default function App() {
       </div>
 
       <Duck />
-      {/* <motion.img
-          src="/cart.svg"
-          alt="Shopping cart"
-          className="cart"
-          style={{ width: '100px', height: 'auto' }}
-          animate={{ x: [0, 10, 0] }}
-          transition={{ duration: 0, repeat: Infinity, ease: "easeInOut" }}
-        /> */}
 
-      <div style={{
-        position: 'absolute',
-        top: '90%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '100%',
-        height: '20%',
-        backgroundColor: 'var(--uo-green)',
-        zIndex: 1
-      }} />
+      <Ground />
 
     </div>
   );
