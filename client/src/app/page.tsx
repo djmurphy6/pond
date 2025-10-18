@@ -12,6 +12,7 @@ import Moon from "@/components/LandingPage/moon/moon";
 import Sun from "@/components/LandingPage/sun/sun";
 import Stars from "@/components/LandingPage/stars/stars";
 import Ground from "@/components/LandingPage/ground/ground";
+import Clouds from "@/components/LandingPage/clouds/clouds";
 
 /* 
   Z LAYOUT
@@ -31,6 +32,7 @@ export default function App() {
       <Moon />
       <Sun />
       <Stars />
+      <Clouds />
 
       <div className="relative z-10 flex flex-col items-center">
         <motion.h1

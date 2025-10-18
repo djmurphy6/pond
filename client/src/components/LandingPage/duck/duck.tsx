@@ -1,18 +1,25 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import "./duck.css";
 import { useEffect, useState } from "react";
 import { MOBILE_RATIO } from "@/components/ThemeToggle";
+import { useTheme } from "next-themes";
 
 export default function Duck() {
 
     const [scale, setScale] = useState(1);
+    const [isMobile, setIsMobile] = useState(false);
+    const { theme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => setMounted(true), []);
 
     useEffect(() => {
         const updateScale = () => {
             const zoom = window.devicePixelRatio;
             const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+            setIsMobile(isMobile);
             setScale(isMobile ? MOBILE_RATIO : 1 / zoom);
         };
         updateScale();
@@ -20,17 +27,18 @@ export default function Duck() {
         return () => window.removeEventListener("resize", updateScale);
     }, []);
 
+    if (!mounted) return null;
     return (
 
         <motion.div
             className="duck"
-            style={{ scaleX: -0.75 * scale, scaleY: 0.75 * scale, position: "absolute" }}
+            style={{ scaleX: -0.75 * 1, scaleY: 0.75 * 1, position: "absolute" }}
             animate={{
-                x: [`-${550 * scale}px`, `${550 * scale}px`],
+                x: [`-${(isMobile ? 400 : 1050) * scale}px`, `${(isMobile ? 400 : 1050) * scale}px`],
                 y: [`${250 * scale}px`],
             }}
             transition={{
-                duration: 25,
+                duration: (isMobile ? 20 : 47.27),
                 ease: "linear",
                 repeat: Infinity,
             }}
@@ -49,8 +57,31 @@ export default function Duck() {
                 >
                     <div className="featherHead" />
                     <div className="featherHead2" />
+
+
                     <div className="duck-body" />
-                    <div className="eye"></div>
+
+                    <motion.div
+                        className="eye"
+                        initial={{ rotate: theme === "light" ? -30 : 0 }}
+                        animate={{ rotate: theme === "light" ? -30 : 0 }}
+                    />
+
+                    <AnimatePresence>
+                        {theme === 'light' && (
+                            <motion.div
+                                initial={{ y: -20, opacity: 0.5 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: -20, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: "easeIn" }}
+                            >
+                                <div className="sun-glasses"></div>
+                                <div className="sun-glasses-top"></div>
+                                <div className="arch"></div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <motion.div
                         className="beak"
                         animate={{
