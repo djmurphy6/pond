@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.WebUtils;
 
+import com.pond.server.model.User;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -93,8 +95,18 @@ public class JwtService {
 
     //Makes sure the token username matches the userDetails username and that the token is not expired
     public boolean isTokenValid(String token, UserDetails userDetails){
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final String subject = extractUsername(token); // subject is the email
+        String principalIdentifier;
+        if (userDetails instanceof User u){
+           principalIdentifier = u.getEmail();
+        } else {
+            try {
+                principalIdentifier = (String) userDetails.getClass().getMethod("getEmail").invoke(userDetails);
+            } catch (Exception e) {
+                principalIdentifier = userDetails.getUsername();
+            }
+        }
+        return (subject.equals(principalIdentifier) && !isTokenExpired(token));
     }
 
     public boolean isRefreshTokenValid(String token, UserDetails userDetails){
