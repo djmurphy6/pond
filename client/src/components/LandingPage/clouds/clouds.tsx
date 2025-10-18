@@ -31,15 +31,22 @@ export default function Clouds() {
     const clouds = useMemo(() => CLOUD_POSITIONS.map(({ top, left, scale }, i) => (
         <div
             key={i}
-            className="cloud"
             style={{
                 top: `${top}%`,
                 left: `${left}%`,
+                position: "absolute",
                 transform: `scale(${scale * scaleRatio * 0.5})`,
-                animationDelay: `${(-i * 0.37) % 5}s`,
-                animationDuration: `${10 + i % 5}s`,
-            } as React.CSSProperties}
-        />
+            }}
+        >
+            <div
+                className="cloud"
+                style={{
+                    animationDelay: `${(-i * 0.37) % 5}s`,
+                    animationDuration: `${10 + i % 5}s`,
+                }}
+            />
+        </div>
+
     )), [scaleRatio]);
 
     if (!mounted) return null;
@@ -53,26 +60,7 @@ export default function Clouds() {
                     exit={{ opacity: 0, x: 0 }}
                     transition={{ duration: 0.3 }}
                 >
-                    {CLOUD_POSITIONS.map(({ top, left, scale }, i) => (
-                        <div
-                            key={i}
-                            style={{
-                                top: `${top}%`,
-                                left: `${left}%`,
-                                position: "absolute",
-                                transform: `scale(${scale * scaleRatio * 0.5})`,
-                            }}
-                        >
-                            <div
-                                className="cloud"
-                                style={{
-                                    animationDelay: `${(-i * 0.37) % 5}s`,
-                                    animationDuration: `${10 + i % 5}s`,
-                                }}
-                            />
-                        </div>
-
-                    ))}
+                    {clouds}
                 </motion.div>
             )}
         </AnimatePresence>
