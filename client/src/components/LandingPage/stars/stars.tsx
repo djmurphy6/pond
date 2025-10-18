@@ -37,7 +37,7 @@ export default function Stars() {
         return (
             <div
                 key={i}
-                className={`star${2}`}
+                className={`star`}
                 style={{
                     top: `${top}%`,
                     left: `${left}%`,

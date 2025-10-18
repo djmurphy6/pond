@@ -1,0 +1,10 @@
+.hill {
+    position: absolute;
+    /* top: 60%;
+    left: 100px; */
+    width: 200px;
+    height: 300px;
+    background-color: var(--grass-light);
+    border-radius: 9999px;
+    z-index: 1;
+}

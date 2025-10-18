@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useAnimation } from "framer-motion";
 import "./duck.css";
 import { useEffect, useState } from "react";
 import { MOBILE_RATIO } from "@/components/ThemeToggle";
@@ -32,10 +32,10 @@ export default function Duck() {
 
         <motion.div
             className="duck"
-            style={{ scaleX: -0.75 * 1, scaleY: 0.75 * 1, position: "absolute" }}
+            style={{ scaleX: -0.75 * scale, scaleY: 0.75 * scale, position: "absolute", bottom: '0px' }}
             animate={{
                 x: [`-${(isMobile ? 400 : 1050) * scale}px`, `${(isMobile ? 400 : 1050) * scale}px`],
-                y: [`${250 * scale}px`],
+                y: [`${(isMobile ? -4 : -7) * scale}rem`],
             }}
             transition={{
                 duration: (isMobile ? 20 : 47.27),
