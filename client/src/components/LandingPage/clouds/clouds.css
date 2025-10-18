@@ -1,0 +1,53 @@
+.cloud {
+    position: absolute;
+    transform-origin: top left;
+    width: 200px;
+    height: 100px;
+    background-color: #fff;
+    border-radius: 50px;
+    z-index: 0;
+    transform: translate(0, 0);
+    animation: floatCloud 18s ease-in-out infinite;
+}
+
+.cloud:before {
+    position: absolute;
+    content: "";
+    width: 100px;
+    height: 100px;
+    background-color: #fff;
+    border-radius: 50px;
+    top: -50px;
+    left: 80px;
+}
+
+.cloud:after {
+    position: absolute;
+    content: "";
+    width: 70px;
+    height: 70px;
+    background-color: #fff;
+    border-radius: 50px;
+    top: -30px;
+    left: 30px;
+}
+
+@keyframes floatCloud {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    25% {
+        transform: translate(8px, 2px);
+    }
+
+    50% {
+        transform: translate(15px, 6px);
+    }
+
+    75% {
+        transform: translate(8px, 3px);
+    }
+}
