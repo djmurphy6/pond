@@ -38,14 +38,14 @@
 
 @keyframes wave-drift {
     0% {
-        transform: translateX(0);
+        transform: translateX(-12.5%);
     }
 
     50% {
-        transform: translateX(-25%);
+        transform: translateX(12.5%);
     }
 
     100% {
-        transform: translateX(0);
+        transform: translateX(-12.5%);
     }
 }

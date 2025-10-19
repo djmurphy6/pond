@@ -34,19 +34,19 @@ export default function Water() {
         <>
             <motion.div
                 style={{
-                    height: `${350 * scale}px`,
+                    height: `35vh`,
                 }}
                 className="water-back"
             />
             <motion.div
                 style={{
-                    height: `${350 * scale}px`,
+                    height: `35vh`,
                 }}
                 className="water-mid"
             />
             <motion.div
                 style={{
-                    height: `${350 * scale}px`,
+                    height: `35vh`,
                 }}
                 animate={{ background: theme === "light" ? "linear-gradient(to top, oklch(0.3466 0.1156 257.57 / 0%) 10%, var(--water-front) 50%, var(--water-front) 100%)" : "linear-gradient(to top, oklch(0.3466 0.1156 257.57) 10%, var(--water-front) 50%, var(--water-front) 100%)" }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}

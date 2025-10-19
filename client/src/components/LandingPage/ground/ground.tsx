@@ -34,11 +34,11 @@ export default function Ground() {
         <>
             <motion.div style={{
                 position: 'absolute',
-                bottom: `${-100 * scale}px`,
-                left: `${250 * scale}px`,
+                bottom: `${-11.5}vh`,
+                left: `${isMobile ? 50 : 12.5}vw`,
                 transform: 'translate(-50%, -50%)',
-                width: `${500 * scale}px`,
-                height: `${200 * scale}px`,
+                width: `${isMobile ? 100 : 25}vw`,
+                height: `${22}vh`,
                 overflow: 'revert',
                 zIndex: 2,
                 borderRadius: "0% 20% 0% 0% / 100% 50% 100% 100%"
@@ -50,11 +50,11 @@ export default function Ground() {
             />
             <motion.div style={{
                 position: 'absolute',
-                bottom: `${-100 * scale}px`,
-                right: `-${250 * scale}px`,
+                bottom: `${-11.5}vh`,
+                right: `-${12.5}vw`,
                 transform: 'translate(-50%, -50%)',
-                width: `${500 * scale}px`,
-                height: `${200 * scale}px`,
+                width: `${25}vw`,
+                height: `${22}vh`,
                 overflow: 'revert',
                 zIndex: 2,
                 borderRadius: "20% 0% 0% 0% / 50% 100% 100% 100%"
@@ -67,7 +67,7 @@ export default function Ground() {
 
 
             {!isMobile && (<motion.div
-                style={{ scale: scale, left: 0, bottom: 0 }}
+                style={{ left: 0, bottom: 0 }}
                 initial={{ x: 20 * scale, y: 200 * scale }}
                 animate={{
                     x: 20 * scale,
@@ -78,7 +78,7 @@ export default function Ground() {
                 className="hill"
             />)}
             {!isMobile && (<motion.div
-                style={{ scale: scale, left: 0, bottom: 0 }}
+                style={{ left: 0, bottom: 0 }}
                 initial={{ x: 190 * scale, y: 200 * scale }}
                 animate={{
                     x: 190 * scale,
@@ -94,33 +94,33 @@ export default function Ground() {
 
 
             <motion.div
-                style={{ scale: scale, right: 0, bottom: 0 }}
+                style={{ scale: isMobile ? scale : undefined, right: 0, bottom: 0, width: isMobile ? '50vw' : undefined, height: isMobile ? '40vh' : undefined }}
                 initial={{ x: -130 * scale, y: 200 * scale }}
                 animate={{
                     x: -130 * scale,
-                    y: -50 * scale,
+                    y: -100 * scale,
                     background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hill"
             />
             <motion.div
-                style={{ scale: scale, right: 0, bottom: 0 }}
+                style={{ scale: isMobile ? scale : undefined, right: 0, bottom: 0, width: isMobile ? '50vw' : undefined, height: isMobile ? '40vh' : undefined }}
                 initial={{ x: -30 * scale, y: 200 * scale }}
                 animate={{
                     x: -30 * scale,
-                    y: 10 * scale,
+                    y: -20 * scale,
                     background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hill"
             />
             <motion.div
-                style={{ scale: scale, right: 0, bottom: 0 }}
+                style={{ scale: isMobile ? scale : undefined, right: 0, bottom: 0, width: isMobile ? '50vw' : undefined, height: isMobile ? '40vh' : undefined }}
                 initial={{ x: -200 * scale, y: 200 * scale }}
                 animate={{
                     x: -200 * scale,
-                    y: 50 * scale,
+                    y: 30 * scale,
                     background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}

@@ -36,8 +36,9 @@ export default function Duck() {
             className="duck"
             style={{ scaleX: -0.75 * scale, scaleY: 0.75 * scale, position: "absolute", bottom: '0px' }}
             animate={{
-                x: [`-${(isMobile ? 400 : 1050) * scale}px`, `${(isMobile ? 400 : 1050) * scale}px`],
-                y: isMobile ? ['-3rem'] : [`${-7 * scale}rem`, `${-4 * scale}rem`, `${-4 * scale}rem`, `${-7 * scale}rem`],
+                x: [`-60vw`, '60vw'],
+                // x: [`-${(isMobile ? 400 : 1050) * scale}px`, `${(isMobile ? 400 : 1050) * scale}px`],
+                y: isMobile ? ['-5vh'] : [`-10vh`, `-3vh`, `-3vh`, `-10vh`],
             }}
             transition={{
                 duration: (isMobile ? 20 : 47.27),
@@ -46,11 +47,14 @@ export default function Duck() {
                 repeat: Infinity,
             }}
             onUpdate={(latest) => {
-                const leftEdge = -450 * scale;
-                const rightEdge = 450 * scale;
                 const valX = parseFloat(latest.x.toString());
-                if (valX <= rightEdge && valX >= leftEdge && !isMobile) setIsWalking(false);
-                else setIsWalking(true);
+                console.log(valX)
+
+                if (valX <= 25 && valX >= -25 && !isMobile) {
+                    setIsWalking(false);
+                } else {
+                    setIsWalking(true);
+                }
             }}
         >
             <motion.div
