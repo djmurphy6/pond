@@ -18,7 +18,8 @@ export default function Ground() {
     useEffect(() => {
         const updateScale = () => {
             const zoom = window.devicePixelRatio;
-            const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+            // const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
             setIsMobile(isMobile);
             setScale(isMobile ? MOBILE_RATIO : 1 / zoom);
         };
@@ -65,7 +66,7 @@ export default function Ground() {
             />
 
 
-            <motion.div
+            {!isMobile && (<motion.div
                 style={{ scale: scale, left: 0, bottom: 0 }}
                 initial={{ x: 20 * scale, y: 200 * scale }}
                 animate={{
@@ -75,8 +76,8 @@ export default function Ground() {
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hill"
-            />
-            <motion.div
+            />)}
+            {!isMobile && (<motion.div
                 style={{ scale: scale, left: 0, bottom: 0 }}
                 initial={{ x: 190 * scale, y: 200 * scale }}
                 animate={{
@@ -86,7 +87,7 @@ export default function Ground() {
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hill"
-            />
+            />)}
 
 
 
@@ -94,9 +95,9 @@ export default function Ground() {
 
             <motion.div
                 style={{ scale: scale, right: 0, bottom: 0 }}
-                initial={{ x: -100 * scale, y: 200 * scale }}
+                initial={{ x: -130 * scale, y: 200 * scale }}
                 animate={{
-                    x: -100 * scale,
+                    x: -130 * scale,
                     y: -50 * scale,
                     background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
                 }}
@@ -105,9 +106,9 @@ export default function Ground() {
             />
             <motion.div
                 style={{ scale: scale, right: 0, bottom: 0 }}
-                initial={{ x: -0 * scale, y: 200 * scale }}
+                initial={{ x: -30 * scale, y: 200 * scale }}
                 animate={{
-                    x: 0 * scale,
+                    x: -30 * scale,
                     y: 10 * scale,
                     background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
                 }}
@@ -116,9 +117,9 @@ export default function Ground() {
             />
             <motion.div
                 style={{ scale: scale, right: 0, bottom: 0 }}
-                initial={{ x: -170 * scale, y: 200 * scale }}
+                initial={{ x: -200 * scale, y: 200 * scale }}
                 animate={{
-                    x: -170 * scale,
+                    x: -200 * scale,
                     y: 50 * scale,
                     background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
                 }}

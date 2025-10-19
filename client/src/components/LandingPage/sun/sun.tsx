@@ -21,7 +21,8 @@ export default function Sun() {
     useEffect(() => {
         const updateScale = () => {
             const zoom = window.devicePixelRatio;
-            const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+            // const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
             setScale(isMobile ? MOBILE_RATIO : 1 / zoom);
         };
         updateScale();
