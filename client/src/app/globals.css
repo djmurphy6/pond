@@ -100,6 +100,11 @@
   --landing-page-bg-color2: oklch(0.8574 0.1033 190.79);
   --landing-page-bg: linear-gradient(to bottom, var(--landing-page-bg-color2) 20%, var(--landing-page-bg-color) 100%);
 
+  /* Water */
+  --water-back: oklch(0.5547 0.1708 257.02 / 20%);
+  --water-mid: oklch(0.5547 0.1708 257.02 / 50%);
+  --water-front: oklch(0.5547 0.1708 257.02);
+  --water-gradient: oklch(0.3466 0.1156 257.57 / 0%);
 }
 
 .dark {
@@ -148,6 +153,12 @@
   --landing-page-bg-color: oklch(53.51% 0.0462 254.247);
   --landing-page-bg-color2: oklch(0% 0 0);
   --landing-page-bg: linear-gradient(to bottom, var(--landing-page-bg-color2) 40%, var(--landing-page-bg-color) 100%);
+
+  /* Water */
+  --water-back: oklch(0.5547 0.1708 257.02 / 20%);
+  --water-mid: oklch(0.5547 0.1708 257.02 / 50%);
+  --water-front: oklch(0.5547 0.1708 257.02);
+  --water-gradient: oklch(0.3466 0.1156 257.57);
 }
 
 @layer base {

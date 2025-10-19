@@ -45,7 +45,7 @@ export default function Sun() {
                     style={{ scale: 1.5 * scale, cursor: "pointer" }}
                     initial={{ x: 0 * scale, y: -850 * scale, }}
                     animate={{ x: 0, y: -300 * scale, }}
-                    exit={{ x: 0 * scale, y: 500 * scale, }}
+                    exit={{ x: 0 * scale, y: 700 * scale, }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                 />
 

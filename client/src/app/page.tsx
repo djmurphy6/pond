@@ -14,6 +14,7 @@ import Stars from "@/components/LandingPage/stars/stars";
 import Ground from "@/components/LandingPage/ground/ground";
 import Clouds from "@/components/LandingPage/clouds/clouds";
 import { useTheme } from "next-themes";
+import Water from "@/components/LandingPage/water/water";
 
 /* 
             Z LAYOUT
@@ -30,7 +31,7 @@ const textBorder = 4;
 
 export default function App() {
   return (
-    <div style={{ zIndex: 0, background: "var(--landing-page-bg)", transition: "--landing-page-bg-color2 0.5s, --landing-page-bg-color 0.5s" }} className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden">
+    <div style={{ zIndex: 0, background: "var(--landing-page-bg)", transition: "--landing-page-bg-color2 0.3s, --landing-page-bg-color 0.3s" }} className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden">
 
       <Moon />
       <Sun />
@@ -78,6 +79,7 @@ export default function App() {
 
       <Duck />
 
+      <Water />
       <Ground />
 
     </div>

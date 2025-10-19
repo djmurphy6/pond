@@ -74,7 +74,7 @@ const CLOUD_POSITIONS = [
     { top: 50, left: 7, scale: 1.2 },
     { top: 10, left: 72, scale: 1.2 },
     { top: 50, left: 67, scale: 1.2 },
-    { top: 70, left: 37, scale: 1.2 },
+    { top: 30, left: 5, scale: 1.2 },
 
 ];
 
