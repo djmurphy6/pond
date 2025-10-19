@@ -19,16 +19,6 @@ export const metadata: Metadata = {
   title: "Pond",
   description: "UO Student Marketplace",
 
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    viewportFit: "cover",
-  },
-  themeColor: [
-    // Chrome/Android
-    { media: "(prefers-color-scheme: light)", color: "#0a330d" },
-    { media: "(prefers-color-scheme: dark)", color: "#001a08" },
-  ],
   // Optional iOS support
   other: {
     "mobile-web-app-capable": "yes",
