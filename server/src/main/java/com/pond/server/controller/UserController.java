@@ -1,7 +1,7 @@
 package com.pond.server.controller;
 
-
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,31 +23,44 @@ public class UserController {
     private final UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    public UserController(UserService userService){
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<User>> allUsers(){
-        logger.info("allUsers() endpoint called");
-        List<User> users = userService.allUsers();
-        logger.info("Returning {} users", users.size());
-        return ResponseEntity.ok(users);
+    public ResponseEntity<?> allUsers() {
+        try {
+            logger.info("allUsers() endpoint called");
+            List<User> users = userService.allUsers();
+            logger.info("Returning {} users", users.size());
+            return ResponseEntity.ok(users);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
-
-
     @GetMapping("/me")
-    public ResponseEntity<UserProfileDTO> authenticatedUser(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
-        UserProfileDTO userProfileDTO = new UserProfileDTO(currentUser.getId(), currentUser.getUsername(), currentUser.getEmail(), currentUser.getAvatar_url());
-        return ResponseEntity.ok(userProfileDTO);
+    public ResponseEntity<?> authenticatedUser() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User currentUser = (User) authentication.getPrincipal();
+            UserProfileDTO userProfileDTO = new UserProfileDTO(currentUser.getId(), currentUser.getUsername(),
+                    currentUser.getEmail(), currentUser.getAvatar_url());
+            return ResponseEntity.ok(userProfileDTO);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @GetMapping("/{username}")
-    public ResponseEntity<UserProfileDTO> getByUsername(@PathVariable String username){
-        return userService.getProfileByUsername(username).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> getByUsername(@PathVariable String username) {
+        try {
+
+            return userService.getProfileByUsername(username).map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
 }

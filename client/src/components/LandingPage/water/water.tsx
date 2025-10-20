@@ -48,7 +48,7 @@ export default function Water() {
                 style={{
                     height: `35vh`,
                 }}
-                animate={{ background: theme === "light" ? "linear-gradient(to top, oklch(0.3466 0.1156 257.57 / 0%) 10%, var(--water-front) 50%, var(--water-front) 100%)" : "linear-gradient(to top, oklch(0.3466 0.1156 257.57) 10%, var(--water-front) 50%, var(--water-front) 100%)" }}
+                animate={{ background: theme === "light" ? "linear-gradient(to top, var(--water-front) 50%, var(--water-front) 100%)" : "linear-gradient(to top, oklch(0.3466 0.1156 257.57) 10%, var(--water-front) 50%, var(--water-front) 100%)" }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="water-front"
             />

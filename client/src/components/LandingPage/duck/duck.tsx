@@ -35,9 +35,9 @@ export default function Duck() {
         <motion.div
             className="duck"
             style={{ scaleX: -0.75 * scale, scaleY: 0.75 * scale, position: "absolute", bottom: '0px' }}
+            initial={{ x: '-60vw' }}
             animate={{
                 x: [`-60vw`, '60vw'],
-                // x: [`-${(isMobile ? 400 : 1050) * scale}px`, `${(isMobile ? 400 : 1050) * scale}px`],
                 y: isMobile ? ['-5vh'] : [`-10vh`, `-3vh`, `-3vh`, `-10vh`],
             }}
             transition={{
@@ -48,7 +48,6 @@ export default function Duck() {
             }}
             onUpdate={(latest) => {
                 const valX = parseFloat(latest.x.toString());
-                console.log(valX)
 
                 if (valX <= 25 && valX >= -25 && !isMobile) {
                     setIsWalking(false);

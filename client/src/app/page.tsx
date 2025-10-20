@@ -21,8 +21,8 @@ import Water from "@/components/LandingPage/water/water";
           -------------
           Duck - 3
           Ground - 2
+          Water - 2
           Moon/Sun - 1
-          Water - 1
           Stars/Clouds - 0
           BG - 0
           -------------
@@ -31,7 +31,8 @@ const textBorder = 4;
 
 export default function App() {
   return (
-    <div style={{ zIndex: 0, background: "var(--landing-page-bg)", transition: "--landing-page-bg-color2 0.3s, --landing-page-bg-color 0.3s" }} className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden">
+    <div className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-[var(--background)]" style={{ zIndex: 0 }}>
+      <Background />
 
       <Moon />
       <Sun />
@@ -84,6 +85,47 @@ export default function App() {
 
     </div>
   );
+}
+
+function Background() {
+  const [mounted, setMounted] = useState(false);
+  const { theme } = useTheme();
+
+  useEffect(() => setMounted(true))
+
+  if (!mounted) return null;
+  return (
+    <>
+      {/* Old gradient */}
+      <motion.div
+        key={`old-${theme === "light" ? "dark" : "light"}`}
+        initial={{ opacity: .25 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1 }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          background: "var(--landing-page-bg)",
+        }}
+      />
+      {/* New gradient */}
+      <motion.div
+        key={theme}
+        initial={{ opacity: .25 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1 }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          background: "var(--landing-page-bg)",
+        }}
+      />
+    </>
+  )
 }
 
 function PondText() {

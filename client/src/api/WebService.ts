@@ -59,8 +59,18 @@ class API {
             console.log("Response:", JSON.stringify(response));
 
             if (response.status === 401 || response.status === 403 && appConfig.access_token) {
-                await sendRefreshToken();
-                continue;
+                try {
+                    await sendRefreshToken();
+                    continue;
+                } catch (refreshError) {
+                    console.error("Refresh token failed:", refreshError);
+                    return new ErrorResponse(
+                        internalMethod,
+                        401,
+                        "Unauthorized",
+                        { error: "Session expired. Please log in again." }
+                    );
+                }
             }
 
             if (!response.ok || (response.status !== 401 && response.status !== 200)) {
