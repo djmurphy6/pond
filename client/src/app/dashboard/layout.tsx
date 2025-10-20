@@ -18,7 +18,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     useEffect(() => {
         const getUserInfo = async () => {
-            const userInfo = await api.GetUserInfo({ email: "test@uo.com" });
+            const userInfo = await api.GetUserInfo({});
             console.log("GetUserInfo:", JSON.stringify(userInfo));
             if (userInfo instanceof ErrorResponse) {
                 router.push("/login?error=unauthorized");

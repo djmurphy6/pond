@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.WebUtils;
 
+import com.pond.server.model.User;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -72,11 +74,18 @@ public class JwtService {
 
     //Build token builds a hashmap of the extra claims and the user details, and then builds the token
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration){
-        //Initializes the builder, then sets the claims, subject, issued at, expiration, and sign with the sign in key, and finally compacts the token
+        // Prefer email as subject to match UserDetailsService lookup; fallback to username
+        String subject;
+        try {
+            subject = (String) userDetails.getClass().getMethod("getEmail").invoke(userDetails);
+        } catch (Exception ignored) {
+            subject = userDetails.getUsername();
+        }
+
         return Jwts
             .builder()
             .setClaims(extraClaims)
-            .setSubject(userDetails.getUsername())
+            .setSubject(subject)
             .setIssuedAt(new Date(System.currentTimeMillis()))
             .setExpiration(new Date(System.currentTimeMillis() + expiration))
             .signWith(getSignInKey(), SignatureAlgorithm.HS256)
@@ -86,8 +95,18 @@ public class JwtService {
 
     //Makes sure the token username matches the userDetails username and that the token is not expired
     public boolean isTokenValid(String token, UserDetails userDetails){
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final String subject = extractUsername(token); // subject is the email
+        String principalIdentifier;
+        if (userDetails instanceof User u){
+           principalIdentifier = u.getEmail();
+        } else {
+            try {
+                principalIdentifier = (String) userDetails.getClass().getMethod("getEmail").invoke(userDetails);
+            } catch (Exception e) {
+                principalIdentifier = userDetails.getUsername();
+            }
+        }
+        return (subject.equals(principalIdentifier) && !isTokenExpired(token));
     }
 
     public boolean isRefreshTokenValid(String token, UserDetails userDetails){

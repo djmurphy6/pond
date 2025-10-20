@@ -1,21 +1,59 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion, useAnimate, useAnimation } from "framer-motion";
 import "./duck.css";
+import { useEffect, useState } from "react";
+import { MOBILE_RATIO } from "@/components/ThemeToggle";
+import { useTheme } from "next-themes";
 
 export default function Duck() {
+
+    const [scale, setScale] = useState(1);
+    const [isMobile, setIsMobile] = useState(false);
+    const { theme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+    const [isWalking, setIsWalking] = useState(true);
+
+    useEffect(() => setMounted(true), []);
+
+    useEffect(() => {
+        const updateScale = () => {
+            const zoom = window.devicePixelRatio;
+            // const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            setIsMobile(isMobile);
+            setScale(isMobile ? MOBILE_RATIO : 1 / zoom);
+        };
+        updateScale();
+        window.addEventListener("resize", updateScale);
+        return () => window.removeEventListener("resize", updateScale);
+    }, []);
+
+    if (!mounted) return null;
     return (
 
         <motion.div
             className="duck"
-            style={{ scaleX: -0.75, scaleY: 0.75, position: "absolute", translateY: "100%" }}
+            style={{ scaleX: -0.75 * scale, scaleY: 0.75 * scale, position: "absolute", bottom: '0px' }}
+            initial={{ x: '-60vw' }}
             animate={{
-                x: ["-70vw", "50vw"],
+                x: [`-60vw`, '60vw'],
+                y: isMobile ? ['-5vh'] : [`-10vh`, `-3vh`, `-3vh`, `-10vh`],
             }}
             transition={{
-                duration: 25,
+                duration: (isMobile ? 20 : 47.27),
+                times: isMobile ? undefined : [0, 0.3, 0.35, 0.65, 0.7, 1],
                 ease: "linear",
                 repeat: Infinity,
+            }}
+            onUpdate={(latest) => {
+                const valX = parseFloat(latest.x.toString());
+
+                if (valX <= 25 && valX >= -25 && !isMobile) {
+                    setIsWalking(false);
+                } else {
+                    setIsWalking(true);
+                }
             }}
         >
             <motion.div
@@ -32,8 +70,31 @@ export default function Duck() {
                 >
                     <div className="featherHead" />
                     <div className="featherHead2" />
+
+
                     <div className="duck-body" />
-                    <div className="eye"></div>
+
+                    <motion.div
+                        className="eye"
+                        initial={{ rotate: theme === "light" ? -30 : 0 }}
+                        animate={{ rotate: theme === "light" ? -30 : 0 }}
+                    />
+
+                    <AnimatePresence>
+                        {theme === 'light' && (
+                            <motion.div
+                                initial={{ y: -20, opacity: 0.5 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: -20, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: "easeIn" }}
+                            >
+                                <div className="sun-glasses"></div>
+                                <div className="sun-glasses-top"></div>
+                                <div className="arch"></div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <motion.div
                         className="beak"
                         animate={{
@@ -52,29 +113,52 @@ export default function Duck() {
                     />
                 </motion.div>
 
-
-
-
-                <motion.div
-                    className="leg-left"
-                    animate={{
-                        // x: [-5, 0, -5],
-                        y: [0, 10, 0],
-                        rotate: [5, -2, 5],
-                    }}
-                    transition={{ delay: 0.5, duration: 1, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.div
-                    className="leg-right"
-                    animate={{
-                        // x: [-5, 0, -5],
-                        y: [0, 10, 0],
-                        rotate: [5, -2, 5],
-                    }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
-                />
+                <DuckLegs isWalking={isWalking} />
 
             </motion.div>
         </motion.div>
+    );
+}
+
+export function DuckLegs({ isWalking }: { isWalking: boolean }) {
+    const leftControls = useAnimation();
+    const rightControls = useAnimation();
+
+    useEffect(() => {
+        const startWalking = async () => {
+            await Promise.all([
+                leftControls.start({ y: 0, rotate: 0, transition: { duration: 0.4, ease: "easeInOut" } }),
+                rightControls.start({ y: 0, rotate: 0, transition: { duration: 0.4, ease: "easeInOut" } }),
+            ]);
+            leftControls.start({
+                y: [0, 10, 0],
+                rotate: [5, -2, 5],
+                transition: { delay: 0.5, duration: 1, repeat: Infinity, ease: "easeInOut" },
+            });
+            rightControls.start({
+                y: [0, 10, 0],
+                rotate: [5, -2, 5],
+                transition: { duration: 1, repeat: Infinity, ease: "easeInOut" },
+            });
+        };
+
+        const stopWalking = async () => {
+            leftControls.stop();
+            rightControls.stop();
+            await Promise.all([
+                leftControls.start({ y: -15, rotate: 0, transition: { duration: 0.4, ease: "easeInOut" } }),
+                rightControls.start({ y: -15, rotate: 0, transition: { duration: 0.4, ease: "easeInOut" } }),
+            ]);
+        };
+
+        if (isWalking) startWalking();
+        else stopWalking();
+    }, [isWalking, leftControls, rightControls]);
+
+    return (
+        <>
+            <motion.div className="leg-left" animate={leftControls} />
+            <motion.div className="leg-right" animate={rightControls} />
+        </>
     );
 }

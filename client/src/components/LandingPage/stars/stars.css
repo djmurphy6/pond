@@ -1,0 +1,53 @@
+.star {
+    pointer-events: none;
+    will-change: opacity, transform;
+    position: absolute;
+    content: "";
+    background-color: #fefefe;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    transform-origin: center center;
+}
+
+.star::before {
+    position: absolute;
+    content: "";
+    background-color: #fefefe;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: 1;
+}
+
+.star::after {
+    position: absolute;
+    content: "";
+    background-color: #fefefe;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    filter: blur(5px);
+    opacity: 1;
+}
+
+@keyframes twinkle {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.95);
+    }
+}
+
+.star1,
+.star2,
+.star3 {
+    animation: twinkle 3s ease-in-out infinite;
+}

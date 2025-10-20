@@ -58,6 +58,13 @@ public class User implements UserDetails {
     public User() {
     }
 
+    @Override
+    public String getUsername(){
+        return username;
+    }
+
+    
+
     //TODO: implement 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){

@@ -2,11 +2,13 @@ package com.pond.server.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.pond.server.dto.UserProfileDTO;
 import com.pond.server.model.User;
-import com.pond.server.repository.UserRepository;  
+import com.pond.server.repository.UserRepository;
 
 @Service
 public class UserService {
@@ -20,5 +22,9 @@ public class UserService {
         userRepository.findAll().forEach(users::add);
         return users;
     }
+    public Optional<UserProfileDTO> getProfileByUsername(String username){
+        return userRepository.findByUsername(username).map(u -> new UserProfileDTO(u.getId(), u.getUsername(), u.getEmail(), u.getAvatar_url()));
+    }
+
 }
 

@@ -3,10 +3,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import "./moon.css";
+import "./sun.css";
 import { MOBILE_RATIO, THEME_KEY } from "@/components/ThemeToggle";
 
-export default function Moon() {
+
+export default function Sun() {
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
@@ -16,6 +17,7 @@ export default function Moon() {
         setTheme(localStorage.getItem(THEME_KEY) || "light");
         setMounted(true);
     }, []);
+
     useEffect(() => {
         const updateScale = () => {
             const zoom = window.devicePixelRatio;
@@ -27,7 +29,6 @@ export default function Moon() {
         window.addEventListener("resize", updateScale);
         return () => window.removeEventListener("resize", updateScale);
     }, []);
-
     if (!mounted) return null;
 
     const toggleTheme = () => {
@@ -38,25 +39,17 @@ export default function Moon() {
 
     return (
         <AnimatePresence mode="wait">
-            {theme === "dark" && (
+            {theme === "light" && (
                 <motion.div
                     onClick={toggleTheme}
-                    className="moon"
+                    className="sun"
                     style={{ scale: 1.5 * scale, cursor: "pointer" }}
                     initial={{ x: 0 * scale, y: -850 * scale, }}
                     animate={{ x: 0, y: -300 * scale, }}
                     exit={{ x: 0 * scale, y: 700 * scale, }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
-                >
-                    {/* moon craters */}
-                    {[...Array(11)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="hole"
-                            style={i === 3 ? { transform: "scale(0.75)" } : {}}
-                        />
-                    ))}
-                </motion.div>
+                />
+
             )}
         </AnimatePresence>
     );

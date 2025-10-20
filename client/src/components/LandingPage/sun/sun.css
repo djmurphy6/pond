@@ -1,0 +1,30 @@
+.sun {
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+    /* top: 50px; */
+    /* right: 50px; */
+    background-color: #fdf490;
+    z-index: 1;
+}
+
+.sun:before {
+    position: absolute;
+    content: "";
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+    background-color: #ffe96d;
+    filter: blur(15px);
+}
+
+.sun:after {
+    position: absolute;
+    content: "";
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+    background-color: #fff7e5;
+    filter: blur(20px);
+}

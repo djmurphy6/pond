@@ -1,33 +1,48 @@
 "use client"
 
 //React
-import React, { CSSProperties, useEffect } from "react";
+import React, { CSSProperties, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 //Internal
 import ThemeToggle from "@/components/ThemeToggle";
 import Duck from "../components/LandingPage/duck/duck";
+
 import Moon from "@/components/LandingPage/moon/moon";
+import Sun from "@/components/LandingPage/sun/sun";
+import Stars from "@/components/LandingPage/stars/stars";
+import Ground from "@/components/LandingPage/ground/ground";
+import Clouds from "@/components/LandingPage/clouds/clouds";
+import { useTheme } from "next-themes";
+import Water from "@/components/LandingPage/water/water";
+
+/* 
+            Z LAYOUT
+          -------------
+          Duck - 3
+          Ground - 2
+          Water - 2
+          Moon/Sun - 1
+          Stars/Clouds - 0
+          BG - 0
+          -------------
+*/
+const textBorder = 4;
 
 export default function App() {
   return (
-    <div style={{ zIndex: 0 }} className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-[var(--landing-page-bg)]">
+    <div className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-[var(--background)]" style={{ zIndex: 0 }}>
+      <Background />
 
       <Moon />
+      <Sun />
+      <Stars />
+      <Clouds />
 
-      <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-        <ThemeToggle />
-      </div>
       <div className="relative z-10 flex flex-col items-center">
-        <motion.h1
-          className="text-7xl sm:text-8xl font-extrabold text-primary drop-shadow-lg"
-          initial={{ y: -200, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          Pond
-        </motion.h1>
+        <PondText />
         <motion.p
+          style={{ color: "var(--muted-foreground)" }}
           className="mt-3 text-lg text-muted-foreground text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -36,7 +51,6 @@ export default function App() {
           Buy • Sell • Connect — The UO Student Marketplace
         </motion.p>
 
-        {/* Buttons */}
         <motion.div
           className="mt-8 flex gap-4"
           initial={{ opacity: 0, y: 20 }}
@@ -65,16 +79,74 @@ export default function App() {
       </div>
 
       <Duck />
-      {/* <motion.img
-          src="/cart.svg"
-          alt="Shopping cart"
-          className="cart"
-          style={{ width: '100px', height: 'auto' }}
-          animate={{ x: [0, 10, 0] }}
-          transition={{ duration: 0, repeat: Infinity, ease: "easeInOut" }}
-        /> */}
+
+      <Water />
+      <Ground />
 
     </div>
+  );
+}
+
+function Background() {
+  const [mounted, setMounted] = useState(false);
+  const { theme } = useTheme();
+
+  useEffect(() => setMounted(true))
+
+  if (!mounted) return null;
+  return (
+    <>
+      {/* Old gradient */}
+      <motion.div
+        key={`old-${theme === "light" ? "dark" : "light"}`}
+        initial={{ opacity: .25 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1 }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          background: "var(--landing-page-bg)",
+        }}
+      />
+      {/* New gradient */}
+      <motion.div
+        key={theme}
+        initial={{ opacity: .25 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1 }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          background: "var(--landing-page-bg)",
+        }}
+      />
+    </>
+  )
+}
+
+function PondText() {
+  const [mounted, setMounted] = useState(false);
+  const { theme } = useTheme();
+
+  useEffect(() => setMounted(true))
+
+  if (!mounted) return null;
+  return (
+    <motion.h1
+      style={{
+        textShadow: theme === 'light' ? `${textBorder}px ${textBorder}px 0 #000` : "0px 0px 0px transparent"
+      }}
+      className="text-7xl sm:text-8xl font-extrabold text-white drop-shadow-lg"
+      initial={{ y: -200, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+    >
+      Pond
+    </motion.h1>
   );
 }
 
