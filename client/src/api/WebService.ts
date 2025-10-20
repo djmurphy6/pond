@@ -58,7 +58,7 @@ class API {
 
             console.log("Response:", JSON.stringify(response));
 
-            if (response.status === 401 && appConfig.access_token) {
+            if (response.status === 401 || response.status === 403 && appConfig.access_token) {
                 await sendRefreshToken();
                 continue;
             }
@@ -92,7 +92,7 @@ class API {
     }
 
     async GetUserInfo(body: GetUserInfoRequest): Promise<UserInfo | ErrorResponse> {
-        return this.Request<UserInfo>("/auth/all", "POST", { body }, 'GetUserInfo');
+        return this.Request<UserInfo>("/users/me", "GET", { body }, 'GetUserInfo');
     }
 }
 

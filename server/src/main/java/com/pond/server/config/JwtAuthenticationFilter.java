@@ -36,70 +36,43 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response,
-            @Nonnull FilterChain filterChain) throws ServletException, IOException {
+        @Nonnull FilterChain filterChain) throws ServletException, IOException {
 
-        String path = request.getServletPath();
+    String path = request.getServletPath();
+    if (path.startsWith("/auth/login") || path.startsWith("/auth/signup") || path.startsWith("/auth/refresh")) {
+        filterChain.doFilter(request, response);
+        return;
+    }
 
-        if (path.startsWith("/auth/login") || path.startsWith("/auth/signup")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+    String jwt = null;
+    final String authHeader = request.getHeader("Authorization");
+    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        jwt = authHeader.substring(7);
+    }
 
-        String jwt = null;
-
-        // 1) Try Authorization header (access token)
-        final String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwt = authHeader.substring(7);
-        }
-
-        try {
-            boolean authenticated = false;
-
-            if (jwt != null) {
+    try {
+        if (jwt != null) {
+            try {
                 final String userEmail = jwtService.extractUsername(jwt);
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
                 if (userEmail != null && authentication == null) {
                     UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
                     if (jwtService.isAccessTokenValid(jwt, userDetails)) {
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
+                        UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
-                        authenticated = true;
                     }
                 }
+            } catch (io.jsonwebtoken.JwtException e) {
+                // Invalid/expired access token -> do not authenticate here; client must call /auth/refresh
+                SecurityContextHolder.clearContext();
             }
-
-            // 2) If not authenticated via access token, try refresh cookie, mint a new
-            // access token
-            if (!authenticated) {
-                var refreshOpt = jwtService.extractRefreshTokenFromRequest(request);
-                if (refreshOpt.isPresent()) {
-                    String refresh = refreshOpt.get();
-                    final String userEmail = jwtService.extractUsername(refresh);
-                    if (userEmail != null) {
-                        UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-                        if (jwtService.isRefreshTokenValid(refresh, userDetails)) {
-                            // Mint new access token and authenticate request
-                            String newAccess = jwtService.generateAccessToken(userDetails);
-                            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                    userDetails, null, userDetails.getAuthorities());
-                            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                            SecurityContextHolder.getContext().setAuthentication(authToken);
-
-                            // Expose the new access token to the client
-                            response.setHeader("X-Access-Token", newAccess);
-                            authenticated = true;
-                        }
-                    }
-                }
-            }
-
-            filterChain.doFilter(request, response);
-        } catch (Exception exception) {
-            handlerExceptionResolver.resolveException(request, response, null, exception);
         }
+
+        filterChain.doFilter(request, response);
+    } catch (Exception exception) {
+        handlerExceptionResolver.resolveException(request, response, null, exception);
     }
+}
 }

@@ -5,6 +5,8 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,10 +27,12 @@ import jakarta.servlet.http.HttpServletRequest;
 public class AuthenticationController {
     private final JwtService jwtService;
     private final AuthenticationService authenticationService;
+    private final UserDetailsService userDetailsService;
 
-    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService) {
+    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService, UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
+        this.userDetailsService = userDetailsService;
     }
 
     @PostMapping("/signup")
@@ -46,25 +50,22 @@ public class AuthenticationController {
     // TODO: Refresh the refresh Token when refresh is called
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request) {
-        try {
-            String accessToken = jwtService.extractRefreshTokenFromRequest(request)
-                    .orElseThrow(() -> new RuntimeException("Refresh token not found"));
-            String userEmail = jwtService.extractUsername(accessToken);
-            LoginUserDTO loginUserDTO = new LoginUserDTO();
-            loginUserDTO.setEmail(userEmail);
-            User user = authenticationService.authentication(loginUserDTO);
+    try {
+        String refresh = jwtService.extractRefreshTokenFromRequest(request)
+                .orElseThrow(() -> new RuntimeException("Refresh token not found"));
+        String userEmail = jwtService.extractUsername(refresh);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-            if (!jwtService.isRefreshTokenValid(accessToken, user)) {
-                throw new RuntimeException("Invalid refresh token");
-            }
-
-            String newAccessToken = jwtService.generateAccessToken(user);
-            return ResponseEntity.ok(Map.of(
-                    "accessToken", newAccessToken));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        if (!jwtService.isRefreshTokenValid(refresh, userDetails)) {
+            throw new RuntimeException("Invalid refresh token");
         }
+
+        String newAccessToken = jwtService.generateAccessToken(userDetails);
+        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
+    } catch (RuntimeException e) {
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     }
+}
 
     @PostMapping("/login")
     public ResponseEntity<?> Authenticate(@RequestBody LoginUserDTO loginUserDTO) {
