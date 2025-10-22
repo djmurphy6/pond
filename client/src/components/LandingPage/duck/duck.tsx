@@ -81,7 +81,7 @@ export default function Duck() {
                     />
 
                     <AnimatePresence>
-                        {theme === 'light' && (
+                        {theme !== "dark" && (
                             <motion.div
                                 initial={{ y: -20, opacity: 0.5 }}
                                 animate={{ y: 0, opacity: 1 }}

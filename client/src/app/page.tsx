@@ -138,7 +138,7 @@ function PondText() {
   return (
     <motion.h1
       style={{
-        textShadow: theme === 'light' ? `${textBorder}px ${textBorder}px 0 #000` : "0px 0px 0px transparent"
+        textShadow: theme !== "dark" ? `${textBorder}px ${textBorder}px 0 #000` : "0px 0px 0px transparent"
       }}
       className="text-7xl sm:text-8xl font-extrabold text-white drop-shadow-lg"
       initial={{ y: -200, opacity: 0 }}

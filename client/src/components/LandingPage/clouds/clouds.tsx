@@ -52,7 +52,7 @@ export default function Clouds() {
     if (!mounted) return null;
     return (
         <AnimatePresence mode="wait">
-            {theme === 'light' && (
+            {theme !== "dark" && (
                 <motion.div
                     style={{ zIndex: 0, }}
                     initial={{ opacity: 0, x: 0 }}
