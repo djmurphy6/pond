@@ -20,7 +20,7 @@ export default function ThemeToggle() {
     if (!mounted) return null;
 
     const toggle = () => {
-        let newTheme = theme === "light" ? "dark" : "light";
+        let newTheme = theme !== "dark" ? "dark" : "light";
         localStorage.setItem(THEME_KEY, newTheme);
         setTheme(newTheme);
     };
@@ -37,7 +37,7 @@ export default function ThemeToggle() {
             style={{ cursor: 'pointer' }}
         >
             <AnimatePresence mode="wait" initial={false}>
-                {theme === "light" ? (
+                {theme !== "dark" ? (
                     <motion.div
                         key="sun"
                         initial={{ rotate: -90, opacity: 0 }}

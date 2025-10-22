@@ -13,7 +13,7 @@ export default function Moon() {
     const [scale, setScale] = useState(1);
 
     useEffect(() => {
-        setTheme(localStorage.getItem(THEME_KEY) || "light");
+        setTheme(localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light");
         setMounted(true);
     }, []);
     useEffect(() => {
@@ -31,7 +31,7 @@ export default function Moon() {
     if (!mounted) return null;
 
     const toggleTheme = () => {
-        let newTheme = theme === "light" ? "dark" : "light";
+        let newTheme = theme !== "dark" ? "dark" : "light";
         localStorage.setItem(THEME_KEY, newTheme);
         setTheme(newTheme);
     };

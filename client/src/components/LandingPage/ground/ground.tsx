@@ -44,7 +44,7 @@ export default function Ground() {
                 borderRadius: "0% 20% 0% 0% / 100% 50% 100% 100%"
             }}
                 animate={{
-                    background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 40%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 40%, #0dad78ff 100%)",
+                    background: theme !== "dark" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 40%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 40%, #0dad78ff 100%)",
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
             />
@@ -60,7 +60,7 @@ export default function Ground() {
                 borderRadius: "20% 0% 0% 0% / 50% 100% 100% 100%"
             }}
                 animate={{
-                    background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 40%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 40%, #0dad78ff 100%)",
+                    background: theme !== "dark" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 40%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 40%, #0dad78ff 100%)",
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
             />
@@ -72,7 +72,7 @@ export default function Ground() {
                 animate={{
                     x: 20 * scale,
                     y: 30 * scale,
-                    background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
+                    background: theme !== "dark" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hill"
@@ -83,7 +83,7 @@ export default function Ground() {
                 animate={{
                     x: 190 * scale,
                     y: -30 * scale,
-                    background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
+                    background: theme !== "dark" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hill"
@@ -99,7 +99,7 @@ export default function Ground() {
                 animate={{
                     x: -130 * scale,
                     y: -100 * scale,
-                    background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
+                    background: theme !== "dark" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hill"
@@ -110,7 +110,7 @@ export default function Ground() {
                 animate={{
                     x: -30 * scale,
                     y: -20 * scale,
-                    background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
+                    background: theme !== "dark" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hill"
@@ -121,7 +121,7 @@ export default function Ground() {
                 animate={{
                     x: -200 * scale,
                     y: 30 * scale,
-                    background: theme === "light" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
+                    background: theme !== "dark" ? "linear-gradient(to top, #0a330dff 0%, #37941bff 10%, #7dfc15ff 100%)" : "linear-gradient(to top, #0a3330ff 0%, #0e4d3aff 10%, #0dad78ff 100%)",
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hill"

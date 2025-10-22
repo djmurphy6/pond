@@ -14,7 +14,7 @@ export default function Sun() {
     const [scale, setScale] = useState(1);
 
     useEffect(() => {
-        setTheme(localStorage.getItem(THEME_KEY) || "light");
+        setTheme(localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light");
         setMounted(true);
     }, []);
 
@@ -32,14 +32,14 @@ export default function Sun() {
     if (!mounted) return null;
 
     const toggleTheme = () => {
-        let newTheme = theme === "light" ? "dark" : "light";
+        let newTheme = theme !== "dark" ? "dark" : "light";
         localStorage.setItem(THEME_KEY, newTheme);
         setTheme(newTheme);
     };
 
     return (
         <AnimatePresence mode="wait">
-            {theme === "light" && (
+            {theme !== "dark" && (
                 <motion.div
                     onClick={toggleTheme}
                     className="sun"

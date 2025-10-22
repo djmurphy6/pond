@@ -91,14 +91,14 @@ function Background() {
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
 
-  useEffect(() => setMounted(true))
+  useEffect(() => setMounted(true), [])
 
   if (!mounted) return null;
   return (
     <>
       {/* Old gradient */}
       <motion.div
-        key={`old-${theme === "light" ? "dark" : "light"}`}
+        key={`old-${theme !== "dark" ? "dark" : "light"}`}
         initial={{ opacity: .25 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

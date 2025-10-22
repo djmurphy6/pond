@@ -20,7 +20,7 @@ export const useUserInfoStore = create<UserInfoStore>()(
     persist(
         (set) => ({
             userInfo: undefined,
-            setUserInfo: (userInfo) => set({ userInfo }),
+            setUserInfo: (userInfo?: UserInfo) => set({ userInfo }),
         }),
         {
             name: "user-info-store",

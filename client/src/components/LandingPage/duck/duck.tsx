@@ -76,8 +76,8 @@ export default function Duck() {
 
                     <motion.div
                         className="eye"
-                        initial={{ rotate: theme === "light" ? -30 : 0 }}
-                        animate={{ rotate: theme === "light" ? -30 : 0 }}
+                        initial={{ rotate: theme !== "dark" ? -30 : 0 }}
+                        animate={{ rotate: theme !== "dark" ? -30 : 0 }}
                     />
 
                     <AnimatePresence>
