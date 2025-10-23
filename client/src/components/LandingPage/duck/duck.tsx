@@ -34,7 +34,7 @@ export default function Duck() {
 
         <motion.div
             className="duck"
-            style={{ scaleX: -0.75 * scale, scaleY: 0.75 * scale, position: "absolute", bottom: '0px' }}
+            style={{ scaleX: -0.75, scaleY: 0.75, position: "absolute", bottom: '0px' }}
             initial={{ x: '-60vw' }}
             animate={{
                 x: [`-60vw`, '60vw'],

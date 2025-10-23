@@ -31,7 +31,7 @@ export default function Stars() {
     const stars = useMemo(() => STAR_POSITIONS.map(({ top, left }, i) => {
         const delay = (i * 0.37) % 5;
         const duration = 1 + ((i * 0.61) % 3);
-        const scale = (0.25 + ((i * 0.43) % 0.8) * scaleRatio);
+        const scale = (0.25 + ((i * 0.43) % 0.8));
         const opacity = 0.3 + ((i * 0.51) % 0.7);
 
         return (

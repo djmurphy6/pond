@@ -43,10 +43,10 @@ export default function Sun() {
                 <motion.div
                     onClick={toggleTheme}
                     className="sun"
-                    style={{ scale: 1.5 * scale, cursor: "pointer" }}
-                    initial={{ x: 0 * scale, y: -850 * scale, }}
-                    animate={{ x: 0, y: -300 * scale, }}
-                    exit={{ x: 0 * scale, y: 700 * scale, }}
+                    style={{ scale: 2, cursor: "pointer" }}
+                    initial={{ x: 0, y: '-85vh', }}
+                    animate={{ x: 0, y: '-30vh', }}
+                    exit={{ x: 0, y: '70vh', }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                 />
 

@@ -35,7 +35,7 @@ export default function Clouds() {
                 top: `${top}%`,
                 left: `${left}%`,
                 position: "absolute",
-                transform: `scale(${scale * scaleRatio * 0.5})`,
+                transform: `scale(${scale * 0.5})`,
             }}
         >
             <div

@@ -46,8 +46,8 @@
     }
 }
 
-.star1,
+.star,
 .star2,
 .star3 {
-    animation: twinkle 3s ease-in-out infinite;
+    animation: twinkle 1s ease-in-out infinite;
 }
