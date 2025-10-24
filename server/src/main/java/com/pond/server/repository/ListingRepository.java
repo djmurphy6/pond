@@ -9,6 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.pond.server.model.Listing;
 
 public interface ListingRepository extends JpaRepository<Listing, UUID> {
-    List<Listing> findByUsergu(UUID usergu);
-    Optional<Listing> findByListingguAndUsergu(UUID listinggu, UUID usergu);
+    List<Listing> findByUserGU(UUID userGU);
+    Optional<Listing> findByListingGUAndUserGU(UUID listingGU, UUID userGU);
 }

@@ -42,11 +42,11 @@ public class ListingService {
     }
 
     public List<ListingDTO> mine(User owner) {
-        return listingRepository.findByUsergu(owner.getUserGU()).stream().map(this::toDto).toList();
+        return listingRepository.findByUserGU(owner.getUserGU()).stream().map(this::toDto).toList();
     }
 
     public ListingDTO update(UUID id, UpdateListingRequest req, User owner) {
-        Listing l = listingRepository.findByListingguAndUsergu(id, owner.getUserGU())
+        Listing l = listingRepository.findByListingGUAndUserGU(id, owner.getUserGU())
                 .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
         if (req.getDescription() != null) l.setDescription(req.getDescription());
         if (req.getPicture1_url() != null) l.setPicture1_url(req.getPicture1_url());
@@ -58,7 +58,7 @@ public class ListingService {
     }
 
     public void delete(UUID id, User owner) {
-        Listing l = listingRepository.findByListingguAndUsergu(id, owner.getUserGU())
+        Listing l = listingRepository.findByListingGUAndUserGU(id, owner.getUserGU())
                 .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
         listingRepository.delete(l);
     }
