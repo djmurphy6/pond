@@ -14,6 +14,7 @@ public class ListingDTO {
     private final UUID listinggu;
     @JsonProperty("usergu")
     private final UUID usergu;
+    private String title;
     private String description;
     @JsonProperty("picture1_url")
     private String picture1_url;
@@ -21,4 +22,5 @@ public class ListingDTO {
     private String picture2_url;
     private Integer price;
     private String condition;
+    
 }

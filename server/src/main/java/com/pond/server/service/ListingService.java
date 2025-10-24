@@ -53,6 +53,7 @@ public class ListingService {
         if (req.getPicture2_url() != null) l.setPicture2_url(req.getPicture2_url());
         if (req.getPrice() != null) l.setPrice(req.getPrice());
         if (req.getCondition() != null) l.setCondition(req.getCondition());
+        if (req.getTitle() != null) l.setTitle(req.getTitle());
         l = listingRepository.save(l);
         return toDto(l);
     }
@@ -65,13 +66,14 @@ public class ListingService {
 
     private ListingDTO toDto(Listing l) {
         return new ListingDTO(
-                l.getListingGU(),
-                l.getUserGU(),
-                l.getDescription(),
-                l.getPicture1_url(),
-                l.getPicture2_url(),
-                l.getPrice(),
-                l.getCondition()
-        );
+            l.getListingGU(),
+            l.getUserGU(),
+            l.getTitle(),
+            l.getDescription(),
+            l.getPicture1_url(),
+            l.getPicture2_url(),
+            l.getPrice(),
+            l.getCondition()
+    );
     }
 }

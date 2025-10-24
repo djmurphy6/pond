@@ -13,4 +13,5 @@ public class CreateListingRequest {
     private String picture2_url;
     private Integer price;
     private String condition;
+    private String title;
 }

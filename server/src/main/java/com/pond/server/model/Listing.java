@@ -28,6 +28,9 @@ public class Listing {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "title")
+    private String title;
+
     @Column(name = "picture1_url")
     private String picture1_url;
 
