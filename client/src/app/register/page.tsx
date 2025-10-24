@@ -35,7 +35,7 @@ export default function Register() {
 
         let res = await api.Register({ email, password, username: name, });
         if (res instanceof ErrorResponse) {
-            alert(JSON.stringify(res));
+            toast.error("Account Creation Error: " + res.body?.error);
         } else {
             console.log(JSON.stringify(res))
             toast.success("Successfully created an account")

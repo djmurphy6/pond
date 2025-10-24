@@ -68,10 +68,10 @@ export function CreateListingModal() {
         let res = await api.CreateListing(listing);
         setIsLoading(false);
         if (res instanceof ErrorResponse) {
-            alert(res.body?.error);
+            toast.success("Create Listing Error:" + res.body?.error);
         } else {
             //TOAST
-            toast.success("Successfully created listing")
+            toast.success("Successfully created listing");
             setOpen(false);
         }
     };

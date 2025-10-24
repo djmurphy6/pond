@@ -35,7 +35,6 @@ export default function LoginPage() {
         let res = await api.Login({ email, password });
 
         if (res instanceof ErrorResponse) {
-            // alert(JSON.stringify(res));
             toast.error(res.body?.error);
         } else {
             if (res.accessToken) {
