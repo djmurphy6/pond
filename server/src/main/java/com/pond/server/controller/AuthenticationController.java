@@ -1,5 +1,6 @@
 package com.pond.server.controller;
 
+import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
@@ -70,7 +71,7 @@ public class AuthenticationController {
                     .httpOnly(true)
                     .secure(true) // for local HTTP dev, you can temporarily set false
                     .path("/")
-                    .maxAge(jwtService.getExpirationTime())
+                    .maxAge(Duration.ofMillis(jwtService.getExpirationTime()))
                     .sameSite("None") // for same-site local HTTP, use "Lax" instead
                     .build();
 
