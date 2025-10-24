@@ -3,6 +3,7 @@ package com.pond.server.model;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,8 +17,6 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-
-
 // TODO: Annotate and get class ready for JPA and ensure email is immutable
 @Entity
 @Table(name = "users")
@@ -25,9 +24,16 @@ import lombok.Setter;
 @Setter
 public class User implements UserDetails {
 
+    
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID) // Hibernate 6
+    private UUID UserGU;
+
+    @Column(nullable = true)
+    private String bio;
+
+    @Column(nullable = false)
+    private Boolean admin = false;
 
     @Column(unique = true, nullable = false)
     private String username;

@@ -23,7 +23,7 @@ public class UserService {
         return users;
     }
     public Optional<UserProfileDTO> getProfileByUsername(String username){
-        return userRepository.findByUsername(username).map(u -> new UserProfileDTO(u.getId(), u.getUsername(), u.getEmail(), u.getAvatar_url()));
+        return userRepository.findByUsername(username).map(u -> new UserProfileDTO(u.getUserGU(), u.getUsername(), u.getEmail(), u.getAvatar_url(), u.getBio(), u.getAdmin()));
     }
 
 }

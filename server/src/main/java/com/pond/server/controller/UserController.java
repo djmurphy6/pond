@@ -44,8 +44,8 @@ public class UserController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User currentUser = (User) authentication.getPrincipal();
-            UserProfileDTO userProfileDTO = new UserProfileDTO(currentUser.getId(), currentUser.getUsername(),
-                    currentUser.getEmail(), currentUser.getAvatar_url());
+            UserProfileDTO userProfileDTO = new UserProfileDTO(currentUser.getUserGU(), currentUser.getUsername(),
+                    currentUser.getEmail(), currentUser.getAvatar_url(), currentUser.getBio(), currentUser.getAdmin());
             return ResponseEntity.ok(userProfileDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
