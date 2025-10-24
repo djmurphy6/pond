@@ -37,20 +37,17 @@ public class AuthenticationController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> register(@RequestBody RegisterUserDTO registerUserDTO) {
-        try {
             User registeredUser = authenticationService.signup(registerUserDTO);
             return ResponseEntity.ok()
                     .header("Success-message", "Account created successfully")
                     .body(registeredUser);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+        
     }
 
     // TODO: Refresh the refresh Token when refresh is called
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request) {
-    try {
+
         String refresh = jwtService.extractRefreshTokenFromRequest(request)
                 .orElseThrow(() -> new RuntimeException("Refresh token not found"));
         String userEmail = jwtService.extractUsername(refresh);
@@ -59,17 +56,13 @@ public class AuthenticationController {
         if (!jwtService.isRefreshTokenValid(refresh, userDetails)) {
             throw new RuntimeException("Invalid refresh token");
         }
-
         String newAccessToken = jwtService.generateAccessToken(userDetails);
         return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
-    } catch (RuntimeException e) {
-        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-    }
 }
 
     @PostMapping("/login")
     public ResponseEntity<?> Authenticate(@RequestBody LoginUserDTO loginUserDTO) {
-        try {
+
             User authenticatedUser = authenticationService.authentication(loginUserDTO);
 
             String refreshToken = jwtService.generateToken(authenticatedUser);
@@ -87,20 +80,17 @@ public class AuthenticationController {
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
                     .body(loginResponse);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+
+
 
     }
 
     @PostMapping("/verify")
     public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDTO verifyUserDTO) {
-        try {
+
             authenticationService.verifyUser(verifyUserDTO);
             return ResponseEntity.ok("Account verified successfully.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+       
     }
 
     @PostMapping("/logout")

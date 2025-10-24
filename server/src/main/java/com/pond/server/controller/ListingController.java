@@ -1,7 +1,6 @@
 package com.pond.server.controller;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -33,62 +32,48 @@ public class ListingController {
 
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody CreateListingRequest req) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User currentUser = (User) authentication.getPrincipal();
-            ListingDTO dto = listingService.create(req, currentUser);
-            return ResponseEntity.ok(dto);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        ListingDTO dto = listingService.create(req, currentUser);
+        return ResponseEntity.ok(dto);
+        
     }
 
     @GetMapping
     public ResponseEntity<?> all() {
-        try {
-            List<ListingDTO> list = listingService.all();
+        List<ListingDTO> list = listingService.all();
         return ResponseEntity.ok(list);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
     }
 
     @GetMapping("/me")
     public ResponseEntity<?> mine() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User currentUser)) {
+            return ResponseEntity.status(401).body(java.util.Map.of("error", "Unauthorized"));
+        }
         return ResponseEntity.ok(listingService.mine(currentUser));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable("id") UUID id) {
-        try {
-            return ResponseEntity.ok(listingService.get(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(listingService.get(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable("id") UUID id, @RequestBody UpdateListingRequest req) {
-        try {
+        
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User currentUser = (User) authentication.getPrincipal();
             return ResponseEntity.ok(listingService.update(id, req, currentUser));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") UUID id) {
-        try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User currentUser = (User) authentication.getPrincipal();
             listingService.delete(id, currentUser);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
     }
 }
