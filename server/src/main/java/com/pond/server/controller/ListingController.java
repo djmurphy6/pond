@@ -31,7 +31,7 @@ public class ListingController {
         this.listingService = listingService;
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody CreateListingRequest req) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
