@@ -28,6 +28,7 @@ import { Separator } from "@/components/ui/separator";
 
 //Internal
 import ThemeToggle from "@/components/ThemeToggle";
+import { CreateListingModal } from "@/components/CreateListingModal";
 
 interface Listing {
     id: number;
@@ -40,7 +41,9 @@ interface Listing {
 
 export default function DashboardPage() {
     const [listings, setListings] = useState<Listing[]>([]);
+    const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
+    const { theme } = useTheme();
 
     useEffect(() => {
         // Simulate API delay
@@ -57,12 +60,14 @@ export default function DashboardPage() {
             ]);
             setLoading(false);
         }, 1500);
+        setMounted(true);
     }, []);
 
+    if (!mounted) return null;
     return (
-        <div className="flex h-screen bg-muted/10 transition-colors duration-300">
+        <div className="flex h-screen bg-background transition-colors duration-300">
             {/* Sidebar */}
-            <aside className="w-64 border-r bg-background p-4 flex flex-col transition-colors duration-300">
+            <aside className={`w-64 border-r bg-muted/10 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
                 {/* Top section */}
                 <div className="flex items-center gap-2 mb-6 justify-between">
                     <h2 className="text-lg font-semibold">Pond</h2>
@@ -85,12 +90,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Create Listing */}
-                <Button
-                    style={{ cursor: "pointer" }}
-                    className="mb-4 w-full bg-[var(--uo-green)] text-white hover:bg-[rgba(0,0,0,0.6)] transition-colors duration-300"
-                >
-                    + Create New Listing
-                </Button>
+                <CreateListingModal />
 
                 <Separator className="my-4 transition-colors duration-300" />
 
@@ -171,11 +171,11 @@ function ListingCard({ item }: { item: Listing }) {
     const { theme } = useTheme();
 
     return (
-        <Card className="hover:shadow-md transition-shadow transition-colors duration-300 cursor-pointer">
+        <Card className={`${theme !== 'dark' && 'hover:shadow-lg'} hover:underline hover:-translate-y-1 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}>
             <div
-                className="relative h-40 w-full flex items-center justify-center rounded-t-md overflow-hidden transition-colors duration-300"
+                className="relative h-40 w-full flex items-center justify-center overflow-hidden transition-colors duration-300"
                 style={{
-                    backgroundColor: theme === "dark" ? "#1f1f1f" : "#f4f4f4",
+                    backgroundColor: theme === "dark" ? "#111111" : "#ededed",
                     transition: "background-color 300ms ease-in-out",
                 }}
             >
@@ -193,8 +193,8 @@ function ListingCard({ item }: { item: Listing }) {
                 )}
             </div>
             <CardContent className="p-3">
-                <p className="font-medium">{item.title}</p>
-                <p className="text-sm text-muted-foreground">${item.price}</p>
+                <p className="font-medium">${item.price}</p>
+                <p className="text-md text-muted-foreground">{item.title}</p>
             </CardContent>
         </Card>
     );

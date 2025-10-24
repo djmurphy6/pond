@@ -8,7 +8,7 @@ export type UserInfo = {
     avatarURL: string;
     bio: string;
     userScore: number;
-    userType: boolean;
+    admin: boolean;
 }
 
 type UserInfoStore = {

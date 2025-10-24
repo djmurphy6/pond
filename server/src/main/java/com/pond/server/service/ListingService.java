@@ -28,6 +28,7 @@ public class ListingService {
         l.setPicture2_url(req.getPicture2_url());
         l.setPrice(req.getPrice());
         l.setCondition(req.getCondition());
+        l.setTitle(req.getTitle());
         l = listingRepository.save(l);
         return toDto(l);
     }

@@ -36,3 +36,25 @@ export type LoginResponse = {
 export type GetUserInfoRequest = {
     // email: string;
 }
+
+//CREATE LISTING
+export type CreateListingRequest = {
+    description: string;
+    picture1_url?: string;
+    picture2_url?: string;
+    price: number;
+    condition: string;
+    title: string;
+}
+export type CreateListingResponse = Listing
+
+export type Listing = {
+    userGU: string;
+    listingGU: string;
+    description: string;
+    picture1_url: string;
+    picture2_url: string;
+    price: number;
+    condition: string;
+    title: string;
+}
