@@ -23,8 +23,8 @@ import { CreateListingRequest, ErrorResponse } from "@/api/WebTypes";
 
 // Type definition matching your ListingDTO
 export interface ListingDTO {
-    listinggu: string;
-    usergu: string;
+    listingGU: string;
+    userGU: string;
     description: string;
     picture1_url: string;
     picture2_url: string;

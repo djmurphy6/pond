@@ -10,9 +10,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ListingDTO {
-    @JsonProperty("listinggu")
+    @JsonProperty("listingGU")
     private final UUID listinggu;
-    @JsonProperty("usergu")
+    @JsonProperty("userGU")
     private final UUID usergu;
     private String title;
     private String description;
