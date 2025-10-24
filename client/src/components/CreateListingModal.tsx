@@ -32,7 +32,7 @@ export interface ListingDTO {
     condition: string;
 }
 
-export function CreateListingModal() {
+export function CreateListingModal(props: { onSuccess?: () => void }) {
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -68,10 +68,11 @@ export function CreateListingModal() {
         let res = await api.CreateListing(listing);
         setIsLoading(false);
         if (res instanceof ErrorResponse) {
-            toast.success("Create Listing Error:" + res.body?.error);
+            toast.error("Create Listing Error:" + res.body?.error);
         } else {
             //TOAST
             toast.success("Successfully created listing");
+            props.onSuccess?.();
             setOpen(false);
         }
     };

@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
     const token = request.cookies.get("refreshToken")?.value;
 
     // List of routes that require authentication
-    const protectedRoutes = ["/dashboard"];
+    const protectedRoutes = ["/dashboard", "/dashboard/you/listings"];
 
     const isProtected = protectedRoutes.some((path) =>
         request.nextUrl.pathname.startsWith(path)

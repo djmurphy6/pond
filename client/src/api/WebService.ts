@@ -14,7 +14,7 @@ class API {
     private async Request<T>(
         path: string,
         method: "GET" | "POST" | "PUT" | "DELETE",
-        options: { body?: unknown; params?: Record<string, string | number> } = {},
+        options: { body?: any; params?: Record<string, string | number> } = {},
         internalMethod: string,
         headerArgs?: Record<string, string>
     ): Promise<T | ErrorResponse> {
@@ -56,7 +56,7 @@ class API {
                     : undefined,
             });
 
-            console.log("Response:", JSON.stringify(response));
+            console.log("Response:", response, '\nMethodName', internalMethod);
 
             if (response.status === 401 || response.status === 403 && appConfig.access_token) {
                 try {
@@ -112,6 +112,10 @@ class API {
 
     async GetListings(): Promise<Listing[] | ErrorResponse> {
         return this.Request<Listing[]>("/listings", "GET", {}, 'GetListings');
+    }
+
+    async GetMyListings(): Promise<Listing[] | ErrorResponse> {
+        return this.Request<Listing[]>("/listings/me", "GET", {}, 'GetListings');
     }
 }
 
