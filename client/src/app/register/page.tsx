@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 // API
 import api from "@/api/WebService";
@@ -37,6 +38,7 @@ export default function Register() {
             alert(JSON.stringify(res));
         } else {
             console.log(JSON.stringify(res))
+            toast.success("Successfully created an account")
             router.replace("/login?from=register");
         }
 

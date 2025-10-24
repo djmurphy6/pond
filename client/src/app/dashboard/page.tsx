@@ -17,6 +17,9 @@ import {
     ChevronRight,
 } from "lucide-react";
 
+// API
+import api from "@/api/WebService";
+
 //ShadCN
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,15 +32,8 @@ import { Separator } from "@/components/ui/separator";
 //Internal
 import ThemeToggle from "@/components/ThemeToggle";
 import { CreateListingModal } from "@/components/CreateListingModal";
-
-interface Listing {
-    id: number;
-    title: string;
-    price: number;
-    image?: string;
-    category: string;
-    condition: string;
-}
+import { ErrorResponse, Listing } from "@/api/WebTypes";
+import { toast } from "sonner";
 
 export default function DashboardPage() {
     const [listings, setListings] = useState<Listing[]>([]);
@@ -46,22 +42,27 @@ export default function DashboardPage() {
     const { theme } = useTheme();
 
     useEffect(() => {
-        // Simulate API delay
-        setTimeout(() => {
-            setListings([
-                { id: 1, title: "Mini Fridge", price: 35, category: "Tech", condition: "Used" },
-                { id: 2, title: "Panasonic Bike", price: 150, category: "Tech", condition: "Used" },
-                { id: 3, title: "Tie-dye UO Jersey", price: 65, category: "Clothing", condition: "Like New" },
-                { id: 4, title: "LG Smart TV", price: 150, category: "Tech", condition: "Used" },
-                { id: 5, title: "Small Desk with Storage", price: 45, category: "Furniture", condition: "Good" },
-                { id: 6, title: "Golden Pothos", price: 20, category: "Housing", condition: "New" },
-                { id: 7, title: "Olympus Stylus Film Camera", price: 109, category: "Tech", condition: "Used" },
-                { id: 8, title: "Set of Plates & Bowls", price: 15, category: "Housing", condition: "Good" },
-            ]);
-            setLoading(false);
-        }, 1500);
         setMounted(true);
     }, []);
+
+    useEffect(() => {
+        if (mounted) {
+            GetListings();
+        }
+    }, [mounted]);
+
+    async function GetListings() {
+        setLoading(true);
+        let res = await api.GetListings();
+        setLoading(false);
+        if (res instanceof ErrorResponse) {
+            toast.error(res.body?.error);
+        } else {
+            console.log(JSON.stringify(res))
+            setListings(res);
+        }
+        setLoading(false);
+    }
 
     if (!mounted) return null;
     return (
@@ -144,7 +145,7 @@ export default function DashboardPage() {
             <main className="flex-1 overflow-y-auto p-6 transition-colors duration-300">
                 {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {Array.from({ length: 8 }).map((_, i) => (
+                        {Array.from({ length: 12 }).map((_, i) => (
                             <Card key={i} className="transition-colors duration-300">
                                 <Skeleton className="h-40 w-full rounded-t-md transition-colors duration-300" />
                                 <CardContent className="p-3">
@@ -157,7 +158,7 @@ export default function DashboardPage() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                         {listings.map((item) => (
-                            <ListingCard key={item.id} item={item} />
+                            <ListingCard key={item.listinggu} item={item} />
                         ))}
                     </div>
                 )}
@@ -179,11 +180,11 @@ function ListingCard({ item }: { item: Listing }) {
                     transition: "background-color 300ms ease-in-out",
                 }}
             >
-                {!item.image || hasError ? (
+                {!item.picture1_url || hasError ? (
                     <ImageIcon className="h-10 w-10 text-muted-foreground transition-colors duration-300" />
                 ) : (
                     <Image
-                        src={item.image}
+                        src={item.picture1_url}
                         alt={item.title}
                         fill
                         className="object-cover transition-colors duration-300"

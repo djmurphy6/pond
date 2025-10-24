@@ -3,7 +3,9 @@
 // API
 import api from "@/api/WebService";
 
-import { useState } from "react";
+import { toast } from "sonner"
+
+import { useEffect, useState } from "react";
 import {
     Dialog,
     DialogContent,
@@ -41,6 +43,15 @@ export function CreateListingModal() {
     const [price, setPrice] = useState<number | "">("");
     const [condition, setCondition] = useState<string>("");
 
+    useEffect(() => {
+        setTitle("");
+        setDescription("");
+        setPicture1Url("");
+        setPicture2Url("");
+        setPrice("");
+        setCondition("");
+    }, [open]);
+
     const handleSubmit = async () => {
         const listing: CreateListingRequest = {
             description,
@@ -60,6 +71,7 @@ export function CreateListingModal() {
             alert(res.body?.error);
         } else {
             //TOAST
+            toast.success("Successfully created listing")
             setOpen(false);
         }
     };

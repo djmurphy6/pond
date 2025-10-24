@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, ErrorResponse, GetUserInfoRequest, RegisterUserRequest, RegisterUserResponse, type LoginRequest, type LoginResponse } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, type LoginRequest, type LoginResponse } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -101,13 +101,17 @@ class API {
         return this.Request<LoginResponse>("/auth/login", "POST", { body }, 'Login');
     }
 
-    async GetUserInfo(body: GetUserInfoRequest): Promise<UserInfo | ErrorResponse> {
-        return this.Request<UserInfo>("/users/me", "GET", { body }, 'GetUserInfo');
+    async GetUserInfo(): Promise<UserInfo | ErrorResponse> {
+        return this.Request<UserInfo>("/users/me", "GET", {}, 'GetUserInfo');
     }
 
     //Listing CRUD
     async CreateListing(body: CreateListingRequest): Promise<CreateListingResponse | ErrorResponse> {
         return this.Request<CreateListingResponse>("/listings/create", "POST", { body }, 'CreateListing');
+    }
+
+    async GetListings(): Promise<Listing[] | ErrorResponse> {
+        return this.Request<Listing[]>("/listings", "GET", {}, 'GetListings');
     }
 }
 

@@ -19,6 +19,7 @@ import api, { appConfig, SaveAppConfig } from "@/api/WebService";
 
 //Internal
 import ThemeToggle from "@/components/ThemeToggle"
+import { toast } from "sonner";
 
 
 export default function LoginPage() {
@@ -35,7 +36,7 @@ export default function LoginPage() {
 
         if (res instanceof ErrorResponse) {
             // alert(JSON.stringify(res));
-            alert(res.body?.error);
+            toast.error(res.body?.error);
         } else {
             if (res.accessToken) {
                 console.log(JSON.stringify(res));
@@ -43,7 +44,7 @@ export default function LoginPage() {
                 SaveAppConfig();
                 router.replace("/dashboard");
             } else {
-                alert("Login failed: " + JSON.stringify(res));
+                toast.error("Login failed: " + "Unknown Error");
             }
         }
 

@@ -48,9 +48,10 @@ export type CreateListingRequest = {
 }
 export type CreateListingResponse = Listing
 
+//GET LISTING
 export type Listing = {
-    userGU: string;
-    listingGU: string;
+    usergu: string;
+    listinggu: string;
     description: string;
     picture1_url: string;
     picture2_url: string;

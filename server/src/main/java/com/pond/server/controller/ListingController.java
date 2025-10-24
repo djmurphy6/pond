@@ -45,8 +45,12 @@ public class ListingController {
 
     @GetMapping
     public ResponseEntity<?> all() {
-        List<ListingDTO> list = listingService.all();
+        try {
+            List<ListingDTO> list = listingService.all();
         return ResponseEntity.ok(list);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @GetMapping("/me")
