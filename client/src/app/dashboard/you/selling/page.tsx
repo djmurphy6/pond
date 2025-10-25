@@ -71,6 +71,16 @@ export default function SellingPage() {
             console.log(JSON.stringify(res))
             setListings(res);
         }
+        // setListings([{
+        //     title: 'test',
+        //     price: 20,
+        //     description: 'something random that costs $20 because im testing this description field',
+        //     userGU: "",
+        //     listingGU: "l",
+        //     picture1_url: "",
+        //     picture2_url: "",
+        //     condition: "Used"
+        // }])
         setLoading(false);
     }
 
@@ -149,15 +159,15 @@ function ListingCard({ item, openEditModal, openDeleteModal }: { item: Listing, 
 
     return (
         <Card
-            className={`${theme !== 'dark' && 'hover:shadow-lg'} relative group hover:-translate-y-1 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}
+            className={`${theme !== 'dark' && 'hover:shadow-lg'} relative group hover:-translate-y-1 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]`}
         >
             {/* Dropdown actions */}
-            <DropdownMenu>
+            {/* <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant="ghost"
                         size="icon-sm"
-                        className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
                     >
                         <MoreVertical className="h-4 w-4" />
                     </Button>
@@ -171,11 +181,26 @@ function ListingCard({ item, openEditModal, openDeleteModal }: { item: Listing, 
                         <Trash2 className="h-4 w-4 mr-2 text-destructive" /> Delete
                     </DropdownMenuItem>
                 </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
+
+            <Button
+                variant="outline"
+                className="absolute left-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                onClick={() => openEditModal(item)}
+                >
+                <Pencil className="h-4 w-4 mr-2" /> Edit
+            </Button>
+            <Button
+                variant="outline"
+                className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                onClick={() => openDeleteModal(item)}
+            >
+                <Trash2 className="h-4 w-4 mr-2 text-destructive" /> Delete
+            </Button>
 
             {/* Listing thumbnail */}
             <div
-                className="relative mt-5 h-40 w-full flex items-center justify-center overflow-hidden transition-colors duration-300"
+                className="relative mt-7 h-40 w-full flex items-center justify-center overflow-hidden transition-colors duration-300"
                 style={{
                     backgroundColor: theme === "dark" ? "#111111" : "#ededed",
                     transition: "background-color 300ms ease-in-out",

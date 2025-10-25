@@ -93,66 +93,61 @@ export function CreateListingModal(props: { onSuccess?: () => void }) {
                     <DialogTitle>Create New Listing</DialogTitle>
                 </DialogHeader>
 
-                <div className="grid gap-4 py-4">
+                <div className="space-y-4 py-2">
 
                     {/* Title */}
-                    <div className="grid grid-cols-4 items-center gap-2">
-                        <Label htmlFor="title" className="text-right">
-                            Title
-                        </Label>
-                        <Input
-                            id="title"
-                            value={title}
-                            onChange={(e: any) => setTitle(e.target.value)}
-                            placeholder="Title"
-                            className="col-span-3"
-                        />
-                    </div>
+                    <Label htmlFor="title" className="text-right">
+                        Title
+                    </Label>
+                    <Input
+                        id="title"
+                        value={title}
+                        onChange={(e: any) => setTitle(e.target.value)}
+                        placeholder="Name your item..."
+                        className="col-span-3"
+                    />
 
                     {/* Description */}
-                    <div className="grid grid-cols-4 items-center gap-2">
-                        <Label htmlFor="description" className="text-right">
-                            Description
-                        </Label>
-                        <Textarea
-                            id="description"
-                            value={description}
-                            onChange={(e: any) => setDescription(e.target.value)}
-                            placeholder="Describe your item"
-                            className="col-span-3"
-                        />
-                    </div>
+                    <Label htmlFor="description" className="text-right">
+                        Description
+                    </Label>
+                    <Textarea
+                        id="description"
+                        value={description}
+                        onChange={(e: any) => setDescription(e.target.value)}
+                        placeholder="Describe your item..."
+                        className="col-span-3"
+                    />
 
                     {/* Price */}
-                    <div className="grid grid-cols-4 items-center gap-2">
-                        <Label htmlFor="price" className="text-right">
-                            Price ($)
-                        </Label>
-                        <Input
-                            id="price"
-                            type="number"
-                            value={price}
-                            onChange={(e) =>
-                                setPrice(e.target.value ? Number(e.target.value) : "")
-                            }
-                            placeholder="100"
-                            className="col-span-3"
-                        />
-                    </div>
+                    <Label htmlFor="price" className="text-right">
+                        Price
+                    </Label>
+                    <Input
+                        id="price"
+                        type="text"
+                        value={price ? `$ ${Number(price).toLocaleString()}` : ""}
+                        onChange={(e) => {
+                            const raw = e.target.value.replace(/[^0-9.]/g, "");
+                            setPrice(raw ? Number(raw) : "");
+                        }}
+                        placeholder="$ 0"
+                        className="col-span-3"
+                    />
+
+
 
                     {/* Condition */}
-                    <div className="grid grid-cols-4 items-center gap-2">
-                        <Label htmlFor="condition" className="text-right">
-                            Condition
-                        </Label>
-                        <Input
-                            id="condition"
-                            value={condition}
-                            onChange={(e) => setCondition(e.target.value)}
-                            placeholder="New / Used / Like New"
-                            className="col-span-3"
-                        />
-                    </div>
+                    <Label htmlFor="condition" className="text-right">
+                        Condition
+                    </Label>
+                    <Input
+                        id="condition"
+                        value={condition}
+                        onChange={(e) => setCondition(e.target.value)}
+                        placeholder="New / Used / Like New"
+                        className="col-span-3"
+                    />
                 </div>
 
                 <DialogFooter>

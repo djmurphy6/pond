@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, type LoginRequest, type LoginResponse } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, type LoginRequest, type LoginResponse } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -115,7 +115,15 @@ class API {
     }
 
     async GetMyListings(): Promise<Listing[] | ErrorResponse> {
-        return this.Request<Listing[]>("/listings/me", "GET", {}, 'GetListings');
+        return this.Request<Listing[]>("/listings/me", "GET", {}, 'GetMyListings');
+    }
+    
+    async UpdateListing(request: UpdateListingRequest): Promise<Listing[] | ErrorResponse> {
+        return this.Request<Listing[]>(`/listings/${request.listingGU}`, "PUT", {body: request.body}, 'UpdateListing');
+    }
+    
+    async DeleteListing(request: DeleteListingRequest): Promise<Listing[] | ErrorResponse> {
+        return this.Request<Listing[]>(`/listings/${request.listingGU}`, "DELETE", {}, 'DeleteListing');
     }
 }
 

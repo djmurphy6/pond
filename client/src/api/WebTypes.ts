@@ -59,3 +59,13 @@ export type Listing = {
     condition: string;
     title: string;
 }
+
+//UPDATE LISTING
+export type UpdateListingRequest = {
+    listingGU: string;
+    body: Listing;
+}
+
+export type DeleteListingRequest = {
+    listingGU: string;
+}
