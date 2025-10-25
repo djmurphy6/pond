@@ -210,7 +210,7 @@ function ListingCard({ item }: { item: Listing }) {
                 )}
             </div>
             <CardContent className="p-3">
-                <p className="font-medium">${item.price}</p>
+                <p className="font-medium">${item.price.toLocaleString()}</p>
                 <p className="text-md text-muted-foreground">{item.title}</p>
             </CardContent>
         </Card>

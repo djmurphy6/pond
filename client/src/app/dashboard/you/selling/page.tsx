@@ -187,7 +187,7 @@ function ListingCard({ item, openEditModal, openDeleteModal }: { item: Listing, 
                 variant="outline"
                 className="absolute left-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
                 onClick={() => openEditModal(item)}
-                >
+            >
                 <Pencil className="h-4 w-4 mr-2" /> Edit
             </Button>
             <Button
@@ -221,7 +221,7 @@ function ListingCard({ item, openEditModal, openDeleteModal }: { item: Listing, 
             </div>
 
             <CardContent className="p-3">
-                <p className="font-medium">${item.price}</p>
+                <p className="font-medium">${item.price.toLocaleString()}</p>
                 <p className="text-md text-muted-foreground">{item.title}</p>
             </CardContent>
         </Card>

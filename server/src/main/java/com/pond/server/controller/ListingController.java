@@ -1,6 +1,7 @@
 package com.pond.server.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -74,6 +75,6 @@ public class ListingController {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User currentUser = (User) authentication.getPrincipal();
             listingService.delete(id, currentUser);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(Map.of("result", "Success"));
     }
 }
