@@ -54,6 +54,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/ws/**").permitAll() //Allow websockets
+                        .requestMatchers("/ws").permitAll()
+                        .requestMatchers("/ws-test/*").permitAll() // Make sure websockets are working and its just security blocking
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

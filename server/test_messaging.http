@@ -3,8 +3,8 @@
 @contentType = application/json
 
 ### Variables to store tokens and IDs
-@sellerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZWxsZXIxMkB0ZXN0LmNvbSIsImlhdCI6MTc2MTYyNjYxMywiZXhwIjoxNzYxNjI2OTEzfQ.IGM6CcIMIEhgUzE3tftwcUrhY-WEBpPEQXV6I5hjsl0
-@buyerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllcjEyQHRlc3QuY29tIiwiaWF0IjoxNzYxNjI2NTQ0LCJleHAiOjE3NjE2MjY4NDR9.PJp1wfgfUKkC29oPa2Q5JMqfympM5KI2adZ3ixrzhms
+@sellerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZWxsZXIxMkB0ZXN0LmNvbSIsImlhdCI6MTc2MTY2OTYxMSwiZXhwIjoxNzYxNjY5OTExfQ.p6n7s0TH53PfMsC82rC1Wt7ueplsvFp-5H-sZuSFVpQ
+@buyerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllcjEyQHRlc3QuY29tIiwiaWF0IjoxNzYxNjY5NjU1LCJleHAiOjE3NjE2Njk5NTV9.mEG_cPrgcoHJhtptmwTZ_4aSQrrozbx9gs1cHBu41g4
 @sellerGU = 60caff6d-0019-466c-8191-37599a925a0f
 @buyerGU = 9f224bb7-e099-4100-9d8d-bac0163cdd44
 @listingGU = 09153901-54a4-45d5-8e69-783773998498
