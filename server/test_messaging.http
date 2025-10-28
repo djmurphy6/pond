@@ -1,0 +1,266 @@
+### Environment variables
+@baseUrl = http://localhost:8080
+@contentType = application/json
+
+### Variables to store tokens and IDs
+@sellerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZWxsZXIxMkB0ZXN0LmNvbSIsImlhdCI6MTc2MTYyNjYxMywiZXhwIjoxNzYxNjI2OTEzfQ.IGM6CcIMIEhgUzE3tftwcUrhY-WEBpPEQXV6I5hjsl0
+@buyerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllcjEyQHRlc3QuY29tIiwiaWF0IjoxNzYxNjI2NTQ0LCJleHAiOjE3NjE2MjY4NDR9.PJp1wfgfUKkC29oPa2Q5JMqfympM5KI2adZ3ixrzhms
+@sellerGU = 60caff6d-0019-466c-8191-37599a925a0f
+@buyerGU = 9f224bb7-e099-4100-9d8d-bac0163cdd44
+@listingGU = 09153901-54a4-45d5-8e69-783773998498
+@roomId = listing_09153901-54a4-45d5-8e69-783773998498_buyer_9f224bb7-e099-4100-9d8d-bac0163cdd44
+
+###############################################
+### AUTHENTICATION FLOW
+###############################################
+
+### 1. Register Seller
+POST {{baseUrl}}/auth/signup
+Content-Type: {{contentType}}
+
+{
+  "username": "seller_user",
+  "email": "seller12@test.com",
+  "password": "password123"
+}
+
+> {%
+    if (response.status === 200) {
+        client.global.set("sellerGU", response.body.userGU);
+    }
+%}
+
+###
+
+### 2. Register Buyer
+POST {{baseUrl}}/auth/signup
+Content-Type: {{contentType}}
+
+{
+  "username": "buyer_user",
+  "email": "buyer12@test.com",
+  "password": "password123"
+}
+
+> {%
+    if (response.status === 200) {
+        client.global.set("buyerGU", response.body.userGU);
+    }
+%}
+
+###
+
+### 3. Verify Seller (Replace SELLER_CODE with actual code from logs)
+POST {{baseUrl}}/auth/verify
+Content-Type: {{contentType}}
+
+{
+  "email": "seller12@test.com",
+  "verificationCode": "288682"
+}
+
+###
+
+### 4. Verify Buyer (Replace BUYER_CODE with actual code from logs)
+POST {{baseUrl}}/auth/verify
+Content-Type: {{contentType}}
+
+{
+  "email": "buyer12@test.com",
+  "verificationCode": "159306"
+}
+
+###
+
+### 5. Login Seller
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "seller12@test.com",
+  "password": "password123"
+}
+
+> {%
+    if (response.status === 200) {
+        client.global.set("sellerToken", response.body.accessToken);
+    }
+%}
+
+###
+
+### 6. Login Buyer
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "buyer12@test.com",
+  "password": "password123"
+}
+
+> {%
+    if (response.status === 200) {
+        client.global.set("buyerToken", response.body.accessToken);
+    }
+%}
+
+###############################################
+### LISTING OPERATIONS
+###############################################
+
+### 7. Create Listing (as Seller)
+POST {{baseUrl}}/listings/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+{
+  "title": "Used Textbook - Introduction to Algorithms",
+  "description": "Great condition, minimal highlights",
+  "price": 45,
+  "condition": "Like New",
+  "picture1_url": "http://example.com/book1.jpg",
+  "picture2_url": "http://example.com/book2.jpg"
+}
+
+> {%
+    if (response.status === 200) {
+        client.global.set("listingGU", response.body.listingGU);
+    }
+%}
+
+###
+
+### 8. Get All Listings
+GET {{baseUrl}}/listings
+Content-Type: {{contentType}}
+
+###
+
+### 9. Get Seller's Listings
+GET {{baseUrl}}/listings/me
+Content-Type: {{contentType}}
+Authorization: Bearer {{sellerToken}}
+
+###
+
+### 10. Get Specific Listing
+GET {{baseUrl}}/listings/{{listingGU}}
+Content-Type: {{contentType}}
+
+###############################################
+### CHAT ROOM OPERATIONS
+###############################################
+
+### 11. Initialize Chat Room (as Buyer)
+POST {{baseUrl}}/chat/rooms/init?listingGU={{listingGU}}&buyerGU={{buyerGU}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+> {%
+    if (response.status === 200) {
+        const roomId = "listing_" + client.global.get("listingGU") + "_buyer_" + client.global.get("buyerGU");
+        client.global.set("roomId", roomId);
+    }
+%}
+
+###
+
+### 12. Get All Chat Rooms (as Buyer)
+GET {{baseUrl}}/chat/rooms
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+###
+
+### 13. Get All Chat Rooms (as Seller)
+GET {{baseUrl}}/chat/rooms
+Content-Type: {{contentType}}
+Authorization: Bearer {{sellerToken}}
+
+###
+
+### 14. Get Chat Room Details (as Buyer)
+GET {{baseUrl}}/chat/rooms/{{roomId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+###
+
+### 15. Get Chat Room Details (as Seller)
+GET {{baseUrl}}/chat/rooms/{{roomId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{sellerToken}}
+
+###############################################
+### MESSAGE OPERATIONS
+###############################################
+
+### 16. Get Messages (Before sending) - as Buyer
+GET {{baseUrl}}/chat/rooms/{{roomId}}/messages?page=0&size=50
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+###
+
+### 17. Get Messages - as Seller
+GET {{baseUrl}}/chat/rooms/{{roomId}}/messages?page=0&size=50
+Content-Type: {{contentType}}
+Authorization: Bearer {{sellerToken}}
+
+###
+
+### 18. Get Messages with Pagination (Page 1, Size 10)
+GET {{baseUrl}}/chat/rooms/{{roomId}}/messages?page=1&size=10
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+###
+
+### 19. Mark Messages as Read (as Buyer)
+POST {{baseUrl}}/chat/rooms/{{roomId}}/mark-read
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+###
+
+### 20. Mark Messages as Read (as Seller)
+POST {{baseUrl}}/chat/rooms/{{roomId}}/mark-read
+Content-Type: {{contentType}}
+Authorization: Bearer {{sellerToken}}
+
+###############################################
+### ERROR & EDGE CASE TESTING
+###############################################
+
+### 21. Try to access chat room without auth (should fail)
+GET {{baseUrl}}/chat/rooms
+Content-Type: {{contentType}}
+
+###
+
+### 22. Try to mark read with invalid token (should fail)
+POST {{baseUrl}}/chat/rooms/{{roomId}}/mark-read
+Content-Type: {{contentType}}
+Authorization: Bearer invalid_token_here
+
+###
+
+### 23. Try to initialize room with same user as buyer and seller (should fail)
+POST {{baseUrl}}/chat/rooms/init?listingGU={{listingGU}}&buyerGU={{sellerGU}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{sellerToken}}
+
+###############################################
+### NOTES FOR WEBSOCKET TESTING
+###############################################
+# WebSocket testing cannot be done directly in HTTP files
+# Use these credentials in Postman or wscat:
+#
+# Connection URL: ws://localhost:8080/ws
+# Room ID: {{roomId}}
+# Seller Token: {{sellerToken}}
+# Buyer Token: {{buyerToken}}
+#
+# Subscribe to: /topic/room/{{roomId}}
+# Send to: /app/chat.send
+# Payload: {"roomId":"{{roomId}}","content":"Your message here"}
