@@ -16,6 +16,7 @@ import {
     GraduationCap,
     ChevronRight,
     Tag,
+    ArrowLeft,
 } from "lucide-react";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 
@@ -89,6 +90,13 @@ export default function SellingPage() {
         <div className="flex h-screen bg-background transition-colors duration-300">
             {/* Sidebar */}
             <aside className={`w-64 border-r bg-muted/10 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
+                <Button variant={'link'} style={{ color: 'gray', justifyContent: 'flex-start' }} className="!p-0 !px-0 !py-0 hover:underline hover:bg-none cursor-pointer">
+                    <Link style={{flexDirection: 'row'}} className="flex items-center gap-1" href="/dashboard">
+                        <ArrowLeft />
+                        back to dashboard
+                    </Link>
+                </Button>
+
                 {/* Top section */}
                 <div className="flex items-center gap-2 mb-6 justify-between">
                     <h2 className="text-xl font-semibold">Manage Listings</h2>
@@ -100,7 +108,7 @@ export default function SellingPage() {
                     <Button
                         variant="ghost"
                         style={{ cursor: 'pointer' }}
-                        className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300 mb-3"
+                        className="!p-0.5 !py-0 w-full justify-between transition-colors duration-300 mb-3"
                     >
                         <div className="h-7 w-7 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
                             <ImageIcon className="h-4 w-4 text-primary transition-colors duration-300" />
