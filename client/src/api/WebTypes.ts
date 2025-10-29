@@ -69,3 +69,39 @@ export type UpdateListingRequest = {
 export type DeleteListingRequest = {
     listingGU: string;
 }
+
+// MESSAGING
+export type ChatRoomListDTO = {
+    roomId: string;
+    listingGU: string;
+    listingTitle: string;
+    listingImage: string;
+    otherUserGU: string;
+    otherUsername: string;
+    otherUserAvatar: string;
+    lastMessage: string;
+    lastMessageAt: string;
+    unreadCount: number;
+}
+
+export type ChatRoomDetailDTO = {
+    roomId: string;
+    listingGU: string;
+    listingTitle: string;
+    listingPrice: number;
+    listingImage: string;
+    otherUserGU: string;
+    otherUsername: string;
+    otherUserAvatar: string;
+    createdAt: string;
+    lastMessageAt: string;
+}
+
+export type MessageResponseDTO = {
+    id: string;
+    roomId: string;
+    senderGU: string;
+    content: string;
+    timestamp: string;
+    isRead: boolean;
+}
