@@ -377,14 +377,14 @@ function MessageBubble({ message, isOwn }: { message: MessageResponseDTO; isOwn:
             <div
                 className={`max-w-[70%] rounded-lg p-3 ${
                     isOwn
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-gradient-to-br from-green-500 to-emerald-600 text-white"
                         : theme === "dark"
                         ? "bg-muted"
                         : "bg-muted/50"
                 }`}
             >
                 <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-                <p className={`text-xs mt-1 ${isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                <p className={`text-xs mt-1 ${isOwn ? "text-white/70" : "text-muted-foreground"}`}>
                     {new Date(message.timestamp).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
