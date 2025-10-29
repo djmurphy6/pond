@@ -14,4 +14,7 @@ public class CreateListingRequest {
     private Integer price;
     private String condition;
     private String title;
+
+    @JsonProperty("picture1_base64") private String picture1_base64;
+    @JsonProperty("picture2_base64") private String picture2_base64;
 }

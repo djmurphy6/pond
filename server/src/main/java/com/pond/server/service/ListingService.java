@@ -3,6 +3,7 @@ package com.pond.server.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.pond.server.dto.CreateListingRequest;
@@ -15,22 +16,60 @@ import com.pond.server.repository.ListingRepository;
 @Service
 public class ListingService {
     private final ListingRepository listingRepository;
+    private final ImageService imageService;
+    private final SupabaseStorage supabaseStorage;
+    
+    @Value("${supabase.listing-bucket}")
+    private String listingBucket;
 
-    public ListingService(ListingRepository listingRepository) {
+    public ListingService(ListingRepository listingRepository,
+                          ImageService imageService,
+                          SupabaseStorage supabaseStorage) {
         this.listingRepository = listingRepository;
+        this.imageService = imageService;
+        this.supabaseStorage = supabaseStorage;
     }
 
     public ListingDTO create(CreateListingRequest req, User owner) {
         Listing l = new Listing();
         l.setUserGU(owner.getUserGU());
         l.setDescription(req.getDescription());
-        l.setPicture1_url(req.getPicture1_url());
-        l.setPicture2_url(req.getPicture2_url());
         l.setPrice(req.getPrice());
         l.setCondition(req.getCondition());
         l.setTitle(req.getTitle());
+
+        // Prefer images sent as base64 JSON (single request), fallback to provided URLs
+        String b1 = req.getPicture1_base64();
+        String b2 = req.getPicture2_base64();
+        if (b1 != null && !b1.isBlank()) {
+            String url1 = uploadListingImage(owner.getUserGU(), 1, b1);
+            l.setPicture1_url(url1);
+        } else {
+            l.setPicture1_url(req.getPicture1_url());
+        }
+        if (b2 != null && !b2.isBlank()) {
+            String url2 = uploadListingImage(owner.getUserGU(), 2, b2);
+            l.setPicture2_url(url2);
+        } else {
+            l.setPicture2_url(req.getPicture2_url());
+        }
+
         l = listingRepository.save(l);
         return toDto(l);
+    }
+
+    private String uploadListingImage(UUID userGU, int index, String base64OrDataUrl) {
+        byte[] raw = decodeBase64Image(base64OrDataUrl);
+        ImageService.ImageResult img = imageService.process(raw, 2048, 2048, 0.88f);
+        String key = "listings/%s/%s/%d.jpg".formatted(userGU, UUID.randomUUID(), index);
+        return supabaseStorage.uploadPublic(listingBucket, key, img.bytes(), img.contentType());
+    }
+
+    private byte[] decodeBase64Image(String s) {
+        if (s == null) return null;
+        int comma = s.indexOf(',');
+        String payload = comma >= 0 ? s.substring(comma + 1) : s;
+        return java.util.Base64.getDecoder().decode(payload);
     }
 
     public ListingDTO get(UUID id) {
@@ -64,6 +103,7 @@ public class ListingService {
                 .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
         listingRepository.delete(l);
     }
+    
 
     private ListingDTO toDto(Listing l) {
         return new ListingDTO(
