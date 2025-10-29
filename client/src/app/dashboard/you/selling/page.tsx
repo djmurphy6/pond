@@ -42,6 +42,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { CreateListingModal } from "@/components/CreateListingModal";
 import EditListingModal from "./Components/EditListingModal";
 import DeleteListingModal from "./Components/DeleteListingModal";
+import { MyAccountPopover } from "@/components/MyAccountPopover";
 
 export default function SellingPage() {
     const [listings, setListings] = useState<Listing[]>([]);
@@ -91,7 +92,7 @@ export default function SellingPage() {
             {/* Sidebar */}
             <aside className={`w-64 border-r bg-muted/10 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
                 <Button variant={'link'} style={{ color: 'gray', justifyContent: 'flex-start' }} className="!p-0 !px-0 !py-0 hover:underline hover:bg-none cursor-pointer">
-                    <Link style={{flexDirection: 'row'}} className="flex items-center gap-1" href="/dashboard">
+                    <Link style={{ flexDirection: 'row' }} className="flex items-center gap-1" href="/dashboard">
                         <ArrowLeft />
                         back to dashboard
                     </Link>
@@ -103,19 +104,9 @@ export default function SellingPage() {
                     <ThemeToggle />
                 </div>
 
-                {/* Search + Account */}
+                {/* Account */}
                 <div className="mb-4">
-                    <Button
-                        variant="ghost"
-                        style={{ cursor: 'pointer' }}
-                        className="!p-0.5 !py-0 w-full justify-between transition-colors duration-300 mb-3"
-                    >
-                        <div className="h-7 w-7 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
-                            <ImageIcon className="h-4 w-4 text-primary transition-colors duration-300" />
-                        </div>
-                        <span>My Account</span>
-                        <ChevronRight className="transition-colors duration-300" />
-                    </Button>
+                    <MyAccountPopover />
                 </div>
 
                 {/* Create Listing */}

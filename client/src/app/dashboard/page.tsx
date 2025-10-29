@@ -36,6 +36,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { CreateListingModal } from "@/components/CreateListingModal";
 import { ErrorResponse, Listing } from "@/api/WebTypes";
 import { toast } from "sonner";
+import { MyAccountPopover } from "@/components/MyAccountPopover";
 
 export default function DashboardPage() {
     const [listings, setListings] = useState<Listing[]>([]);
@@ -77,21 +78,11 @@ export default function DashboardPage() {
                     <ThemeToggle />
                 </div>
 
-                {/* Search + Account */}
+                {/* Search + Account + Messaging */}
                 <div className="mb-4">
                     <Input placeholder="Search" className="mb-3 transition-colors duration-300" />
 
-                    <Button
-                        variant="ghost"
-                        style={{ cursor: 'pointer' }}
-                        className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300 mb-3"
-                    >
-                        <div className="h-7 w-7 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
-                            <ImageIcon className="h-4 w-4 text-primary transition-colors duration-300" />
-                        </div>
-                        <span>My Account</span>
-                        <ChevronRight className="transition-colors duration-300" />
-                    </Button>
+                    <MyAccountPopover />
 
                     <Button
                         variant="ghost"

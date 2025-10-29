@@ -40,8 +40,8 @@ export type GetUserInfoRequest = {
 //CREATE LISTING
 export type CreateListingRequest = {
     description: string;
-    picture1_url?: string;
-    picture2_url?: string;
+    picture1_base64?: string;
+    picture2_base64?: string;
     price: number;
     condition: string;
     title: string;

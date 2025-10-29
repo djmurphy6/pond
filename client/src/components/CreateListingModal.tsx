@@ -1,10 +1,5 @@
 "use client";
 
-// API
-import api from "@/api/WebService";
-
-import { toast } from "sonner"
-
 import { useEffect, useState } from "react";
 import {
     Dialog,
@@ -18,59 +13,72 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, X, ImageIcon } from "lucide-react";
+import { toast } from "sonner";
+import api from "@/api/WebService";
 import { CreateListingRequest, ErrorResponse } from "@/api/WebTypes";
-
-// Type definition matching your ListingDTO
-export interface ListingDTO {
-    listingGU: string;
-    userGU: string;
-    description: string;
-    picture1_url: string;
-    picture2_url: string;
-    price: number | null;
-    condition: string;
-}
 
 export function CreateListingModal(props: { onSuccess?: () => void }) {
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    const [title, setTitle] = useState<string>("");
-    const [description, setDescription] = useState<string>("");
-    const [picture1_url, setPicture1Url] = useState<string>();
-    const [picture2_url, setPicture2Url] = useState<string>();
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
     const [price, setPrice] = useState<number | "">("");
-    const [condition, setCondition] = useState<string>("");
+    const [condition, setCondition] = useState("");
+
+    // Photos
+    const [photos, setPhotos] = useState<string[]>([]);
 
     useEffect(() => {
-        setTitle("");
-        setDescription("");
-        setPicture1Url("");
-        setPicture2Url("");
-        setPrice("");
-        setCondition("");
+        if (!open) {
+            setTitle("");
+            setDescription("");
+            setPrice("");
+            setCondition("");
+            setPhotos([]);
+        }
     }, [open]);
+
+    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (photos.length >= 2) {
+            toast.error("You can only upload up to 2 photos.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setPhotos((prev) => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const removePhoto = (index: number) => {
+        setPhotos((prev) => prev.filter((_, i) => i !== index));
+    };
 
     const handleSubmit = async () => {
         const listing: CreateListingRequest = {
             description,
-            picture1_url,
-            picture2_url,
+            picture1_base64: photos[0] || "",
+            picture2_base64: photos[1] || "",
             price: price === "" ? 0 : Number(price),
             condition,
             title,
         };
 
         console.log("Submitting listing:", listing);
-        // TODO: send to backend
+
         setIsLoading(true);
         let res = await api.CreateListing(listing);
         setIsLoading(false);
+
         if (res instanceof ErrorResponse) {
             toast.error("Create Listing Error:" + res.body?.error);
         } else {
-            //TOAST
             toast.success("Successfully created listing");
             props.onSuccess?.();
             setOpen(false);
@@ -82,7 +90,7 @@ export function CreateListingModal(props: { onSuccess?: () => void }) {
             <DialogTrigger asChild>
                 <Button
                     style={{ cursor: "pointer" }}
-                    className="mb-4 w-full bg-[var(--uo-green)] hover:bg-[var(--uo-green)]/70 text-white transition-colors duration-300"
+                    className="mb-0 w-full bg-[var(--uo-green)] hover:bg-[var(--uo-green)]/70 text-white transition-colors duration-300"
                 >
                     + Create New Listing
                 </Button>
@@ -94,35 +102,26 @@ export function CreateListingModal(props: { onSuccess?: () => void }) {
                 </DialogHeader>
 
                 <div className="space-y-4 py-2">
-
                     {/* Title */}
-                    <Label htmlFor="title" className="text-right">
-                        Title
-                    </Label>
+                    <Label htmlFor="title">Title</Label>
                     <Input
                         id="title"
                         value={title}
-                        onChange={(e: any) => setTitle(e.target.value)}
+                        onChange={(e) => setTitle(e.target.value)}
                         placeholder="Name your item..."
-                        className="col-span-3"
                     />
 
                     {/* Description */}
-                    <Label htmlFor="description" className="text-right">
-                        Description
-                    </Label>
+                    <Label htmlFor="description">Description</Label>
                     <Textarea
                         id="description"
                         value={description}
-                        onChange={(e: any) => setDescription(e.target.value)}
+                        onChange={(e) => setDescription(e.target.value)}
                         placeholder="Describe your item..."
-                        className="col-span-3"
                     />
 
                     {/* Price */}
-                    <Label htmlFor="price" className="text-right">
-                        Price
-                    </Label>
+                    <Label htmlFor="price">Price</Label>
                     <Input
                         id="price"
                         type="text"
@@ -132,33 +131,71 @@ export function CreateListingModal(props: { onSuccess?: () => void }) {
                             setPrice(raw ? Number(raw) : "");
                         }}
                         placeholder="$ 0"
-                        className="col-span-3"
                     />
 
-
-
                     {/* Condition */}
-                    <Label htmlFor="condition" className="text-right">
-                        Condition
-                    </Label>
+                    <Label htmlFor="condition">Condition</Label>
                     <Input
                         id="condition"
                         value={condition}
                         onChange={(e) => setCondition(e.target.value)}
                         placeholder="New / Used / Like New"
-                        className="col-span-3"
                     />
+
+                    {/* Photos */}
+                    <Label>Photos (max 2)</Label>
+                    <div className="flex gap-3 flex-wrap">
+                        {photos.map((src, i) => (
+                            <div
+                                key={i}
+                                className="relative w-[100px] h-[100px] rounded-md overflow-hidden border border-border"
+                            >
+                                <img
+                                    src={src}
+                                    alt={`Photo ${i + 1}`}
+                                    className="w-full h-full object-cover"
+                                />
+                                <button
+                                    onClick={() => removePhoto(i)}
+                                    className="absolute top-1 right-1 bg-black/50 hover:bg-black/70 text-white rounded-full p-0.5"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        ))}
+
+                        {/* Add photo placeholders */}
+                        {photos.length < 2 && (
+                            <label
+                                htmlFor="photo-upload"
+                                className="w-[100px] h-[100px] rounded-md flex flex-col items-center justify-center border border-dashed border-muted-foreground/40 cursor-pointer hover:bg-muted transition-colors"
+                            >
+                                <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                                <span className="text-xs text-muted-foreground mt-1">
+                                    Add photo
+                                </span>
+                                <input
+                                    id="photo-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handlePhotoUpload}
+                                />
+                            </label>
+                        )}
+                    </div>
                 </div>
 
                 <DialogFooter>
                     <Button
                         onClick={handleSubmit}
+                        disabled={isLoading}
                         className="
-              bg-[var(--uo-green)] 
-              text-white 
-              hover:bg-[color-mix(in_srgb,var(--uo-green)_85%,black)] 
-              transition-colors duration-300
-            "
+                            bg-[var(--uo-green)] 
+                            text-white 
+                            hover:bg-[color-mix(in_srgb,var(--uo-green)_85%,black)] 
+                            transition-colors duration-300
+                            "
                     >
                         {isLoading ? (
                             <>
