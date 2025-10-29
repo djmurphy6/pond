@@ -30,6 +30,12 @@ import { toast } from "sonner";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
 import Image from "next/image";
 
+// Mock data
+import { mockChatRooms, mockMessages, MOCK_CURRENT_USER_GU } from "./mockData";
+
+// Toggle this to switch between mock and real data
+const USE_MOCK_DATA = true;
+
 export default function MessagingPage() {
     const [chatRooms, setChatRooms] = useState<ChatRoomListDTO[]>([]);
     const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
@@ -55,12 +61,34 @@ export default function MessagingPage() {
         if (selectedRoomId) {
             GetMessages(selectedRoomId);
             // Mark messages as read when room is selected
-            api.MarkMessagesAsRead(selectedRoomId);
+            if (!USE_MOCK_DATA) {
+                api.MarkMessagesAsRead(selectedRoomId);
+            } else {
+                // In mock mode, just clear unread count
+                setChatRooms(prev => prev.map(room =>
+                    room.roomId === selectedRoomId
+                        ? { ...room, unreadCount: 0 }
+                        : room
+                ));
+            }
         }
     }, [selectedRoomId]);
 
     async function GetChatRooms() {
         setLoading(true);
+        
+        if (USE_MOCK_DATA) {
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+            setChatRooms(mockChatRooms);
+            // Auto-select first room if available
+            if (mockChatRooms.length > 0 && !selectedRoomId) {
+                setSelectedRoomId(mockChatRooms[0].roomId);
+            }
+            setLoading(false);
+            return;
+        }
+        
         const res = await api.GetChatRooms();
         setLoading(false);
         if (res instanceof ErrorResponse) {
@@ -76,6 +104,16 @@ export default function MessagingPage() {
 
     async function GetMessages(roomId: string) {
         setLoadingMessages(true);
+        
+        if (USE_MOCK_DATA) {
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 300));
+            const roomMessages = mockMessages[roomId] || [];
+            setMessages(roomMessages);
+            setLoadingMessages(false);
+            return;
+        }
+        
         const res = await api.GetRoomMessages(roomId);
         setLoadingMessages(false);
         if (res instanceof ErrorResponse) {
@@ -88,7 +126,32 @@ export default function MessagingPage() {
     function handleSendMessage() {
         if (!messageInput.trim() || !selectedRoomId) return;
         
-        // TODO: Implement WebSocket message sending
+        if (USE_MOCK_DATA) {
+            // Add message to mock data locally
+            const newMessage: MessageResponseDTO = {
+                id: `msg-${Date.now()}`,
+                roomId: selectedRoomId,
+                senderGU: MOCK_CURRENT_USER_GU,
+                content: messageInput.trim(),
+                timestamp: new Date().toISOString(),
+                isRead: false,
+            };
+            
+            setMessages(prev => [...prev, newMessage]);
+            
+            // Update the last message in the chat room list
+            setChatRooms(prev => prev.map(room => 
+                room.roomId === selectedRoomId 
+                    ? { ...room, lastMessage: messageInput.trim(), lastMessageAt: new Date().toISOString() }
+                    : room
+            ));
+            
+            setMessageInput("");
+            toast.success("Message sent! (Mock mode)");
+            return;
+        }
+        
+        // TODO: Implement WebSocket message sending for real backend
         toast.info("WebSocket messaging not yet implemented");
         setMessageInput("");
     }
@@ -99,8 +162,15 @@ export default function MessagingPage() {
 
     return (
         <div className="flex h-screen bg-background transition-colors duration-300">
+            {/* Mock Mode Banner */}
+            {USE_MOCK_DATA && (
+                <div className="fixed top-0 left-0 right-0 bg-orange-500 text-white text-center py-1 text-sm font-medium z-50">
+                    🧪 Mock Mode - UI Development Only
+                </div>
+            )}
+            
             {/* Sidebar */}
-            <aside className={`w-80 border-r bg-muted/10 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
+            <aside className={`w-80 border-r bg-muted/10 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"} ${USE_MOCK_DATA ? "pt-6" : ""}`}>
                 {/* Header */}
                 <div className="p-4 border-b">
                     <div className="flex items-center justify-between mb-4">
@@ -156,7 +226,7 @@ export default function MessagingPage() {
             </aside>
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col transition-colors duration-300">
+            <main className={`flex-1 flex flex-col transition-colors duration-300 ${USE_MOCK_DATA ? "pt-6" : ""}`}>
                 {selectedRoom ? (
                     <>
                         {/* Chat Header */}
@@ -205,7 +275,7 @@ export default function MessagingPage() {
                                         <MessageBubble
                                             key={message.id}
                                             message={message}
-                                            isOwn={message.senderGU === userInfo?.userGU}
+                                            isOwn={USE_MOCK_DATA ? message.senderGU === MOCK_CURRENT_USER_GU : message.senderGU === userInfo?.userGU}
                                         />
                                     ))}
                                 </div>
