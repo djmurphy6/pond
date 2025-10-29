@@ -1,22 +1,21 @@
 package com.pond.server.controller;
 
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
+import com.pond.server.dto.UploadAvatarRequest;
 import com.pond.server.model.User;
 import com.pond.server.repository.UserRepository;
 import com.pond.server.service.ImageService;
-import com.pond.server.service.ImageService.ImageResult;
 import com.pond.server.service.SupabaseStorage;
 
 @RequestMapping("/uploads")
@@ -32,20 +31,25 @@ public class ImageController {
         this.supabaseStorage = supabaseStorage;
     }
 
+    private byte[] decodeBase64Image(String s) {
+        if (s == null) return null;
+        int comma = s.indexOf(',');
+        String payload = comma >= 0 ? s.substring(comma + 1) : s;
+        return java.util.Base64.getDecoder().decode(payload);
+    }
+
     @Value("${supabase.pfp-bucket}")
     private String pfpBucket;
 
-    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadAvatar(@RequestPart("file") MultipartFile file) {
+    @PostMapping(value = "/avatar")  // removed consumes = MULTIPART_FORM_DATA
+    public ResponseEntity<?> uploadAvatar(@RequestBody UploadAvatarRequest req) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) auth.getPrincipal();
-
-        ImageResult img = imageService.process(file, 512, 512, 0.88f);
 
         // Prepare to delete previous file (if any) after successful upload
         String oldUrl = currentUser.getAvatar_url();
         String oldKey = null;
-        if (oldUrl != null) {
+        if (oldUrl != null && !oldUrl.isBlank()) {
             String marker = "/storage/v1/object/public/" + pfpBucket + "/";
             int idx = oldUrl.indexOf(marker);
             if (idx >= 0) {
@@ -53,8 +57,12 @@ public class ImageController {
             }
         }
 
+        // Decode base64 and process image
+        byte[] raw = decodeBase64Image(req.getAvatar_base64());
+        ImageService.ImageResult img = imageService.process(raw, 512, 512, 0.88f);
+
         // Use a versioned key to avoid CDN/browser cache issues
-        String key = "%s/%s.jpg".formatted(currentUser.getUserGU(), java.util.UUID.randomUUID().toString());
+        String key = "%s/%s.jpg".formatted(currentUser.getUserGU(), UUID.randomUUID());
         String url = supabaseStorage.uploadPublic(pfpBucket, key, img.bytes(), img.contentType());
 
         currentUser.setAvatar_url(url);
@@ -71,4 +79,5 @@ public class ImageController {
 
         return ResponseEntity.ok(Map.of("avatar_url", url));
     }
+    
 }
