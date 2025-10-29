@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, type LoginRequest, type LoginResponse } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, type LoginRequest, type LoginResponse } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -124,6 +124,23 @@ class API {
     
     async DeleteListing(request: DeleteListingRequest): Promise<Listing[] | ErrorResponse> {
         return this.Request<Listing[]>(`/listings/${request.listingGU}`, "DELETE", {}, 'DeleteListing');
+    }
+
+    // Messaging
+    async GetChatRooms(): Promise<ChatRoomListDTO[] | ErrorResponse> {
+        return this.Request<ChatRoomListDTO[]>("/chat/rooms", "GET", {}, 'GetChatRooms');
+    }
+
+    async GetChatRoomDetails(roomId: string): Promise<ChatRoomDetailDTO | ErrorResponse> {
+        return this.Request<ChatRoomDetailDTO>(`/chat/rooms/${roomId}`, "GET", {}, 'GetChatRoomDetails');
+    }
+
+    async GetRoomMessages(roomId: string, page: number = 0, size: number = 50): Promise<MessageResponseDTO[] | ErrorResponse> {
+        return this.Request<MessageResponseDTO[]>(`/chat/rooms/${roomId}/messages?page=${page}&size=${size}`, "GET", {}, 'GetRoomMessages');
+    }
+
+    async MarkMessagesAsRead(roomId: string): Promise<{ result: string } | ErrorResponse> {
+        return this.Request<{ result: string }>(`/chat/rooms/${roomId}/mark-read`, "POST", {}, 'MarkMessagesAsRead');
     }
 }
 

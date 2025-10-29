@@ -16,6 +16,7 @@ import {
     GraduationCap,
     ChevronRight,
     Tag,
+    MessageCircle,
 } from "lucide-react";
 
 // API
@@ -95,13 +96,26 @@ export default function DashboardPage() {
                     <Button
                         variant="ghost"
                         style={{ cursor: 'pointer' }}
-                        className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300"
+                        className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300 mb-3"
 
                     >
                         <div className="h-7 w-7 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
                             <Tag className="h-4 w-4 text-primary transition-colors duration-300" />
                         </div>
                         <a href="dashboard/you/selling">Selling</a>
+                        <ChevronRight className="transition-colors duration-300" />
+                    </Button>
+
+                    <Button
+                        variant="ghost"
+                        style={{ cursor: 'pointer' }}
+                        className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300"
+                        onClick={() => window.location.href = '/messaging'}
+                    >
+                        <div className="h-7 w-7 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
+                            <MessageCircle className="h-4 w-4 text-primary transition-colors duration-300" />
+                        </div>
+                        <span>Messages</span>
                         <ChevronRight className="transition-colors duration-300" />
                     </Button>
                 </div>
