@@ -38,30 +38,34 @@ public class ListingService {
         l.setCondition(req.getCondition());
         l.setTitle(req.getTitle());
 
+        // Save first to get the listingGU
+        l = listingRepository.save(l);
+
         // Prefer images sent as base64 JSON (single request), fallback to provided URLs
         String b1 = req.getPicture1_base64();
         String b2 = req.getPicture2_base64();
         if (b1 != null && !b1.isBlank()) {
-            String url1 = uploadListingImage(owner.getUserGU(), 1, b1);
+            String url1 = uploadListingImage(owner.getUserGU(), l.getListingGU(), 1, b1);
             l.setPicture1_url(url1);
         } else {
             l.setPicture1_url(req.getPicture1_url());
         }
         if (b2 != null && !b2.isBlank()) {
-            String url2 = uploadListingImage(owner.getUserGU(), 2, b2);
+            String url2 = uploadListingImage(owner.getUserGU(), l.getListingGU(), 2, b2);
             l.setPicture2_url(url2);
         } else {
             l.setPicture2_url(req.getPicture2_url());
         }
 
+        // Save the listing with the images
         l = listingRepository.save(l);
         return toDto(l);
     }
 
-    private String uploadListingImage(UUID userGU, int index, String base64OrDataUrl) {
+    private String uploadListingImage(UUID userGU, UUID listingGU, int index, String base64OrDataUrl) {
         byte[] raw = decodeBase64Image(base64OrDataUrl);
         ImageService.ImageResult img = imageService.process(raw, 2048, 2048, 0.88f);
-        String key = "listings/%s/%s/%d.jpg".formatted(userGU, UUID.randomUUID(), index);
+        String key = "listings/%s/%s/%d.jpg".formatted(userGU, listingGU, index);
         return supabaseStorage.uploadPublic(listingBucket, key, img.bytes(), img.contentType());
     }
 
