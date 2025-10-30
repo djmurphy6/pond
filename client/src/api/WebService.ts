@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, type LoginRequest, type LoginResponse } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, type LoginRequest, type LoginResponse, GetSpecificListingRequest } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -114,14 +114,18 @@ class API {
         return this.Request<Listing[]>("/listings", "GET", {}, 'GetListings');
     }
 
+    async GetSpecificListing(request: GetSpecificListingRequest): Promise<Listing | ErrorResponse> {
+        return this.Request<Listing>(`/listings/${request.listingGU}`, "GET", {}, 'GetSpecificListing');
+    }
+
     async GetMyListings(): Promise<Listing[] | ErrorResponse> {
         return this.Request<Listing[]>("/listings/me", "GET", {}, 'GetMyListings');
     }
-    
+
     async UpdateListing(request: UpdateListingRequest): Promise<Listing[] | ErrorResponse> {
-        return this.Request<Listing[]>(`/listings/${request.listingGU}`, "PUT", {body: request.body}, 'UpdateListing');
+        return this.Request<Listing[]>(`/listings/${request.listingGU}`, "PUT", { body: request.body }, 'UpdateListing');
     }
-    
+
     async DeleteListing(request: DeleteListingRequest): Promise<Listing[] | ErrorResponse> {
         return this.Request<Listing[]>(`/listings/${request.listingGU}`, "DELETE", {}, 'DeleteListing');
     }
