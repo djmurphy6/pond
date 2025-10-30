@@ -11,7 +11,7 @@ public class UpdateListingRequest {
     private String picture1_url;
     @JsonProperty("picture2_url")
     private String picture2_url;
-    private Integer price;
+    private Double price;
     private String condition;
     private String title;
 

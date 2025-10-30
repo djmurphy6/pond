@@ -21,7 +21,7 @@ public class ChatRoomDetailDTO {
     private String listingTitle;
 
     @JsonProperty("listingPrice")
-    private Integer listingPrice;
+    private Double listingPrice;
 
     @JsonProperty("listingImage")
     private String listingImage;

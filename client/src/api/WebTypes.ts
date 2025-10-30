@@ -58,6 +58,9 @@ export type Listing = {
     price: number;
     condition: string;
     title: string;
+    //only update
+    picture1_base64?: string;
+    picture2_base64?: string;
 }
 
 //UPDATE LISTING

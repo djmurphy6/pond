@@ -38,7 +38,7 @@ public class Listing {
     private String picture2_url;
 
     @Column(name = "price")
-    private Integer price;
+    private Double price;
 
     @Column(name = "condition")
     private String condition;

@@ -69,9 +69,15 @@ export default function EditListingModal({ item, onClose, onSave }: { item?: Lis
                 listingGU: item.listingGU,
                 body: {
                     title,
-                    price,
-                    description
+                    picture1_url: item.picture1_url,
+                    picture2_url: item.picture2_url,
+                    price: price === "" ? 0 : Number(price),
+                    condition,
+                    description,
                     //add images when put mapping allows for it
+                    picture1_base64: photos[0] || "",
+                    picture2_base64: photos[1] || "",
+
                 }
             } as UpdateListingRequest;
 
@@ -106,13 +112,24 @@ export default function EditListingModal({ item, onClose, onSave }: { item?: Lis
                     <Input
                         id="price"
                         type="text"
-                        value={price ? `$ ${Number(price).toLocaleString()}` : ""}
+                        value={price ? `$ ${price}` : ""}
                         onChange={(e) => {
-                            const raw = e.target.value.replace(/[^0-9.]/g, "");
-                            setPrice(raw ? Number(raw) : "");
+                            let raw = e.target.value.replace(/[^0-9.]/g, "");
+                            const parts = raw.split(".");
+                            if (parts.length > 2) raw = parts[0] + "." + parts.slice(1).join("");
+
+                            setPrice(raw);
+                        }}
+                        onBlur={(e) => {
+                            let raw = e.target.value.replace(/[^0-9.]/g, "");
+                            if (raw.includes('.')) {
+                                const parts = raw.split(".");
+                                if (parts[1] === "") {
+                                    setPrice(raw + '0');
+                                }
+                            }
                         }}
                         placeholder="$ 0"
-                        className="col-span-3 mt-2"
                     />
 
                     <Label htmlFor="condition">Condition</Label>

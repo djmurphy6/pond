@@ -24,7 +24,7 @@ export function CreateListingModal(props: { onSuccess?: () => void }) {
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [price, setPrice] = useState<number | "">("");
+    const [price, setPrice] = useState<number | string>("");
     const [condition, setCondition] = useState("");
 
     // Photos
@@ -125,13 +125,26 @@ export function CreateListingModal(props: { onSuccess?: () => void }) {
                     <Input
                         id="price"
                         type="text"
-                        value={price ? `$ ${Number(price).toLocaleString()}` : ""}
+                        value={price ? `$ ${price}` : ""}
                         onChange={(e) => {
-                            const raw = e.target.value.replace(/[^0-9.]/g, "");
-                            setPrice(raw ? Number(raw) : "");
+                            let raw = e.target.value.replace(/[^0-9.]/g, "");
+                            const parts = raw.split(".");
+                            if (parts.length > 2) raw = parts[0] + "." + parts.slice(1).join("");
+
+                            setPrice(raw);
+                        }}
+                        onBlur={(e) => {
+                            let raw = e.target.value.replace(/[^0-9.]/g, "");
+                            if (raw.includes('.')) {
+                                const parts = raw.split(".");
+                                if (parts[1] === "") {
+                                    setPrice(raw + '0');
+                                }
+                            }
                         }}
                         placeholder="$ 0"
                     />
+
 
                     {/* Condition */}
                     <Label htmlFor="condition">Condition</Label>
