@@ -92,12 +92,41 @@ public class ListingService {
     public ListingDTO update(UUID id, UpdateListingRequest req, User owner) {
         Listing l = listingRepository.findByListingGUAndUserGU(id, owner.getUserGU())
                 .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
+        
+        // Update text fields
         if (req.getDescription() != null) l.setDescription(req.getDescription());
-        if (req.getPicture1_url() != null) l.setPicture1_url(req.getPicture1_url());
-        if (req.getPicture2_url() != null) l.setPicture2_url(req.getPicture2_url());
         if (req.getPrice() != null) l.setPrice(req.getPrice());
         if (req.getCondition() != null) l.setCondition(req.getCondition());
         if (req.getTitle() != null) l.setTitle(req.getTitle());
+        
+        // Handle picture1: if base64 provided, delete old and upload new
+        String b1 = req.getPicture1_base64();
+        if (b1 != null && !b1.isBlank()) {
+            // Delete old image before uploading new one
+            deleteListingImage(l.getPicture1_url());
+            // Upload new image
+            String url1 = uploadListingImage(owner.getUserGU(), l.getListingGU(), 1, b1);
+            l.setPicture1_url(url1);
+        } else if (req.getPicture1_url() != null) {
+            // Just update URL if provided (no base64)
+            l.setPicture1_url(req.getPicture1_url());
+        }
+        // else: no change, keep existing picture1_url
+        
+        // Handle picture2: if base64 provided, delete old and upload new
+        String b2 = req.getPicture2_base64();
+        if (b2 != null && !b2.isBlank()) {
+            // Delete old image before uploading new one
+            deleteListingImage(l.getPicture2_url());
+            // Upload new image
+            String url2 = uploadListingImage(owner.getUserGU(), l.getListingGU(), 2, b2);
+            l.setPicture2_url(url2);
+        } else if (req.getPicture2_url() != null) {
+            // Just update URL if provided (no base64)
+            l.setPicture2_url(req.getPicture2_url());
+        }
+        // else: no change, keep existing picture2_url
+        
         l = listingRepository.save(l);
         return toDto(l);
     }
@@ -105,7 +134,24 @@ public class ListingService {
     public void delete(UUID id, User owner) {
         Listing l = listingRepository.findByListingGUAndUserGU(id, owner.getUserGU())
                 .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
+                deleteListingImage(l.getPicture1_url());
+                deleteListingImage(l.getPicture2_url());
         listingRepository.delete(l);
+    }
+
+    private void deleteListingImage(String url){
+        if (url == null || url.isBlank()) return;
+
+        String marker = "/storage/v1/object/public/" + listingBucket + "/";
+        int idx = url.indexOf(marker);
+        if (idx >= 0){
+            String key = url.substring(idx + marker.length());
+            try {
+                supabaseStorage.deleteObject(listingBucket, key);
+            } catch (Exception e) {
+                throw new RuntimeException("Supabase delete failed", e);
+            }
+        }
     }
     
 

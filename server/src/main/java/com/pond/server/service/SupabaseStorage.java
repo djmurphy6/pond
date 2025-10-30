@@ -34,7 +34,7 @@ public class SupabaseStorage {
     public void deleteObject(String bucket, String key){
         try {
             HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(supabaseUrl + "/storage/v1/object/" + bucket + "/" + key))
+                .uri(URI.create(storageUrl + "/storage/v1/object/" + bucket + "/" + key))
                 .header("Authorization", "Bearer " + serviceKey)
                 .DELETE()
                 .build();
