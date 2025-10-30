@@ -65,7 +65,7 @@ public class ListingService {
     private String uploadListingImage(UUID userGU, UUID listingGU, int index, String base64OrDataUrl) {
         byte[] raw = decodeBase64Image(base64OrDataUrl);
         ImageService.ImageResult img = imageService.process(raw, 2048, 2048, 0.88f);
-        String key = "listings/%s/%s/%d.jpg".formatted(userGU, listingGU, index);
+        String key = "listings/%s/%s/%d-%s.jpg".formatted(userGU, listingGU, index, UUID.randomUUID());
         return supabaseStorage.uploadPublic(listingBucket, key, img.bytes(), img.contentType());
     }
 
@@ -93,42 +93,56 @@ public class ListingService {
         Listing l = listingRepository.findByListingGUAndUserGU(id, owner.getUserGU())
                 .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
         
-        // Update text fields
-        if (req.getDescription() != null) l.setDescription(req.getDescription());
-        if (req.getPrice() != null) l.setPrice(req.getPrice());
-        if (req.getCondition() != null) l.setCondition(req.getCondition());
-        if (req.getTitle() != null) l.setTitle(req.getTitle());
-        
-        // Handle picture1: if base64 provided, delete old and upload new
-        String b1 = req.getPicture1_base64();
-        if (b1 != null && !b1.isBlank()) {
-            // Delete old image before uploading new one
-            deleteListingImage(l.getPicture1_url());
-            // Upload new image
-            String url1 = uploadListingImage(owner.getUserGU(), l.getListingGU(), 1, b1);
-            l.setPicture1_url(url1);
-        } else if (req.getPicture1_url() != null) {
-            // Just update URL if provided (no base64)
-            l.setPicture1_url(req.getPicture1_url());
-        }
-        // else: no change, keep existing picture1_url
-        
-        // Handle picture2: if base64 provided, delete old and upload new
-        String b2 = req.getPicture2_base64();
-        if (b2 != null && !b2.isBlank()) {
-            // Delete old image before uploading new one
-            deleteListingImage(l.getPicture2_url());
-            // Upload new image
-            String url2 = uploadListingImage(owner.getUserGU(), l.getListingGU(), 2, b2);
-            l.setPicture2_url(url2);
-        } else if (req.getPicture2_url() != null) {
-            // Just update URL if provided (no base64)
-            l.setPicture2_url(req.getPicture2_url());
-        }
-        // else: no change, keep existing picture2_url
-        
-        l = listingRepository.save(l);
-        return toDto(l);
+                // Update text fields
+                if (req.getDescription() != null) l.setDescription(req.getDescription());
+                if (req.getPrice() != null) l.setPrice(req.getPrice());
+                if (req.getCondition() != null) l.setCondition(req.getCondition());
+                if (req.getTitle() != null) l.setTitle(req.getTitle());
+                
+                // Handle picture1: only treat as base64 if it's a Data URL
+                String b1 = req.getPicture1_base64();
+                if (b1 != null && b1.startsWith("data:")) {
+                    // Delete old image before uploading new one
+                    deleteListingImage(l.getPicture1_url());
+                    // Upload new image
+                    String url1 = uploadListingImage(owner.getUserGU(), l.getListingGU(), 1, b1);
+                    l.setPicture1_url(url1);
+                } else if (req.getPicture1_url() != null) {
+                    String url1 = req.getPicture1_url();
+                    if (url1.isBlank()) {
+                        // Empty string means clear the image
+                        deleteListingImage(l.getPicture1_url());
+                        l.setPicture1_url(null);
+                    } else {
+                        // Just update URL if provided (no base64)
+                        l.setPicture1_url(url1);
+                    }
+                }
+                // else: no change, keep existing picture1_url
+                
+                // Handle picture2: only treat as base64 if it's a Data URL
+                String b2 = req.getPicture2_base64();
+                if (b2 != null && b2.startsWith("data:")) {
+                    // Delete old image before uploading new one
+                    deleteListingImage(l.getPicture2_url());
+                    // Upload new image
+                    String url2 = uploadListingImage(owner.getUserGU(), l.getListingGU(), 2, b2);
+                    l.setPicture2_url(url2);
+                } else if (req.getPicture2_url() != null) {
+                    String url2 = req.getPicture2_url();
+                    if (url2.isBlank()) {
+                        // Empty string means clear the image
+                        deleteListingImage(l.getPicture2_url());
+                        l.setPicture2_url(null);
+                    } else {
+                        // Just update URL if provided (no base64)
+                        l.setPicture2_url(url2);
+                    }
+                }
+                // else: no change, keep existing picture2_url
+                
+                l = listingRepository.save(l);
+                return toDto(l);
     }
 
     public void delete(UUID id, User owner) {
@@ -139,7 +153,7 @@ public class ListingService {
         listingRepository.delete(l);
     }
 
-    private void deleteListingImage(String url){
+        private void deleteListingImage(String url){
         if (url == null || url.isBlank()) return;
 
         String marker = "/storage/v1/object/public/" + listingBucket + "/";
@@ -149,7 +163,7 @@ public class ListingService {
             try {
                 supabaseStorage.deleteObject(listingBucket, key);
             } catch (Exception e) {
-                throw new RuntimeException("Supabase delete failed", e);
+                System.err.println("Warning: Failed to delete old image " + url + ": " + e.getMessage());
             }
         }
     }

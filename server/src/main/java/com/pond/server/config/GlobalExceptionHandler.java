@@ -18,6 +18,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({ DataAccessException.class, RuntimeException.class })
     public ResponseEntity<?> handleServerErrors(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-            java.util.Map.of("error", "Server error. Please try again."));
+            java.util.Map.of("error", "Server error: " + ex.getMessage()));
     }
 }

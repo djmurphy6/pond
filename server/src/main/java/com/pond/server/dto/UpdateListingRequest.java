@@ -1,10 +1,12 @@
 package com.pond.server.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 
 @Getter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateListingRequest {
     private String description;
     @JsonProperty("picture1_url")
@@ -15,8 +17,6 @@ public class UpdateListingRequest {
     private String condition;
     private String title;
 
-    @JsonProperty("picture1_base64")
     private String picture1_base64;
-    @JsonProperty("picture2_base64")
     private String picture2_base64;
 }
