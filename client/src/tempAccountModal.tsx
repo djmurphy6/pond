@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Camera, ChevronRight, Loader2, ImageIcon, User } from "lucide-react";
+import { Camera, ChevronRight, ImageIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/api/WebService";
 import { ErrorResponse, UpdateUserRequest, UploadAvatarRequest } from "@/api/WebTypes";
@@ -121,8 +121,9 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
+      {/* ─ Trigger button ─ */}
       <PopoverTrigger asChild>
-      <Button
+        <Button
           variant="ghost"
           style={{ cursor: "pointer" }}
           className="!p-0.5 w-full justify-between transition-colors duration-300 mb-3"

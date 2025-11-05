@@ -3,11 +3,11 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 export type UserInfo = {
     userGU: string;
-    userName: string;
+    username: string;  // Matches backend field name
     email: string;
-    avatarURL: string;
+    avatar_url: string;  // Matches backend field name
     bio: string;
-    userScore: number;
+    userScore?: number;  // Made optional since backend doesn't return this
     admin: boolean;
 }
 

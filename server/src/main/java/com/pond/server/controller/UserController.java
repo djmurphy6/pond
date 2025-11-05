@@ -7,9 +7,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pond.server.dto.UpdateUserRequest;
 import com.pond.server.dto.UserProfileDTO;
 import com.pond.server.model.User;
 import com.pond.server.service.UserService;
@@ -46,6 +49,20 @@ public class UserController {
             return userService.getProfileByUsername(username).map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
         
+    }
+
+    @PutMapping("/me/update")
+    public ResponseEntity<?> updateProfile(@RequestBody UpdateUserRequest updateRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User currentUser)) {
+            return ResponseEntity.status(401).body(java.util.Map.of("error", "Unauthorized"));
+        }
+        try {
+            UserProfileDTO updatedProfile = userService.updateUserProfile(currentUser, updateRequest);
+            return ResponseEntity.ok(updatedProfile);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
     }
 
 }

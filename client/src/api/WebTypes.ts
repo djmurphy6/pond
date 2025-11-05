@@ -113,3 +113,26 @@ export type MessageResponseDTO = {
     timestamp: string;
     isRead: boolean;
 }
+
+export type UpdateUserRequest = {
+    username?: string;
+    bio?: string;
+}
+
+export type UpdateUserResponse = {
+    userGU: string;
+    username: string;
+    email: string;
+    avatar_url: string;
+    bio: string;
+    admin: boolean;
+}
+
+
+export type UploadAvatarRequest = {
+    avatar_base64: string;
+}
+
+export type UploadAvatarResponse = {
+    avatar_url: string;
+}
