@@ -9,6 +9,8 @@ import { CSSProperties, useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Loader2, Mail } from "lucide-react";
 import { toast } from "sonner";
@@ -76,22 +78,31 @@ function VerifyContent() {
 
                 <CardContent>
                     <form onSubmit={handleVerify} className="space-y-4">
-                        <div>
-                            <Label style={styles.label} htmlFor="code">Verification Code</Label>
-                            <Input
-                                id="code"
-                                type="text"
-                                placeholder="Enter 6-digit code"
-                                required
-                                maxLength={6}
-                                value={verificationCode}
-                                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                                className="text-center text-2xl tracking-widest"
-                            />
-                            <p className="text-xs text-muted-foreground mt-2 text-center">
-                                Code expires in 15 minutes
-                            </p>
-                        </div>
+                    <div>
+    <Label style={styles.label} htmlFor="code">Verification Code</Label>
+        <div className="flex justify-center">
+            <InputOTP
+                maxLength={6}
+                value={verificationCode}
+                onChange={(value) => setVerificationCode(value)}
+                pattern={REGEXP_ONLY_DIGITS}
+            >
+                <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                </InputOTPGroup>
+                <InputOTPGroup>
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                </InputOTPGroup>
+            </InputOTP>
+        </div>
+            <p className="text-xs text-muted-foreground mt-2 text-center">
+            Code expires in 15 minutes
+            </p>
+        </div>
 
                         <Button 
                             style={{ marginTop: 10, color: 'white', cursor: 'pointer' }} 
