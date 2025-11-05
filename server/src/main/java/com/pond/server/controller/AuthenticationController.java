@@ -86,13 +86,11 @@ public class AuthenticationController {
 
     }
 
-    @PostMapping("/verify")
-    public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDTO verifyUserDTO) {
-
-            authenticationService.verifyUser(verifyUserDTO);
-            return ResponseEntity.ok("Account verified successfully.");
-       
-    }
+        @PostMapping("/verify")
+        public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDTO verifyUserDTO) {
+        authenticationService.verifyUser(verifyUserDTO);
+        return ResponseEntity.ok(Map.of("message", "Account verified successfully."));
+        }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {

@@ -21,15 +21,18 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
     public AuthenticationService (
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            AuthenticationManager authenticationManager
+            AuthenticationManager authenticationManager,
+            EmailService emailService
     ){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.emailService = emailService;
     }
 
     public User signup(RegisterUserDTO input){
@@ -38,10 +41,16 @@ public class AuthenticationService {
             throw new RuntimeException("User already exists");
         }
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
-        user.setVerificationCode(generateVerificationCode());
+        String verificationCode = generateVerificationCode();
+        user.setVerificationCode(verificationCode);
         user.setVerificationCodeExpiration(LocalDateTime.now().plusMinutes(15));
         user.setEnabled(false);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        
+        // Send verification email
+        emailService.sendVerificationEmail(user.getEmail(), verificationCode);
+        
+        return savedUser;
     }
 
     public User authentication(LoginUserDTO input){
@@ -66,17 +75,25 @@ public class AuthenticationService {
         Optional<User> optionalUser = userRepository.findByEmail(input.getEmail());
         if (optionalUser.isPresent()){
             User user = optionalUser.get();
-            if (user.getVerificationCodeExpiration().isBefore(LocalDateTime.now())){
+            
+            // Check if verification code exists
+            if (user.getVerificationCode() == null) {
+                throw new RuntimeException("No verification code found. Please register again.");
+            }
+            
+            // Check if expiration exists and if code is expired
+            if (user.getVerificationCodeExpiration() == null || 
+                user.getVerificationCodeExpiration().isBefore(LocalDateTime.now())){
                 throw new RuntimeException("Verification code has expired!");
             }
+            
             if (user.getVerificationCode().equals(input.getVerificationCode())) {
                 user.setEnabled(true);
                 user.setVerificationCode(null);
-//                user.getVerificationCodeExpiration();
+                user.setVerificationCodeExpiration(null);
                 userRepository.save(user);
             } else {
                 throw new RuntimeException("Invalid verification code");
-
             }
         } else {
             throw new RuntimeException("User not found");

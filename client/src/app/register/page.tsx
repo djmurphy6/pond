@@ -38,8 +38,8 @@ export default function Register() {
             toast.error("Account Creation Error: " + res.body?.error);
         } else {
             console.log(JSON.stringify(res))
-            toast.success("Successfully created an account")
-            router.replace("/login?from=register");
+            toast.success("Account created! Please check your email for the verification code.")
+            router.replace(`/verify?email=${encodeURIComponent(email)}`);
         }
 
         setIsLoading(false);
