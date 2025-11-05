@@ -16,7 +16,7 @@ public class UpdateListingRequest {
     private Double price;
     private String condition;
     private String title;
-
+    private String category;
     private String picture1_base64;
     private String picture2_base64;
 }

@@ -37,7 +37,7 @@ public class ListingService {
         l.setPrice(req.getPrice());
         l.setCondition(req.getCondition());
         l.setTitle(req.getTitle());
-
+        l.setCategory(req.getCategory());
         // Save first to get the listingGU
         l = listingRepository.save(l);
 
@@ -98,6 +98,7 @@ public class ListingService {
                 if (req.getPrice() != null) l.setPrice(req.getPrice());
                 if (req.getCondition() != null) l.setCondition(req.getCondition());
                 if (req.getTitle() != null) l.setTitle(req.getTitle());
+                if (req.getCategory() != null) l.setCategory(req.getCategory());
                 
                 // Handle picture1: only treat as base64 if it's a Data URL
                 String b1 = req.getPicture1_base64();
@@ -178,7 +179,8 @@ public class ListingService {
             l.getPicture1_url(),
             l.getPicture2_url(),
             l.getPrice(),
-            l.getCondition()
+            l.getCondition(),
+            l.getCategory()
     );
     }
 }

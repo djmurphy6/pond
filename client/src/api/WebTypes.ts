@@ -44,6 +44,7 @@ export type CreateListingRequest = {
     picture2_base64?: string;
     price: number;
     condition: string;
+    category?: string;
     title: string;
 }
 export type CreateListingResponse = Listing
@@ -57,6 +58,7 @@ export type Listing = {
     picture2_url: string;
     price: number;
     condition: string;
+    category?: string;
     title: string;
     //only update
     picture1_base64?: string;
