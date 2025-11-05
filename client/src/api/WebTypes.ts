@@ -48,7 +48,7 @@ export type CreateListingRequest = {
 }
 export type CreateListingResponse = Listing
 
-//GET LISTING
+//GET LISTINGS
 export type Listing = {
     userGU: string;
     listingGU: string;
@@ -61,6 +61,11 @@ export type Listing = {
     //only update
     picture1_base64?: string;
     picture2_base64?: string;
+}
+
+//GET SPECIFIC LISTING
+export type GetSpecificListingRequest = {
+    listingGU: string
 }
 
 //UPDATE LISTING

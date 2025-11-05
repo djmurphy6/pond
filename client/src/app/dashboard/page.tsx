@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/router";
 
 //React and Other
 import { useEffect, useState } from "react";
@@ -194,30 +195,32 @@ function ListingCard({ item }: { item: Listing }) {
 
     return (
         <Card className={`${theme !== 'dark' && 'hover:shadow-lg'} hover:underline hover:-translate-y-1 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}>
-            <div
-                className="relative h-40 w-full flex items-center justify-center overflow-hidden transition-colors duration-300"
-                style={{
-                    backgroundColor: theme === "dark" ? "#111111" : "#ededed",
-                    transition: "background-color 300ms ease-in-out",
-                }}
-            >
-                {!item.picture1_url || hasError ? (
-                    <ImageIcon className="h-10 w-10 text-muted-foreground transition-colors duration-300" />
-                ) : (
-                    <Image
-                        src={item.picture1_url}
-                        alt={item.title}
-                        fill
-                        className="object-cover transition-colors duration-300"
-                        onError={() => setHasError(true)}
-                        priority
-                    />
-                )}
-            </div>
-            <CardContent className="p-3">
-                <p className="font-medium">${item.price.toLocaleString()}</p>
-                <p className="text-md text-muted-foreground">{item.title}</p>
-            </CardContent>
+            <Link href={`/dashboard/listing/${item.listingGU}`}>
+                <div
+                    className="relative h-40 w-full flex items-center justify-center overflow-hidden transition-colors duration-300"
+                    style={{
+                        backgroundColor: theme === "dark" ? "#111111" : "#ededed",
+                        transition: "background-color 300ms ease-in-out",
+                    }}
+                >
+                    {!item.picture1_url || hasError ? (
+                        <ImageIcon className="h-10 w-10 text-muted-foreground transition-colors duration-300" />
+                    ) : (
+                        <Image
+                            src={item.picture1_url}
+                            alt={item.title}
+                            fill
+                            className="object-cover transition-colors duration-300"
+                            onError={() => setHasError(true)}
+                            priority
+                        />
+                    )}
+                </div>
+                <CardContent className="p-3">
+                    <p className="font-medium">${item.price.toLocaleString()}</p>
+                    <p className="text-md text-muted-foreground">{item.title}</p>
+                </CardContent>
+            </Link>
         </Card>
     );
 }

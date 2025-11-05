@@ -114,14 +114,18 @@ class API {
         return this.Request<Listing[]>("/listings", "GET", {}, 'GetListings');
     }
 
+    async GetSpecificListing(request: GetSpecificListingRequest): Promise<Listing | ErrorResponse> {
+        return this.Request<Listing>(`/listings/${request.listingGU}`, "GET", {}, 'GetSpecificListing');
+    }
+
     async GetMyListings(): Promise<Listing[] | ErrorResponse> {
         return this.Request<Listing[]>("/listings/me", "GET", {}, 'GetMyListings');
     }
-    
+
     async UpdateListing(request: UpdateListingRequest): Promise<Listing[] | ErrorResponse> {
-        return this.Request<Listing[]>(`/listings/${request.listingGU}`, "PUT", {body: request.body}, 'UpdateListing');
+        return this.Request<Listing[]>(`/listings/${request.listingGU}`, "PUT", { body: request.body }, 'UpdateListing');
     }
-    
+
     async DeleteListing(request: DeleteListingRequest): Promise<Listing[] | ErrorResponse> {
         return this.Request<Listing[]>(`/listings/${request.listingGU}`, "DELETE", {}, 'DeleteListing');
     }
