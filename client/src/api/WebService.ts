@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, type LoginRequest, type LoginResponse } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, type LoginRequest, type LoginResponse } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -141,6 +141,15 @@ class API {
 
     async MarkMessagesAsRead(roomId: string): Promise<{ result: string } | ErrorResponse> {
         return this.Request<{ result: string }>(`/chat/rooms/${roomId}/mark-read`, "POST", {}, 'MarkMessagesAsRead');
+    }
+
+    // User Profile
+    async UpdateUserProfile(body: UpdateUserRequest): Promise<UpdateUserResponse | ErrorResponse> {
+        return this.Request<UpdateUserResponse>("/users/me/update", "PUT", { body }, 'UpdateUserProfile');
+    }
+
+    async UploadAvatar(body: UploadAvatarRequest): Promise<UploadAvatarResponse | ErrorResponse> {
+        return this.Request<UploadAvatarResponse>("/uploads/avatar", "POST", { body }, 'UploadAvatar');
     }
 }
 
