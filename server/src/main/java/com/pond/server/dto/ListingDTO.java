@@ -22,5 +22,6 @@ public class ListingDTO {
     private String picture2_url;
     private Double price;
     private String condition;
+    private String category;
     
 }

@@ -43,6 +43,9 @@ public class Listing {
     @Column(name = "condition")
     private String condition;
 
+    @Column(name = "category")
+    private String category;
+
     public Listing() {
     }
 }
