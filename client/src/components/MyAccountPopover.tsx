@@ -21,13 +21,13 @@ import { useUserInfoStore } from "@/stores/UserInfoStore";
 export function MyAccountPopover(props: { onSuccess?: () => void }) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const { userInfo, setUserInfo } = useUserInfoStore();
 
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
+  const [originalPhoto, setOriginalPhoto] = useState<string | null>(null);
 
   // Load current user info when popover opens
   useEffect(() => {
@@ -35,10 +35,11 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
       setUsername(userInfo.username || "");
       setBio(userInfo.bio || "");
       setPhoto(userInfo.avatar_url || null);
+      setOriginalPhoto(userInfo.avatar_url || null);
     }
   }, [open, userInfo]);
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -54,30 +55,11 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
       return;
     }
 
+    // Just preview the image, don't upload yet
     const reader = new FileReader();
-    reader.onloadend = async () => {
+    reader.onloadend = () => {
       const base64String = reader.result as string;
       setPhoto(base64String);
-
-      // Upload immediately
-      setIsUploadingAvatar(true);
-      const uploadRequest: UploadAvatarRequest = {
-        avatar_base64: base64String
-      };
-
-      const res = await api.UploadAvatar(uploadRequest);
-      setIsUploadingAvatar(false);
-
-      if (res instanceof ErrorResponse) {
-        toast.error("Avatar upload failed: " + res.body?.error);
-        setPhoto(userInfo?.avatar_url || null); // Revert
-      } else {
-        toast.success("Avatar uploaded successfully!");
-        // Update user info store
-        if (userInfo) {
-          setUserInfo({ ...userInfo, avatar_url: res.avatar_url });
-        }
-      }
     };
     reader.readAsDataURL(file);
   };
@@ -85,25 +67,50 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
   const handleSubmit = async () => {
     setIsLoading(true);
 
+    const photoChanged = photo !== originalPhoto;
+    
     const updateRequest: UpdateUserRequest = {
       username: username !== userInfo?.username ? username : undefined,
       bio: bio !== userInfo?.bio ? bio : undefined,
     };
 
     // Only send update if something changed
-    if (!updateRequest.username && updateRequest.bio === undefined && !photo) {
+    if (!updateRequest.username && updateRequest.bio === undefined && !photoChanged) {
       toast.info("No changes to save");
       setIsLoading(false);
       return;
     }
 
-    const res = await api.UpdateUserProfile(updateRequest);
-    setIsLoading(false);
+    // Upload avatar first if it changed
+    if (photoChanged && photo && photo.startsWith('data:')) {
+      const uploadRequest: UploadAvatarRequest = {
+        avatar_base64: photo
+      };
 
-    if (res instanceof ErrorResponse) {
-      toast.error("Update failed: " + res.body?.error);
-    } else {
-      toast.success("Profile updated successfully!");
+      const avatarRes = await api.UploadAvatar(uploadRequest);
+      
+      if (avatarRes instanceof ErrorResponse) {
+        toast.error("Avatar upload failed: " + avatarRes.body?.error);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Update the photo state with the URL from the server
+      if (userInfo) {
+        setUserInfo({ ...userInfo, avatar_url: avatarRes.avatar_url });
+      }
+    }
+
+    // Now update profile if username or bio changed
+    if (updateRequest.username || updateRequest.bio !== undefined) {
+      const res = await api.UpdateUserProfile(updateRequest);
+
+      if (res instanceof ErrorResponse) {
+        toast.error("Update failed: " + res.body?.error);
+        setIsLoading(false);
+        return;
+      }
+
       // Update user info store
       setUserInfo({
         userGU: res.userGU,
@@ -114,9 +121,12 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
         userScore: userInfo?.userScore,
         admin: res.admin,
       });
-      props.onSuccess?.();
-      setOpen(false);
     }
+
+    setIsLoading(false);
+    toast.success("Profile updated successfully!");
+    props.onSuccess?.();
+    setOpen(false);
   };
 
   return (
@@ -163,19 +173,13 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
                 <ImageIcon style={{ width: '40px', height: '40px' }} className="text-primary" />
               )}
 
-              {isUploadingAvatar && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <Loader2 className="h-6 w-6 animate-spin text-white" />
-                </div>
-              )}
-
               <input
                 id="photo-upload"
                 type="file"
                 accept="image/*"
                 className="hidden"
                 onChange={handlePhotoUpload}
-                disabled={isUploadingAvatar}
+                disabled={isLoading}
               />
             </label>
           </Button>
@@ -189,7 +193,7 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
             borderWidth: 1
           }}
           className="cursor-pointer absolute top-20 right-25 text-primary rounded-full"
-          disabled={isUploadingAvatar}
+          disabled={isLoading}
         >
           <label
             htmlFor="photo-upload"
@@ -234,7 +238,7 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
             hover:bg-[color-mix(in_srgb,var(--uo-green)_85%,black)] 
             w-full transition-colors duration-300
           "
-          disabled={isLoading || isUploadingAvatar}
+          disabled={isLoading}
         >
           {isLoading ? (
             <>
