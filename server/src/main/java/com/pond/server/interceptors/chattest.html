@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input { margin: 5px 0; padding: 5px; }
+        button { margin: 5px; padding: 10px 20px; }
+        #logs {
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 400px;
+            overflow-y: scroll;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+<h1>WebSocket Chat Test</h1>
+
+<div>
+    <label><strong>Step 1:</strong> Get Token (login first, then paste here)</label><br>
+    <input type="text" id="token" style="width: 600px;" placeholder="Paste your JWT access token here">
+</div>
+
+<div>
+    <label><strong>Step 2:</strong> Room ID</label><br>
+    <input type="text" id="roomId" style="width: 600px;"
+           value="listing_c7cbd9ab-a0ef-4449-a46a-64ec21907026_buyer_9f224bb7-e099-4100-9d8d-bac0163cdd44">
+</div>
+
+<div>
+    <button onclick="connect()" style="background: green; color: white;">Connect</button>
+    <button onclick="disconnect()" style="background: red; color: white;">Disconnect</button>
+</div>
+
+<hr>
+
+<div>
+    <label><strong>Step 3:</strong> Send Message</label><br>
+    <input type="text" id="message" style="width: 600px;" placeholder="Type your message here">
+    <button onclick="sendMessage()" style="background: blue; color: white;">Send</button>
+</div>
+
+<h3>Console Logs:</h3>
+<div id="logs"></div>
+
+<button onclick="clearLogs()">Clear Logs</button>
+
+<script>
+    let stompClient = null;
+
+    function log(message, type = 'info') {
+        const logs = document.getElementById('logs');
+        const time = new Date().toLocaleTimeString();
+        const className = type;
+        logs.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+        logs.scrollTop = logs.scrollHeight;
+        console.log(message); // Also log to browser console
+    }
+
+    function clearLogs() {
+        document.getElementById('logs').innerHTML = '';
+    }
+
+    function connect() {
+        const token = document.getElementById('token').value.trim();
+        const roomId = document.getElementById('roomId').value.trim();
+
+        if (!token) {
+            alert('❌ Please enter a JWT token first!');
+            log('❌ Connection failed: No token provided', 'error');
+            return;
+        }
+
+        if (!roomId) {
+            alert('❌ Please enter a room ID!');
+            log('❌ Connection failed: No room ID provided', 'error');
+            return;
+        }
+
+        log('🔗 Connecting to WebSocket...', 'info');
+        log('📍 URL: ws://localhost:8080/ws?token=***', 'info');
+
+        try {
+            const socket = new SockJS(`http://localhost:8080/ws?token=${token}`);
+            stompClient = Stomp.over(socket);
+
+            // Enable debug for troubleshooting
+            stompClient.debug = function(str) {
+                log('🔍 STOMP: ' + str, 'info');
+            };
+
+            stompClient.connect({},
+                function(frame) {
+                    log('✅ Connected successfully!', 'success');
+                    log('📋 Frame: ' + JSON.stringify(frame), 'success');
+
+                    // Subscribe to room topic
+                    const subscription = stompClient.subscribe('/topic/room/' + roomId, function(message) {
+                        log('📨 Message received!', 'success');
+                        try {
+                            const parsed = JSON.parse(message.body);
+                            log('💬 Content: ' + JSON.stringify(parsed, null, 2), 'success');
+                        } catch (e) {
+                            log('💬 Raw: ' + message.body, 'success');
+                        }
+                    });
+
+                    log('✅ Subscribed to: /topic/room/' + roomId, 'success');
+                    log('🎉 Ready to send messages!', 'success');
+                },
+                function(error) {
+                    log('❌ Connection error: ' + error, 'error');
+                    console.error('Connection error:', error);
+                }
+            );
+        } catch (e) {
+            log('❌ Exception during connect: ' + e.message, 'error');
+            console.error('Exception:', e);
+        }
+    }
+
+    function disconnect() {
+        if (stompClient !== null && stompClient.connected) {
+            stompClient.disconnect(function() {
+                log('🔌 Disconnected', 'info');
+            });
+        } else {
+            log('⚠️ Already disconnected', 'info');
+        }
+    }
+
+    function sendMessage() {
+        const roomId = document.getElementById('roomId').value.trim();
+        const content = document.getElementById('message').value.trim();
+
+        if (!content) {
+            alert('❌ Please enter a message!');
+            return;
+        }
+
+        if (!stompClient || !stompClient.connected) {
+            alert('❌ Not connected! Click Connect first.');
+            log('❌ Cannot send: Not connected', 'error');
+            return;
+        }
+
+        try {
+            const messageObj = {
+                roomId: roomId,
+                content: content
+            };
+
+            log('📤 Sending message: ' + content, 'info');
+            stompClient.send('/app/chat/send', {}, JSON.stringify(messageObj));
+            log('✅ Message sent successfully', 'success');
+
+            // Clear input
+            document.getElementById('message').value = '';
+        } catch (e) {
+            log('❌ Send error: ' + e.message, 'error');
+            console.error('Send error:', e);
+        }
+    }
+
+    // Allow Enter key to send message
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('message').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    });
+</script>
+</body>
+</html>

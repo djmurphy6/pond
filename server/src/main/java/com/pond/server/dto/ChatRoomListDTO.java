@@ -7,7 +7,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-// DTO for chat room list item
+// LiST ALL ACTIVE CHAT ROOMS
 @Getter
 @AllArgsConstructor
 public class ChatRoomListDTO {

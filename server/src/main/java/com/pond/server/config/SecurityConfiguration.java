@@ -54,6 +54,9 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/ws/**").permitAll() //Allow websockets
+                        .requestMatchers("/ws").permitAll()
+                        .requestMatchers("/ws-test/*").permitAll() // Make sure websockets are working and its just security blocking
+                        .requestMatchers("/chat/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -75,7 +78,7 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("CHANGE TO HOSTED BACKEND URL", "http://localhost:8080",
-                "http://localhost:5173", "http://localhost:3000"));
+                "http://localhost:5173", "http://localhost:3000")); // TODO: CHANGE THIS TO THE CORRECT FRONTEND ENDPOINT TO WORK
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

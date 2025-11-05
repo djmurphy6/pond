@@ -7,7 +7,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-// DTO for chat room details with listing info
+// GET A SPECIFiC CHAT ROOM
 @Getter
 @AllArgsConstructor
 public class ChatRoomDetailDTO {
