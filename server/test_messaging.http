@@ -3,12 +3,12 @@
 @contentType = application/json
 
 ### Variables to store tokens and IDs
-@sellerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZWxsZXIxMkB0ZXN0LmNvbSIsImlhdCI6MTc2MTY2OTYxMSwiZXhwIjoxNzYxNjY5OTExfQ.p6n7s0TH53PfMsC82rC1Wt7ueplsvFp-5H-sZuSFVpQ
-@buyerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllcjEyQHRlc3QuY29tIiwiaWF0IjoxNzYxNjY5NjU1LCJleHAiOjE3NjE2Njk5NTV9.mEG_cPrgcoHJhtptmwTZ_4aSQrrozbx9gs1cHBu41g4
+@sellerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZWxsZXIxMkB0ZXN0LmNvbSIsImlhdCI6MTc2MTc3ODE1OCwiZXhwIjoxNzYxNzc4NDU4fQ.Vj6ccyTT-iUzsmipzAk2lbg_-7eUk8Pqm7CWfx-rLgU
+@buyerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllcjEyQHRlc3QuY29tIiwiaWF0IjoxNzYyMzIzODU2LCJleHAiOjE3NjIzMjQxNTZ9.j6sAHO8e_OIr01LBx7VZuKelf8m2JfUeVH8-ijWDXsM
 @sellerGU = 60caff6d-0019-466c-8191-37599a925a0f
 @buyerGU = 9f224bb7-e099-4100-9d8d-bac0163cdd44
-@listingGU = 09153901-54a4-45d5-8e69-783773998498
-@roomId = listing_09153901-54a4-45d5-8e69-783773998498_buyer_9f224bb7-e099-4100-9d8d-bac0163cdd44
+@listingGU = c7cbd9ab-a0ef-4449-a46a-64ec21907026
+@roomId =listing_c7cbd9ab-a0ef-4449-a46a-64ec21907026_buyer_9f224bb7-e099-4100-9d8d-bac0163cdd44
 
 ###############################################
 ### AUTHENTICATION FLOW

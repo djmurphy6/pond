@@ -1,6 +1,9 @@
 package com.pond.server.config;
 
+import com.pond.server.interceptors.JwtHandshakeInterceptor;
+import com.pond.server.interceptors.WebSocketChannelInterceptor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -10,24 +13,32 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
 
+    private final WebSocketChannelInterceptor webSocketChannelInterceptor;
+    private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
+
+    public WebSocketConfiguration(WebSocketChannelInterceptor webSocketChannelInterceptor,
+                                  JwtHandshakeInterceptor jwtHandshakeInterceptor) {
+        this.webSocketChannelInterceptor = webSocketChannelInterceptor;
+        this.jwtHandshakeInterceptor = jwtHandshakeInterceptor;
+    }
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config){
-
-        // Enables a simple in memory message broker with the two destination prefixes
         config.enableSimpleBroker("/topic", "/queue");
-
-        // Messages with destinations starting with /app are routed to the @MessageMapping methods
         config.setApplicationDestinationPrefixes("/app");
-
-        // User specific destination prefix
         config.setUserDestinationPrefix("/user");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry){
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:3000", "http://localhost:5173", "http://localhost:8080", "http://localhost:*");
-//                .setAllowedOriginPatterns("*"); // Just for testing allowing everything.
+                .setAllowedOriginPatterns("*") // TODO: CHANGE THIS TO THE CORRECT FRONTEND ENDPOINT TO WORK. We will need to switch to setAllowedOrigins.
+                .addInterceptors(jwtHandshakeInterceptor)
+                .withSockJS(); // Add handshake interceptor here
+    }
 
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration){
+        registration.interceptors(webSocketChannelInterceptor);
     }
 }

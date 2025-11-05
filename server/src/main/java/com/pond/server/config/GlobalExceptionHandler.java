@@ -12,12 +12,22 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<?> handleBadRequest(Exception ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-            java.util.Map.of("error", "Invalid request: " + ex.getMessage()));
+                java.util.Map.of("error", "Invalid request: " + ex.getMessage()));
     }
 
-    @ExceptionHandler({ DataAccessException.class, RuntimeException.class })
-    public ResponseEntity<?> handleServerErrors(Exception ex) {
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
+        System.err.println("❌ RuntimeException: " + ex.getMessage());
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-            java.util.Map.of("error", "Server error. Please try again."));
+                java.util.Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<?> handleDataAccessException(Exception ex) {
+        System.err.println("❌ DataAccessException: " + ex.getMessage());
+        ex.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                java.util.Map.of("error", "Database error. Please try again."));
     }
 }
