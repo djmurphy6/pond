@@ -37,7 +37,7 @@ export default function EditListingModal({ item, onClose, onSave }: { item?: Lis
             setDescription(item?.description ?? "");
             setPrice(item?.price ?? "");
             setCondition(item?.condition ?? "");
-
+            setCategory(item?.category ?? "");
             let imgs = [];
             if (!!item.picture1_url) { imgs.push(item.picture1_url) }
             if (!!item.picture2_url) { imgs.push(item.picture2_url) }
@@ -67,12 +67,21 @@ export default function EditListingModal({ item, onClose, onSave }: { item?: Lis
 
     async function handleSave() {
         if (item) {
+             // Map photos array to URLs and base64
+            const picture1 = photos[0];
+            const picture2 = photos[1];
+            
+            // Determine if photos are URLs or new base64 data
+            const isPicture1New = picture1?.startsWith("data:");
+            const isPicture2New = picture2?.startsWith("data:");
             const req = {
                 listingGU: item.listingGU,
                 body: {
                     title,
-                    picture1_url: item.picture1_url,
-                    picture2_url: item.picture2_url,
+                    // If photo doesn't exist, send empty string to signal deletion
+                    // If it's original URL, keep it; if it's new, backend will use base64
+                    picture1_url: !picture1 ? "" : (isPicture1New ? item.picture1_url : picture1),
+                    picture2_url: !picture2 ? "" : (isPicture2New ? item.picture2_url : picture2),
                     price: price === "" ? 0 : Number(price),
                     condition,
                     category,
