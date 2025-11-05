@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, type LoginRequest, type LoginResponse } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
