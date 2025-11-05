@@ -68,7 +68,7 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
     setIsLoading(true);
 
     const photoChanged = photo !== originalPhoto;
-    
+
     const updateRequest: UpdateUserRequest = {
       username: username !== userInfo?.username ? username : undefined,
       bio: bio !== userInfo?.bio ? bio : undefined,
@@ -88,13 +88,13 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
       };
 
       const avatarRes = await api.UploadAvatar(uploadRequest);
-      
+
       if (avatarRes instanceof ErrorResponse) {
         toast.error("Avatar upload failed: " + avatarRes.body?.error);
         setIsLoading(false);
         return;
       }
-      
+
       // Update the photo state with the URL from the server
       if (userInfo) {
         setUserInfo({ ...userInfo, avatar_url: avatarRes.avatar_url });
@@ -132,13 +132,21 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-      <Button
+        <Button
           variant="ghost"
           style={{ cursor: "pointer" }}
           className="!p-0.5 w-full justify-between transition-colors duration-300 mb-3"
         >
           <div className="h-7 w-7 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
-            <ImageIcon className="h-4 w-4 text-primary transition-colors duration-300" />
+            {userInfo?.avatar_url ? (
+              <img
+                src={userInfo.avatar_url}
+                alt="Profile"
+                className="w-full h-full object-cover rounded-full"
+              />
+            ) : (
+              <ImageIcon className="h-4 w-4 text-primary transition-colors duration-300" />
+            )}
           </div>
           <span>My Account</span>
           <ChevronRight color="#00000000" className="transition-colors duration-300" />
@@ -208,8 +216,8 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
         <div className="space-y-5">
           <div className="space-y-3">
             <Label htmlFor="username">Username</Label>
-            <Input 
-              id="username" 
+            <Input
+              id="username"
               placeholder="Enter username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -219,8 +227,8 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
 
           <div className="space-y-3">
             <Label htmlFor="bio">Bio</Label>
-            <Textarea 
-              id="bio" 
+            <Textarea
+              id="bio"
               placeholder="Write something..."
               value={bio}
               onChange={(e) => setBio(e.target.value)}

@@ -17,6 +17,7 @@ import { Loader2, X, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/api/WebService";
 import { CreateListingRequest, ErrorResponse } from "@/api/WebTypes";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 export function CreateListingModal(props: { onSuccess?: () => void }) {
     const [open, setOpen] = useState(false);
@@ -26,6 +27,7 @@ export function CreateListingModal(props: { onSuccess?: () => void }) {
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState<number | string>("");
     const [condition, setCondition] = useState("");
+    const [category, setCategory] = useState("");
 
     // Photos
     const [photos, setPhotos] = useState<string[]>([]);
@@ -36,6 +38,7 @@ export function CreateListingModal(props: { onSuccess?: () => void }) {
             setDescription("");
             setPrice("");
             setCondition("");
+            setCategory("");
             setPhotos([]);
         }
     }, [open]);
@@ -67,6 +70,7 @@ export function CreateListingModal(props: { onSuccess?: () => void }) {
             picture2_base64: photos[1] || "",
             price: price === "" ? 0 : Number(price),
             condition,
+            category,
             title,
         };
 
@@ -125,7 +129,7 @@ export function CreateListingModal(props: { onSuccess?: () => void }) {
                     <Input
                         id="price"
                         type="text"
-                        value={price ? `$ ${price}` : ""}
+                        value={price ? `$ ${price.toLocaleString()}` : ""}
                         onChange={(e) => {
                             let raw = e.target.value.replace(/[^0-9.]/g, "");
                             const parts = raw.split(".");
@@ -148,12 +152,31 @@ export function CreateListingModal(props: { onSuccess?: () => void }) {
 
                     {/* Condition */}
                     <Label htmlFor="condition">Condition</Label>
-                    <Input
-                        id="condition"
-                        value={condition}
-                        onChange={(e) => setCondition(e.target.value)}
-                        placeholder="New / Used / Like New"
-                    />
+                    <Select value={condition} onValueChange={setCondition}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Condition" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="New">New</SelectItem>
+                            <SelectItem value="Used">Used</SelectItem>
+                            <SelectItem value="Like New">Like New</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    {/* Category */}
+                    <Label htmlFor="category">Category</Label>
+                    <Select value={category} onValueChange={setCategory}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Furniture">Furniture</SelectItem>
+                            <SelectItem value="Clothing">Clothing</SelectItem>
+                            <SelectItem value="Housing">Housing</SelectItem>
+                            <SelectItem value="Tech">Tech</SelectItem>
+                            <SelectItem value="School">School</SelectItem>
+                        </SelectContent>
+                    </Select>
 
                     {/* Photos */}
                     <Label>Photos (max 2)</Label>

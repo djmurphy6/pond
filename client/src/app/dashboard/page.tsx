@@ -31,6 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
 
 //Internal
 import ThemeToggle from "@/components/ThemeToggle";
@@ -120,14 +121,17 @@ export default function DashboardPage() {
                 {/* Filters */}
                 <ScrollArea className="flex-1 pr-2 transition-colors duration-300">
                     <div className="space-y-6">
-                        <div>
-                            <Label>Sort by</Label>
-                            <select className="w-full border mt-1 rounded-md bg-background p-2 text-sm transition-colors duration-300">
-                                <option>Price (Low → High)</option>
-                                <option>Price (High → Low)</option>
-                                <option>Date Listed</option>
-                            </select>
-                        </div>
+                        <Label className="mb-2">Sort by</Label>
+                        <Select>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Sort by" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Price (Low → High)">Price (Low → High)</SelectItem>
+                                <SelectItem value="Price (High → Low)">Price (High → Low)</SelectItem>
+                                <SelectItem value="Date Listed">Date Listed</SelectItem>
+                            </SelectContent>
+                        </Select>
 
                         <div>
                             <Label>Price</Label>

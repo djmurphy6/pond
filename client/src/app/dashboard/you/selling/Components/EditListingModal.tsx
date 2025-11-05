@@ -17,6 +17,7 @@ import { ImageIcon, X } from "lucide-react";
 //API
 import api from "@/api/WebService"
 import { ErrorResponse, Listing, UpdateListingRequest } from "@/api/WebTypes";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 export default function EditListingModal({ item, onClose, onSave }: { item?: Listing, onClose: () => void, onSave: () => void }) {
@@ -24,6 +25,7 @@ export default function EditListingModal({ item, onClose, onSave }: { item?: Lis
     const [description, setDescription] = useState(item?.description ?? "");
     const [price, setPrice] = useState(item?.price ?? "");
     const [condition, setCondition] = useState(item?.condition ?? "");
+    const [category, setCategory] = useState(item?.category ?? "");
     const [photos, setPhotos] = useState<string[]>([]);
 
     const [loading, setLoading] = useState(false);
@@ -73,6 +75,7 @@ export default function EditListingModal({ item, onClose, onSave }: { item?: Lis
                     picture2_url: item.picture2_url,
                     price: price === "" ? 0 : Number(price),
                     condition,
+                    category,
                     description,
                     //add images when put mapping allows for it
                     picture1_base64: photos[0] || "",
@@ -113,6 +116,7 @@ export default function EditListingModal({ item, onClose, onSave }: { item?: Lis
                         id="price"
                         type="text"
                         value={price ? `$ ${price}` : ""}
+                        className="mt-2"
                         onChange={(e) => {
                             let raw = e.target.value.replace(/[^0-9.]/g, "");
                             const parts = raw.split(".");
@@ -133,7 +137,30 @@ export default function EditListingModal({ item, onClose, onSave }: { item?: Lis
                     />
 
                     <Label htmlFor="condition">Condition</Label>
-                    <Input className="mt-2" id="condition" value={condition} onChange={(e) => setCondition(e.target.value)} />
+                    <Select value={condition} onValueChange={setCondition}>
+                        <SelectTrigger className="w-full mt-2">
+                            <SelectValue placeholder="Condition" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="New">New</SelectItem>
+                            <SelectItem value="Used">Used</SelectItem>
+                            <SelectItem value="Like New">Like New</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    <Label htmlFor="category">Category</Label>
+                    <Select value={category} onValueChange={setCategory}>
+                        <SelectTrigger className="w-full mt-2">
+                            <SelectValue placeholder="Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Furniture">Furniture</SelectItem>
+                            <SelectItem value="Clothing">Clothing</SelectItem>
+                            <SelectItem value="Housing">Housing</SelectItem>
+                            <SelectItem value="Tech">Tech</SelectItem>
+                            <SelectItem value="School">School</SelectItem>
+                        </SelectContent>
+                    </Select>
 
                     {/* Photos */}
                     <Label>Photos (max 2)</Label>
