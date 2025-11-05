@@ -52,7 +52,7 @@ public class User implements UserDetails {
     @Column(name = "verification_code")
     private String verificationCode;
 
-    @Column(name = "verification_expiration")
+    @Column(name = "verification_code_expiration")
     private LocalDateTime verificationCodeExpiration;
 
     public User(String username, String email, String password) {

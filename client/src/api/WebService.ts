@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -39,7 +39,7 @@ class API {
                 headers["Content-Type"] = "application/json";
             }
 
-            const notProtectedMethods = ["Login", "Register"];
+            const notProtectedMethods = ["Login", "Register", "VerifyUser"];
             const isProtectedMethod = !notProtectedMethods.includes(internalMethod);
             if (appConfig.access_token && isProtectedMethod) {
                 headers["Authorization"] = `Bearer ${appConfig.access_token}`;
@@ -99,6 +99,10 @@ class API {
 
     async Login(body: LoginRequest): Promise<LoginResponse | ErrorResponse> {
         return this.Request<LoginResponse>("/auth/login", "POST", { body }, 'Login');
+    }
+
+    async VerifyUser(body: VerifyUserRequest): Promise<VerifyUserResponse | ErrorResponse> {
+        return this.Request<VerifyUserResponse>("/auth/verify", "POST", { body }, 'VerifyUser');
     }
 
     async GetUserInfo(): Promise<UserInfo | ErrorResponse> {

@@ -32,6 +32,15 @@ export type LoginResponse = {
     accessToken: string;
 }
 
+//VERIFY USER
+export type VerifyUserRequest = {
+    email: string;
+    verificationCode: string;
+}
+export type VerifyUserResponse = {
+    message: string;
+}
+
 //GET USER INFO
 export type GetUserInfoRequest = {
     // email: string;
