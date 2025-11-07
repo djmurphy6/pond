@@ -78,36 +78,35 @@ function VerifyContent() {
 
                 <CardContent>
                     <form onSubmit={handleVerify} className="space-y-4">
-                    <div>
-    <Label style={styles.label} htmlFor="code">Verification Code</Label>
-        <div className="flex justify-center">
-            <InputOTP
-                maxLength={6}
-                value={verificationCode}
-                onChange={(value) => setVerificationCode(value)}
-                pattern={REGEXP_ONLY_DIGITS}
-            >
-                <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                </InputOTPGroup>
-                <InputOTPGroup>
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                </InputOTPGroup>
-            </InputOTP>
-        </div>
-            <p className="text-xs text-muted-foreground mt-2 text-center">
-            Code expires in 15 minutes
-            </p>
-        </div>
+                        <div>
+                            <div className="flex justify-center">
+                                <InputOTP
+                                    maxLength={6}
+                                    value={verificationCode}
+                                    onChange={(value) => setVerificationCode(value)}
+                                    pattern={REGEXP_ONLY_DIGITS}
+                                >
+                                    <InputOTPGroup>
+                                        <InputOTPSlot index={0} />
+                                        <InputOTPSlot index={1} />
+                                        <InputOTPSlot index={2} />
+                                    </InputOTPGroup>
+                                    <InputOTPGroup>
+                                        <InputOTPSlot index={3} />
+                                        <InputOTPSlot index={4} />
+                                        <InputOTPSlot index={5} />
+                                    </InputOTPGroup>
+                                </InputOTP>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2 text-center">
+                                Code expires in 15 minutes
+                            </p>
+                        </div>
 
-                        <Button 
-                            style={{ marginTop: 10, color: 'white', cursor: 'pointer' }} 
-                            type="submit" 
-                            className="w-full bg-[var(--uo-green)] hover:bg-[var(--uo-green)]/70" 
+                        <Button
+                            style={{ marginTop: 10, color: 'white', cursor: 'pointer' }}
+                            type="submit"
+                            className="w-full bg-[var(--uo-green)] hover:bg-[var(--uo-green)]/70"
                             disabled={isLoading || verificationCode.length !== 6}
                         >
                             {isLoading ? (
