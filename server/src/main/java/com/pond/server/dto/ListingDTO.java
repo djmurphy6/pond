@@ -1,5 +1,6 @@
 package com.pond.server.dto;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,5 +24,7 @@ public class ListingDTO {
     private Double price;
     private String condition;
     private String category;
+    @JsonProperty("createdAt")
+    private LocalDateTime createdAt;
     
 }

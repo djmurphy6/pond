@@ -59,6 +59,14 @@ export type CreateListingRequest = {
 export type CreateListingResponse = Listing
 
 //GET LISTINGS
+export type GetListingsRequest = {
+    categories?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    sortBy?: string;
+    sortOrder?: string;
+}
+
 export type Listing = {
     userGU: string;
     listingGU: string;
@@ -69,6 +77,7 @@ export type Listing = {
     condition: string;
     category?: string;
     title: string;
+    createdAt: string; // ISO date string
     //only update
     picture1_base64?: string;
     picture2_base64?: string;

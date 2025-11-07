@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -114,7 +114,12 @@ class API {
         return this.Request<CreateListingResponse>("/listings/create", "POST", { body }, 'CreateListing');
     }
 
-    async GetListings(): Promise<Listing[] | ErrorResponse> {
+    async GetListings(filters?: GetListingsRequest): Promise<Listing[] | ErrorResponse> {
+        // If filters are provided, use POST /listings/filter
+        if (filters) {
+            return this.Request<Listing[]>("/listings/filter", "POST", { body: filters }, 'GetListings');
+        }
+        // Otherwise, use GET /listings for all listings
         return this.Request<Listing[]>("/listings", "GET", {}, 'GetListings');
     }
 

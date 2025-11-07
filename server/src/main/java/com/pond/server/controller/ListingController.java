@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pond.server.dto.CreateListingRequest;
+import com.pond.server.dto.FilterListingsRequest;
 import com.pond.server.dto.ListingDTO;
 import com.pond.server.dto.UpdateListingRequest;
 import com.pond.server.model.User;
@@ -41,9 +42,22 @@ public class ListingController {
         
     }
 
+    @PostMapping("/filter")
+    public ResponseEntity<?> filter(@RequestBody FilterListingsRequest req) {
+        List<ListingDTO> list = listingService.getFiltered(
+            req.getCategories(), 
+            req.getMinPrice(), 
+            req.getMaxPrice(), 
+            req.getSortBy(), 
+            req.getSortOrder()
+        );
+        return ResponseEntity.ok(list);
+    }
+
     @GetMapping
     public ResponseEntity<?> all() {
-        List<ListingDTO> list = listingService.all();
+        // Return all listings with default sorting (date desc)
+        List<ListingDTO> list = listingService.getFiltered(null, null, null, "date", "desc");
         return ResponseEntity.ok(list);
     }
 
