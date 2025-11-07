@@ -18,6 +18,7 @@ import {
     ChevronRight,
     Tag,
     MessageCircle,
+    Check,
 } from "lucide-react";
 
 // API
@@ -45,6 +46,12 @@ export default function DashboardPage() {
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
     const { theme } = useTheme();
+    
+    // Filtering and sorting state
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [sortOption, setSortOption] = useState<string>("date-desc");
+    const [minPrice, setMinPrice] = useState<string>("");
+    const [maxPrice, setMaxPrice] = useState<string>("");
 
     useEffect(() => {
         setMounted(true);
@@ -56,9 +63,34 @@ export default function DashboardPage() {
         }
     }, [mounted]);
 
+    // Fetch listings when filters change (with debounce for price inputs)
+    useEffect(() => {
+        if (!mounted) return;
+        
+        // Debounce price inputs to avoid too many API calls while typing
+        const timeoutId = setTimeout(() => {
+            GetListings();
+        }, 300); // 300ms debounce
+        
+        return () => clearTimeout(timeoutId);
+    }, [selectedCategories, sortOption, minPrice, maxPrice, mounted]);
+
     async function GetListings() {
         setLoading(true);
-        let res = await api.GetListings();
+        
+        // Parse sort option (e.g., "date-desc" -> sortBy: "date", sortOrder: "desc")
+        const [sortBy, sortOrder] = sortOption.split('-');
+        
+        // Prepare filter parameters
+        const filters = {
+            categories: selectedCategories.length > 0 ? selectedCategories : undefined,
+            minPrice: minPrice ? parseFloat(minPrice) : undefined,
+            maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+            sortBy,
+            sortOrder,
+        };
+        
+        let res = await api.GetListings(filters);
         setLoading(false);
         if (res instanceof ErrorResponse) {
             toast.error(res.body?.error);
@@ -66,8 +98,16 @@ export default function DashboardPage() {
             console.log(JSON.stringify(res))
             setListings(res);
         }
-        setLoading(false);
     }
+
+    // Toggle category selection
+    const toggleCategory = (category: string) => {
+        setSelectedCategories(prev => 
+            prev.includes(category) 
+                ? prev.filter(c => c !== category) //Remove if already selected
+                : [...prev, category] // Add if not selected
+        );
+    };
 
     if (!mounted) return null;
     return (
@@ -121,23 +161,56 @@ export default function DashboardPage() {
                 {/* Filters */}
                 <ScrollArea className="flex-1 pr-2 transition-colors duration-300">
                     <div className="space-y-6">
-                        <Label className="mb-2">Sort by</Label>
-                        <Select>
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Sort by" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Price (Low → High)">Price (Low → High)</SelectItem>
-                                <SelectItem value="Price (High → Low)">Price (High → Low)</SelectItem>
-                                <SelectItem value="Date Listed">Date Listed</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <div className="flex items-center justify-between">
+                            <Label>Filters</Label>
+                            {(selectedCategories.length > 0 || minPrice || maxPrice) && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setSelectedCategories([]);
+                                        setMinPrice("");
+                                        setMaxPrice("");
+                                    }}
+                                    className="h-6 text-xs"
+                                >
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
+                        
+                        <div>
+                            <Label className="mb-2">Sort by</Label>
+                            <Select value={sortOption} onValueChange={setSortOption}>
+                                <SelectTrigger className="w-full mt-2">
+                                    <SelectValue placeholder="Sort by" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="date-desc">Date Listed (Newest)</SelectItem>
+                                    <SelectItem value="date-asc">Date Listed (Oldest)</SelectItem>
+                                    <SelectItem value="price-asc">Price (Low → High)</SelectItem>
+                                    <SelectItem value="price-desc">Price (High → Low)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
 
                         <div>
                             <Label>Price</Label>
                             <div className="flex gap-2 mt-2">
-                                <Input placeholder="Min" className="w-1/2 transition-colors duration-300" />
-                                <Input placeholder="Max" className="w-1/2 transition-colors duration-300" />
+                                <Input 
+                                    type="number"
+                                    placeholder="Min" 
+                                    className="w-1/2 transition-colors duration-300"
+                                    value={minPrice}
+                                    onChange={(e) => setMinPrice(e.target.value)}
+                                />
+                                <Input 
+                                    type="number"
+                                    placeholder="Max" 
+                                    className="w-1/2 transition-colors duration-300"
+                                    value={maxPrice}
+                                    onChange={(e) => setMaxPrice(e.target.value)}
+                                />
                             </div>
                         </div>
 
@@ -151,16 +224,24 @@ export default function DashboardPage() {
                                     { name: "Housing", icon: Home },
                                     { name: "Tech", icon: Laptop },
                                     { name: "School", icon: GraduationCap },
-                                ].map(({ name, icon: Icon }) => (
-                                    <Link
-                                        key={name}
-                                        href={`/dashboard/${name.toLowerCase()}`}
-                                        className="flex items-center gap-2 text-sm py-1 px-2 rounded-md hover:bg-muted transition-colors duration-300"
-                                    >
-                                        <Icon className="h-4 w-4 text-muted-foreground transition-colors duration-300" />
-                                        {name}
-                                    </Link>
-                                ))}
+                                ].map(({ name, icon: Icon }) => {
+                                    const isSelected = selectedCategories.includes(name);
+                                    return (
+                                        <button
+                                            key={name}
+                                            onClick={() => toggleCategory(name)}
+                                            className={`flex items-center gap-2 text-sm py-1 px-2 rounded-md hover:bg-muted transition-colors duration-300 ${
+                                                isSelected ? 'bg-muted' : ''
+                                            }`}
+                                        >
+                                            <Icon className="h-4 w-4 text-muted-foreground transition-colors duration-300" />
+                                            <span className="flex-1 text-left">{name}</span>
+                                            {isSelected && (
+                                                <Check className="h-4 w-4 text-primary transition-colors duration-300" />
+                                            )}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>

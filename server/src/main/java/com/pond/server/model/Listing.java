@@ -1,5 +1,6 @@
 package com.pond.server.model;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -46,6 +47,10 @@ public class Listing {
     @Column(name = "category")
     private String category;
 
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
     public Listing() {
+        this.createdAt = LocalDateTime.now();
     }
 }

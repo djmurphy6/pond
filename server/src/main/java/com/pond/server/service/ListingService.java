@@ -85,6 +85,20 @@ public class ListingService {
         return listingRepository.findAll().stream().map(this::toDto).toList();
     }
 
+    public List<ListingDTO> getFiltered(List<String> categories, Double minPrice, Double maxPrice, String sortBy, String sortOrder) {
+        // Default sort parameters if not provided
+        String effectiveSortBy = (sortBy == null || sortBy.isEmpty()) ? "date" : sortBy;
+        String effectiveSortOrder = (sortOrder == null || sortOrder.isEmpty()) ? "desc" : sortOrder;
+        
+        // Convert empty list to null for proper JPA query handling
+        List<String> effectiveCategories = (categories != null && !categories.isEmpty()) ? categories : null;
+        
+        return listingRepository.findFiltered(effectiveCategories, minPrice, maxPrice, effectiveSortBy, effectiveSortOrder)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     public List<ListingDTO> mine(User owner) {
         return listingRepository.findByUserGU(owner.getUserGU()).stream().map(this::toDto).toList();
     }
@@ -180,7 +194,8 @@ public class ListingService {
             l.getPicture2_url(),
             l.getPrice(),
             l.getCondition(),
-            l.getCategory()
+            l.getCategory(),
+            l.getCreatedAt()
     );
     }
 }
