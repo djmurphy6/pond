@@ -121,9 +121,16 @@ public class ListingService {
         return listingRepository.findByUserGU(owner.getUserGU()).stream().map(this::toDto).toList();
     }
 
-    public ListingDTO update(UUID id, UpdateListingRequest req, User owner) {
-        Listing l = listingRepository.findByListingGUAndUserGU(id, owner.getUserGU())
-                .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
+    public ListingDTO update(UUID id, UpdateListingRequest req, User currentUser) {
+        // Admins can edit any listing, regular users can only edit their own
+        Listing l;
+        if (currentUser.getAdmin()) {
+            l = listingRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Listing not found"));
+        } else {
+            l = listingRepository.findByListingGUAndUserGU(id, currentUser.getUserGU())
+                    .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
+        }
         
                 // Update text fields
                 if (req.getDescription() != null) l.setDescription(req.getDescription());
@@ -137,8 +144,8 @@ public class ListingService {
                 if (b1 != null && b1.startsWith("data:")) {
                     // Delete old image before uploading new one
                     deleteListingImage(l.getPicture1_url());
-                    // Upload new image
-                    String url1 = uploadListingImage(owner.getUserGU(), l.getListingGU(), 1, b1);
+                    // Upload new image (use listing owner's userGU for storage path)
+                    String url1 = uploadListingImage(l.getUserGU(), l.getListingGU(), 1, b1);
                     l.setPicture1_url(url1);
                 } else if (req.getPicture1_url() != null) {
                     String url1 = req.getPicture1_url();
@@ -158,8 +165,8 @@ public class ListingService {
                 if (b2 != null && b2.startsWith("data:")) {
                     // Delete old image before uploading new one
                     deleteListingImage(l.getPicture2_url());
-                    // Upload new image
-                    String url2 = uploadListingImage(owner.getUserGU(), l.getListingGU(), 2, b2);
+                    // Upload new image (use listing owner's userGU for storage path)
+                    String url2 = uploadListingImage(l.getUserGU(), l.getListingGU(), 2, b2);
                     l.setPicture2_url(url2);
                 } else if (req.getPicture2_url() != null) {
                     String url2 = req.getPicture2_url();
@@ -178,11 +185,18 @@ public class ListingService {
                 return toDto(l);
     }
 
-    public void delete(UUID id, User owner) {
-        Listing l = listingRepository.findByListingGUAndUserGU(id, owner.getUserGU())
-                .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
-                deleteListingImage(l.getPicture1_url());
-                deleteListingImage(l.getPicture2_url());
+    public void delete(UUID id, User currentUser) {
+        // Admins can delete any listing, regular users can only delete their own
+        Listing l;
+        if (currentUser.getAdmin()) {
+            l = listingRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Listing not found"));
+        } else {
+            l = listingRepository.findByListingGUAndUserGU(id, currentUser.getUserGU())
+                    .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
+        }
+        deleteListingImage(l.getPicture1_url());
+        deleteListingImage(l.getPicture2_url());
         listingRepository.delete(l);
     }
 

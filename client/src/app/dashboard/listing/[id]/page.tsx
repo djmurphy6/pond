@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 import { useTheme } from "next-themes";
 
 //React
-import { Bookmark, MessageCircle, MoreHorizontal, Share2, X } from "lucide-react";
+import { Bookmark, MessageCircle, MoreHorizontal, Share2, X, Pencil, Trash2, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -21,12 +21,23 @@ import ImageViewer from "@/components/ImageViewer";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Separator } from "@/components/ui/separator";
 
+//Internal
+import { useUserInfoStore } from "@/stores/UserInfoStore";
+import EditListingModal from "../../you/selling/Components/EditListingModal";
+import DeleteListingModal from "../../you/selling/Components/DeleteListingModal";
+import { useRouter } from "next/navigation";
+
 export default function ListingPage() {
     const params = useParams() as { id: string };
     const [listing, setListing] = useState<Listing>();
     const { theme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const [copied, setCopied] = useState(false);
+    const { userInfo } = useUserInfoStore();
+    const router = useRouter();
+    
+    const [editItem, setEditItem] = useState<Listing | undefined>();
+    const [deleteItem, setDeleteItem] = useState<Listing | undefined>();
 
     useEffect(() => {
         (async () => {
@@ -54,6 +65,25 @@ export default function ListingPage() {
         }
     };
 
+    const refetchListing = async () => {
+        let res = await api.GetSpecificListing({ listingGU: params.id });
+        if (res instanceof ErrorResponse) {
+            toast.error(res.body?.error);
+        } else {
+            setListing(res);
+        }
+    };
+
+    const handleDeleteSuccess = () => {
+        toast.success("Listing deleted successfully");
+        router.push("/dashboard");
+    };
+
+    // Check if current user is owner or admin
+    const isOwner = userInfo?.userGU === listing?.userGU;
+    const isAdmin = userInfo?.admin === true;
+    const canModify = isOwner || isAdmin;
+
     if (!listing || !mounted) return null;
 
     const images = [
@@ -73,7 +103,15 @@ export default function ListingPage() {
             <aside style={{ zIndex: 1 }} className={`w-80 border-l bg-muted/10 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[-2px_0_10px_rgba(0,0,0,0.15)]"}`}>
                 {/* Top section */}
                 <div className="flex items-center gap-2 mb-0 justify-between">
-                    <h2 className="text-xl font-semibold">Pond</h2>
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-xl font-semibold">Pond</h2>
+                        {isAdmin && (
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-md text-xs font-medium">
+                                <Shield className="h-3 w-3" />
+                                Admin
+                            </div>
+                        )}
+                    </div>
                     <ThemeToggle />
                 </div>
 
@@ -83,10 +121,12 @@ export default function ListingPage() {
                     <h2 className="text-xl font-bold leading-tight">{listing.title}</h2>
                     <div className="flex items-center gap-2 mt-1">
                         <span className="text-xl font-semibold">${listing.price.toLocaleString()}</span>
-                        {/* <span className="text-muted-foreground line-through">$4,000</span> */}
                     </div>
-                    {/* can add the time its been uploaded for */}
-                    {/* <p className="text-sm text-muted-foreground mt-1"></p> */}
+                    {listing.username && (
+                        <p className="text-sm text-muted-foreground mt-2">
+                            Listed by <span className="font-medium text-foreground">@{listing.username}</span>
+                        </p>
+                    )}
                 </div>
 
 
@@ -101,11 +141,35 @@ export default function ListingPage() {
                     <Button onClick={handleCopy} variant="outline" size="icon" className="cursor-pointer">
                         <Share2 className="h-4 w-4" />
                     </Button>
-                    {/* More Options */}
-                    {/* <Button variant="outline" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                    </Button> */}
                 </div>
+
+                {/* Admin/Owner Controls */}
+                {canModify && (
+                    <>
+                        <Separator className="my-4" />
+                        <div className="space-y-2">
+                            {isAdmin && !isOwner && (
+                                <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mb-2">
+                                    Admin Controls
+                                </p>
+                            )}
+                            <Button
+                                variant="outline"
+                                className="w-full cursor-pointer"
+                                onClick={() => setEditItem(listing)}
+                            >
+                                <Pencil className="mr-2 h-4 w-4" /> Edit Listing
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="w-full cursor-pointer text-destructive hover:text-destructive"
+                                onClick={() => setDeleteItem(listing)}
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete Listing
+                            </Button>
+                        </div>
+                    </>
+                )}
 
 
                 <Separator className="my-4" />
@@ -127,6 +191,18 @@ export default function ListingPage() {
                     </p>
                 </div>
             </aside>
+
+            <EditListingModal
+                item={editItem}
+                onClose={() => setEditItem(undefined)}
+                onSave={refetchListing}
+            />
+
+            <DeleteListingModal
+                item={deleteItem}
+                onClose={() => setDeleteItem(undefined)}
+                onDelete={handleDeleteSuccess}
+            />
         </div>
     );
 }
