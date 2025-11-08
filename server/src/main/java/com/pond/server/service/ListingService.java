@@ -8,26 +8,31 @@ import org.springframework.stereotype.Service;
 
 import com.pond.server.dto.CreateListingRequest;
 import com.pond.server.dto.ListingDTO;
+import com.pond.server.dto.ListingDetailDTO;
 import com.pond.server.dto.UpdateListingRequest;
 import com.pond.server.model.Listing;
 import com.pond.server.model.User;
 import com.pond.server.repository.ListingRepository;
+import com.pond.server.repository.UserRepository;
 
 @Service
 public class ListingService {
     private final ListingRepository listingRepository;
     private final ImageService imageService;
     private final SupabaseStorage supabaseStorage;
+    private final UserRepository userRepository;
     
     @Value("${supabase.listing-bucket}")
     private String listingBucket;
 
     public ListingService(ListingRepository listingRepository,
                           ImageService imageService,
-                          SupabaseStorage supabaseStorage) {
+                          SupabaseStorage supabaseStorage,
+                          UserRepository userRepository) {
         this.listingRepository = listingRepository;
         this.imageService = imageService;
         this.supabaseStorage = supabaseStorage;
+        this.userRepository = userRepository;
     }
 
     public ListingDTO create(CreateListingRequest req, User owner) {
@@ -76,9 +81,22 @@ public class ListingService {
         return java.util.Base64.getDecoder().decode(payload);
     }
 
-    public ListingDTO get(UUID id) {
+    public ListingDetailDTO get(UUID id) {
         Listing l = listingRepository.findById(id).orElseThrow(() -> new RuntimeException("Listing not found"));
-        return toDto(l);
+        String username = userRepository.findById(l.getUserGU()).map(User::getUsername).orElse(null);
+        return new ListingDetailDTO(
+            l.getListingGU(),
+            l.getUserGU(),
+            username,
+            l.getTitle(),
+            l.getDescription(),
+            l.getPicture1_url(),
+            l.getPicture2_url(),
+            l.getPrice(),
+            l.getCondition(),
+            l.getCategory(),
+            l.getCreatedAt()
+        );
     }
 
     public List<ListingDTO> all() {
