@@ -70,7 +70,7 @@ export type GetListingsRequest = {
 export type Listing = {
     userGU: string;
     listingGU: string;
-    username?: string; // Only present in detail view
+    username: string;
     description: string;
     picture1_url: string;
     picture2_url: string;

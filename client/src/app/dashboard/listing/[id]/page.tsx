@@ -26,6 +26,7 @@ import { useUserInfoStore } from "@/stores/UserInfoStore";
 import EditListingModal from "../../you/selling/Components/EditListingModal";
 import DeleteListingModal from "../../you/selling/Components/DeleteListingModal";
 import { useRouter } from "next/navigation";
+import { MessageSellerModal } from "@/components/MessageSellerModal";
 
 export default function ListingPage() {
     const params = useParams() as { id: string };
@@ -35,7 +36,7 @@ export default function ListingPage() {
     const [copied, setCopied] = useState(false);
     const { userInfo } = useUserInfoStore();
     const router = useRouter();
-    
+
     const [editItem, setEditItem] = useState<Listing | undefined>();
     const [deleteItem, setDeleteItem] = useState<Listing | undefined>();
 
@@ -118,9 +119,9 @@ export default function ListingPage() {
 
                 {/* Listing Title and Price */}
                 <div className="my-6">
-                    <h2 className="text-xl font-bold leading-tight">{listing.title}</h2>
+                    <h2 className="text-2xl font-bold leading-tight">{listing.title}</h2>
                     <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xl font-semibold">${listing.price.toLocaleString()}</span>
+                        <span className="text-lg font-semibold">${listing.price.toLocaleString()}</span>
                     </div>
                     {listing.username && (
                         <p className="text-sm text-muted-foreground mt-2">
@@ -131,10 +132,14 @@ export default function ListingPage() {
 
 
                 {/* Buttons */}
-                <div className="flex gap-2 mb-6">
-                    <Button className="cursor-pointer flex-1 text-white bg-[var(--uo-green)] hover:bg-[var(--uo-green)]/70">
-                        <MessageCircle className="mr-2 h-4 w-4" /> Message
-                    </Button>
+                <div className="flex gap-2 mb-2">
+                    <MessageSellerModal
+                        listingId={params.id}
+                        username={listing.username}
+                        image={listing.picture1_url}
+                        title={listing.title}
+                        price={listing.price}
+                    />
                     <Button variant="outline" size="icon" className="cursor-pointer">
                         <Bookmark className="h-4 w-4" />
                     </Button>
@@ -146,7 +151,7 @@ export default function ListingPage() {
                 {/* Admin/Owner Controls */}
                 {canModify && (
                     <>
-                        <Separator className="my-4" />
+                        <Separator className="my-2" />
                         <div className="space-y-2">
                             {isAdmin && !isOwner && (
                                 <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mb-2">
