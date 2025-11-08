@@ -99,7 +99,7 @@ export default function ListingPage() {
 
     const handleSaveToggle = async () => {
         if (!listing || savingInProgress) return;
-        
+
         setSavingInProgress(true);
         try {
             if (isSaved) {
@@ -179,16 +179,20 @@ export default function ListingPage() {
 
                 {/* Buttons */}
                 <div className="flex gap-2 mb-2">
-                    <MessageSellerModal
-                        listingId={params.id}
-                        username={listing.username}
-                        image={listing.picture1_url}
-                        title={listing.title}
-                        price={listing.price}
-                    />
-                    <Button 
-                        variant="outline" 
-                        size="icon" 
+
+                    {(userInfo?.userGU !== listing.userGU) && (
+                        <MessageSellerModal
+                            listingId={params.id}
+                            username={listing.username}
+                            image={listing.picture1_url}
+                            title={listing.title}
+                            price={listing.price}
+                        />
+                    )}
+
+                    <Button
+                        variant="outline"
+                        size="icon"
                         className="cursor-pointer"
                         onClick={handleSaveToggle}
                         disabled={savingInProgress}
@@ -204,7 +208,7 @@ export default function ListingPage() {
                 {/* Admin/Owner Controls */}
                 {canModify && (
                     <>
-                        <Separator className="my-2" />
+                        <Separator className="my-4" />
                         <div className="space-y-2">
                             {isAdmin && !isOwner && (
                                 <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mb-2">
