@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -163,6 +163,27 @@ class API {
 
     async UploadAvatar(body: UploadAvatarRequest): Promise<UploadAvatarResponse | ErrorResponse> {
         return this.Request<UploadAvatarResponse>("/uploads/avatar", "POST", { body }, 'UploadAvatar');
+    }
+
+    // Saved Listings
+    async SaveListing(request: SaveListingRequest): Promise<SaveListingResponse | ErrorResponse> {
+        return this.Request<SaveListingResponse>("/saved-listings", "POST", { body: request }, 'SaveListing');
+    }
+
+    async UnsaveListing(request: UnsaveListingRequest): Promise<UnsaveListingResponse | ErrorResponse> {
+        return this.Request<UnsaveListingResponse>("/saved-listings", "DELETE", { body: request }, 'UnsaveListing');
+    }
+
+    async CheckSavedStatus(request: CheckSavedStatusRequest): Promise<CheckSavedStatusResponse | ErrorResponse> {
+        return this.Request<CheckSavedStatusResponse>("/saved-listings/status", "POST", { body: request }, 'CheckSavedStatus');
+    }
+
+    async GetSavedListings(): Promise<GetSavedListingsResponse | ErrorResponse> {
+        return this.Request<GetSavedListingsResponse>("/saved-listings", "GET", {}, 'GetSavedListings');
+    }
+
+    async GetSavedListingIds(): Promise<GetSavedListingIdsResponse | ErrorResponse> {
+        return this.Request<GetSavedListingIdsResponse>("/saved-listings/ids", "GET", {}, 'GetSavedListingIds');
     }
 }
 

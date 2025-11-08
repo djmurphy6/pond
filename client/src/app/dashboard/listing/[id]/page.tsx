@@ -39,6 +39,8 @@ export default function ListingPage() {
 
     const [editItem, setEditItem] = useState<Listing | undefined>();
     const [deleteItem, setDeleteItem] = useState<Listing | undefined>();
+    const [isSaved, setIsSaved] = useState(false);
+    const [savingInProgress, setSavingInProgress] = useState(false);
 
     useEffect(() => {
         (async () => {
@@ -52,6 +54,13 @@ export default function ListingPage() {
         })();
         setMounted(true);
     }, []);
+
+    // Check saved status when listing loads
+    useEffect(() => {
+        if (listing && userInfo) {
+            checkSavedStatus();
+        }
+    }, [listing, userInfo]);
 
     const handleCopy = async () => {
         try {
@@ -78,6 +87,43 @@ export default function ListingPage() {
     const handleDeleteSuccess = () => {
         toast.success("Listing deleted successfully");
         router.push("/dashboard");
+    };
+
+    const checkSavedStatus = async () => {
+        if (!listing) return;
+        const res = await api.CheckSavedStatus({ listingGU: listing.listingGU });
+        if (!(res instanceof ErrorResponse)) {
+            setIsSaved(res.isSaved);
+        }
+    };
+
+    const handleSaveToggle = async () => {
+        if (!listing || savingInProgress) return;
+        
+        setSavingInProgress(true);
+        try {
+            if (isSaved) {
+                // Unsave
+                const res = await api.UnsaveListing({ listingGU: listing.listingGU });
+                if (res instanceof ErrorResponse) {
+                    toast.error(res.body?.error || "Failed to unsave listing");
+                } else {
+                    setIsSaved(false);
+                    toast.success("Listing removed from saved");
+                }
+            } else {
+                // Save
+                const res = await api.SaveListing({ listingGU: listing.listingGU });
+                if (res instanceof ErrorResponse) {
+                    toast.error(res.body?.error || "Failed to save listing");
+                } else {
+                    setIsSaved(true);
+                    toast.success("Listing saved!");
+                }
+            }
+        } finally {
+            setSavingInProgress(false);
+        }
     };
 
     // Check if current user is owner or admin
@@ -140,8 +186,15 @@ export default function ListingPage() {
                         title={listing.title}
                         price={listing.price}
                     />
-                    <Button variant="outline" size="icon" className="cursor-pointer">
-                        <Bookmark className="h-4 w-4" />
+                    <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="cursor-pointer"
+                        onClick={handleSaveToggle}
+                        disabled={savingInProgress}
+                        title={isSaved ? "Remove from saved" : "Save listing"}
+                    >
+                        <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
                     </Button>
                     <Button onClick={handleCopy} variant="outline" size="icon" className="cursor-pointer">
                         <Share2 className="h-4 w-4" />

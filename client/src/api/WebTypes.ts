@@ -157,3 +157,34 @@ export type UploadAvatarRequest = {
 export type UploadAvatarResponse = {
     avatar_url: string;
 }
+// SAVED LISTINGS
+export type SaveListingRequest = {
+    listingGU: string;
+}
+
+export type SaveListingResponse = {
+    message: string;
+}
+
+export type UnsaveListingRequest = {
+    listingGU: string;
+}
+
+export type UnsaveListingResponse = {
+    message: string;
+}
+
+export type CheckSavedStatusRequest = {
+    listingGU: string;
+}
+
+export type CheckSavedStatusResponse = {
+    isSaved: boolean;
+}
+
+export type GetSavedListingsResponse = Listing[];
+
+export type GetSavedListingIdsResponse = {
+    savedListingIds: string[];
+
+}
