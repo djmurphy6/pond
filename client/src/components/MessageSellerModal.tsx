@@ -83,7 +83,7 @@ export function MessageSellerModal(props: MessageModalProps) {
                     </div>
                 </div>
 
-                <div className="flex flex-col space-y-1">
+                <div className="flex flex-col space-y-2">
                     <Textarea
                         className="resize-none"
                         id="message"
@@ -96,13 +96,14 @@ export function MessageSellerModal(props: MessageModalProps) {
 
                 <DialogFooter className="mt-2">
                     <Button
+                        variant="default"
                         onClick={() => setOpen(false)}
-                        className="cursor-pointer tracking-wide flex-1 text-[var(--uo-green)] bg-[var(--uo-red)] hover:bg-[var(--uo-red)]/70"
+                        className="cursor-pointer tracking-wide flex-1 text-[var(--uo-link)] bg-[none] hover:bg-[none] hover:text-[var(--uo-link)]/70"
                     >
                         Cancel
                     </Button>
                     <Button
-                        disabled={isLoading}
+                        disabled={isLoading || !message}
                         className={`cursor-pointer flex-1 text-white bg-[var(--uo-green)] hover:bg-[var(--uo-green)]/70`}
                     >
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

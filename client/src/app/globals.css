@@ -87,6 +87,8 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* UO Colors */
+  --uo-link: oklch(70.809% 0.22719 139.862);
+
   --uo-green: oklch(0.5325 0.1697 139.52);
   --uo-yellow: oklch(0.6824 0.1554 91.94);
 
@@ -141,6 +143,7 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   /* UO Colors */
+  --uo-link: oklch(70.809% 0.22719 139.862);
   --uo-green: oklch(0.5325 0.1697 139.52);
   --uo-yellow: oklch(0.9647 0.1586 108);
 
