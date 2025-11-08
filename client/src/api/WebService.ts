@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoomListDTO, ChatRoomDetailDTO, MessageResponseDTO, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetailDTO, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -140,16 +140,16 @@ class API {
     }
 
     // Messaging
-    async GetChatRooms(): Promise<ChatRoomListDTO[] | ErrorResponse> {
-        return this.Request<ChatRoomListDTO[]>("/chat/rooms", "GET", {}, 'GetChatRooms');
+    async GetChatRooms(): Promise<ChatRoom[] | ErrorResponse> {
+        return this.Request<ChatRoom[]>("/chat/rooms", "GET", {}, 'GetChatRooms');
     }
 
     async GetChatRoomDetails(roomId: string): Promise<ChatRoomDetailDTO | ErrorResponse> {
         return this.Request<ChatRoomDetailDTO>(`/chat/rooms/${roomId}`, "GET", {}, 'GetChatRoomDetails');
     }
 
-    async GetRoomMessages(roomId: string, page: number = 0, size: number = 50): Promise<MessageResponseDTO[] | ErrorResponse> {
-        return this.Request<MessageResponseDTO[]>(`/chat/rooms/${roomId}/messages?page=${page}&size=${size}`, "GET", {}, 'GetRoomMessages');
+    async GetRoomMessages(roomId: string, page: number = 0, size: number = 50): Promise<Message[] | ErrorResponse> {
+        return this.Request<Message[]>(`/chat/rooms/${roomId}/messages?page=${page}&size=${size}`, "GET", {}, 'GetRoomMessages');
     }
 
     async MarkMessagesAsRead(roomId: string): Promise<{ result: string } | ErrorResponse> {

@@ -46,7 +46,7 @@ export default function DashboardPage() {
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
     const { theme } = useTheme();
-    
+
     // Filtering and sorting state
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [sortOption, setSortOption] = useState<string>("date-desc");
@@ -66,21 +66,21 @@ export default function DashboardPage() {
     // Fetch listings when filters change (with debounce for price inputs)
     useEffect(() => {
         if (!mounted) return;
-        
+
         // Debounce price inputs to avoid too many API calls while typing
         const timeoutId = setTimeout(() => {
             GetListings();
         }, 300); // 300ms debounce
-        
+
         return () => clearTimeout(timeoutId);
     }, [selectedCategories, sortOption, minPrice, maxPrice, mounted]);
 
     async function GetListings() {
         setLoading(true);
-        
+
         // Parse sort option (e.g., "date-desc" -> sortBy: "date", sortOrder: "desc")
         const [sortBy, sortOrder] = sortOption.split('-');
-        
+
         // Prepare filter parameters
         const filters = {
             categories: selectedCategories.length > 0 ? selectedCategories : undefined,
@@ -89,7 +89,7 @@ export default function DashboardPage() {
             sortBy,
             sortOrder,
         };
-        
+
         let res = await api.GetListings(filters);
         setLoading(false);
         if (res instanceof ErrorResponse) {
@@ -102,8 +102,8 @@ export default function DashboardPage() {
 
     // Toggle category selection
     const toggleCategory = (category: string) => {
-        setSelectedCategories(prev => 
-            prev.includes(category) 
+        setSelectedCategories(prev =>
+            prev.includes(category)
                 ? prev.filter(c => c !== category) //Remove if already selected
                 : [...prev, category] // Add if not selected
         );
@@ -143,7 +143,7 @@ export default function DashboardPage() {
                         variant="ghost"
                         style={{ cursor: 'pointer' }}
                         className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300"
-                        onClick={() => window.location.href = '/messaging'}
+                        onClick={() => window.location.href = 'dashboard/messaging'}
                     >
                         <div className="h-7 w-7 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
                             <MessageCircle className="h-4 w-4 text-primary transition-colors duration-300" />
@@ -178,7 +178,7 @@ export default function DashboardPage() {
                                 </Button>
                             )}
                         </div>
-                        
+
                         <div>
                             <Label className="mb-2">Sort by</Label>
                             <Select value={sortOption} onValueChange={setSortOption}>
@@ -197,16 +197,16 @@ export default function DashboardPage() {
                         <div>
                             <Label>Price</Label>
                             <div className="flex gap-2 mt-2">
-                                <Input 
+                                <Input
                                     type="number"
-                                    placeholder="Min" 
+                                    placeholder="Min"
                                     className="w-1/2 transition-colors duration-300"
                                     value={minPrice}
                                     onChange={(e) => setMinPrice(e.target.value)}
                                 />
-                                <Input 
+                                <Input
                                     type="number"
-                                    placeholder="Max" 
+                                    placeholder="Max"
                                     className="w-1/2 transition-colors duration-300"
                                     value={maxPrice}
                                     onChange={(e) => setMaxPrice(e.target.value)}
@@ -230,9 +230,8 @@ export default function DashboardPage() {
                                         <button
                                             key={name}
                                             onClick={() => toggleCategory(name)}
-                                            className={`flex items-center gap-2 text-sm py-1 px-2 rounded-md hover:bg-muted transition-colors duration-300 ${
-                                                isSelected ? 'bg-muted' : ''
-                                            }`}
+                                            className={`flex items-center gap-2 text-sm py-1 px-2 rounded-md hover:bg-muted transition-colors duration-300 ${isSelected ? 'bg-muted' : ''
+                                                }`}
                                         >
                                             <Icon className="h-4 w-4 text-muted-foreground transition-colors duration-300" />
                                             <span className="flex-1 text-left">{name}</span>

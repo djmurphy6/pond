@@ -1,7 +1,7 @@
-import { ChatRoomListDTO, MessageResponseDTO } from "@/api/WebTypes";
+import { ChatRoom, Message } from "@/api/WebTypes";
 
 // Mock chat rooms
-export const mockChatRooms: ChatRoomListDTO[] = [
+export const mockChatRooms: ChatRoom[] = [
     {
         roomId: "room-1",
         listingGU: "listing-1",
@@ -65,7 +65,7 @@ export const mockChatRooms: ChatRoomListDTO[] = [
 ];
 
 // Mock messages for each room
-export const mockMessages: Record<string, MessageResponseDTO[]> = {
+export const mockMessages: Record<string, Message[]> = {
     "room-1": [
         {
             id: "msg-1",

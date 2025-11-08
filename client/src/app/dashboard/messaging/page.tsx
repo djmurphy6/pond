@@ -10,6 +10,7 @@ import {
     ImageIcon,
     ChevronLeft,
     MessageCircle,
+    ArrowLeft,
 } from "lucide-react";
 
 // API
@@ -25,21 +26,22 @@ import { Separator } from "@/components/ui/separator";
 
 //Internal
 import ThemeToggle from "@/components/ThemeToggle";
-import { ErrorResponse, ChatRoomListDTO, MessageResponseDTO } from "@/api/WebTypes";
+import { ErrorResponse, ChatRoom, Message } from "@/api/WebTypes";
 import { toast } from "sonner";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
 import Image from "next/image";
 
 // Mock data
 import { mockChatRooms, mockMessages, MOCK_CURRENT_USER_GU } from "./mockData";
+import Link from "next/link";
 
 // Toggle this to switch between mock and real data
 const USE_MOCK_DATA = true;
 
 export default function MessagingPage() {
-    const [chatRooms, setChatRooms] = useState<ChatRoomListDTO[]>([]);
+    const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
     const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-    const [messages, setMessages] = useState<MessageResponseDTO[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [messageInput, setMessageInput] = useState("");
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -76,19 +78,19 @@ export default function MessagingPage() {
 
     async function GetChatRooms() {
         setLoading(true);
-        
+
         if (USE_MOCK_DATA) {
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 500));
-            setChatRooms(mockChatRooms);
-            // Auto-select first room if available
-            if (mockChatRooms.length > 0 && !selectedRoomId) {
-                setSelectedRoomId(mockChatRooms[0].roomId);
-            }
+            // setChatRooms(mockChatRooms);
+            // // Auto-select first room if available
+            // if (mockChatRooms.length > 0 && !selectedRoomId) {
+            //     setSelectedRoomId(mockChatRooms[0].roomId);
+            // }
             setLoading(false);
             return;
         }
-        
+
         const res = await api.GetChatRooms();
         setLoading(false);
         if (res instanceof ErrorResponse) {
@@ -104,16 +106,16 @@ export default function MessagingPage() {
 
     async function GetMessages(roomId: string) {
         setLoadingMessages(true);
-        
+
         if (USE_MOCK_DATA) {
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 300));
-            const roomMessages = mockMessages[roomId] || [];
-            setMessages(roomMessages);
+            // const roomMessages = mockMessages[roomId] || [];
+            // setMessages(roomMessages);
             setLoadingMessages(false);
             return;
         }
-        
+
         const res = await api.GetRoomMessages(roomId);
         setLoadingMessages(false);
         if (res instanceof ErrorResponse) {
@@ -125,32 +127,32 @@ export default function MessagingPage() {
 
     function handleSendMessage() {
         if (!messageInput.trim() || !selectedRoomId) return;
-        
+
         if (USE_MOCK_DATA) {
             // Add message to mock data locally
-            const newMessage: MessageResponseDTO = {
-                id: `msg-${Date.now()}`,
-                roomId: selectedRoomId,
-                senderGU: MOCK_CURRENT_USER_GU,
-                content: messageInput.trim(),
-                timestamp: new Date().toISOString(),
-                isRead: false,
-            };
-            
-            setMessages(prev => [...prev, newMessage]);
-            
+            // const newMessage: Message = {
+            //     id: `msg-${Date.now()}`,
+            //     roomId: selectedRoomId,
+            //     senderGU: MOCK_CURRENT_USER_GU,
+            //     content: messageInput.trim(),
+            //     timestamp: new Date().toISOString(),
+            //     isRead: false,
+            // };
+
+            // setMessages(prev => [...prev, newMessage]);
+
             // Update the last message in the chat room list
-            setChatRooms(prev => prev.map(room => 
-                room.roomId === selectedRoomId 
+            setChatRooms(prev => prev.map(room =>
+                room.roomId === selectedRoomId
                     ? { ...room, lastMessage: messageInput.trim(), lastMessageAt: new Date().toISOString() }
                     : room
             ));
-            
+
             setMessageInput("");
             toast.success("Message sent! (Mock mode)");
             return;
         }
-        
+
         // TODO: Implement WebSocket message sending for real backend
         toast.info("WebSocket messaging not yet implemented");
         setMessageInput("");
@@ -162,30 +164,20 @@ export default function MessagingPage() {
 
     return (
         <div className="flex h-screen bg-background transition-colors duration-300">
-            {/* Mock Mode Banner */}
-            {USE_MOCK_DATA && (
-                <div className="fixed top-0 left-0 right-0 bg-orange-500 text-white text-center py-1 text-sm font-medium z-50">
-                    🧪 Mock Mode - UI Development Only
-                </div>
-            )}
-            
             {/* Sidebar */}
-            <aside className={`w-80 border-r bg-muted/10 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"} ${USE_MOCK_DATA ? "pt-6" : ""}`}>
+            <aside className={`w-80 border-r bg-muted/10 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
                 {/* Header */}
-                <div className="p-4 border-b">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => window.history.back()}
-                            >
-                                <ChevronLeft className="h-5 w-5" />
-                            </Button>
-                            <h2 className="text-xl font-semibold">Messages</h2>
-                        </div>
-                        <ThemeToggle />
-                    </div>
+                <Button variant={'link'} style={{ color: 'gray', justifyContent: 'flex-start' }} className="!p-0 !px-0 !py-0 hover:underline hover:bg-none cursor-pointer">
+                    <Link style={{ flexDirection: 'row' }} className="flex items-center gap-1" href="/dashboard">
+                        <ArrowLeft />
+                        back to dashboard
+                    </Link>
+                </Button>
+
+                {/* Top section */}
+                <div className="flex items-center gap-2 mb-6 justify-between">
+                    <h2 className="text-xl font-semibold">Messages</h2>
+                    <ThemeToggle />
                 </div>
 
                 {/* Chat Rooms List */}
@@ -226,7 +218,7 @@ export default function MessagingPage() {
             </aside>
 
             {/* Main Chat Area */}
-            <main className={`flex-1 flex flex-col transition-colors duration-300 ${USE_MOCK_DATA ? "pt-6" : ""}`}>
+            <main className={`flex-1 flex flex-col transition-colors duration-300`}>
                 {selectedRoom ? (
                     <>
                         {/* Chat Header */}
@@ -321,18 +313,17 @@ export default function MessagingPage() {
     );
 }
 
-function ChatRoomItem({ room, isSelected, onClick }: { room: ChatRoomListDTO; isSelected: boolean; onClick: () => void }) {
+function ChatRoomItem({ room, isSelected, onClick }: { room: ChatRoom; isSelected: boolean; onClick: () => void }) {
     const { theme } = useTheme();
     const [hasError, setHasError] = useState(false);
 
     return (
         <button
             onClick={onClick}
-            className={`w-full p-3 rounded-lg text-left transition-all duration-200 ${
-                isSelected
-                    ? "bg-primary/10 border border-primary/20"
-                    : "hover:bg-muted/50"
-            }`}
+            className={`w-full p-3 rounded-lg text-left transition-all duration-200 ${isSelected
+                ? "bg-primary/10 border border-primary/20"
+                : "hover:bg-muted/50"
+                }`}
         >
             <div className="flex gap-3">
                 <div className="relative h-12 w-12 rounded-full bg-muted overflow-hidden flex-shrink-0">
@@ -369,19 +360,18 @@ function ChatRoomItem({ room, isSelected, onClick }: { room: ChatRoomListDTO; is
     );
 }
 
-function MessageBubble({ message, isOwn }: { message: MessageResponseDTO; isOwn: boolean }) {
+function MessageBubble({ message, isOwn }: { message: Message; isOwn: boolean }) {
     const { theme } = useTheme();
 
     return (
         <div className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
             <div
-                className={`max-w-[70%] rounded-lg p-3 ${
-                    isOwn
-                        ? "bg-gradient-to-br from-green-500 to-emerald-600 text-white"
-                        : theme === "dark"
+                className={`max-w-[70%] rounded-lg p-3 ${isOwn
+                    ? "bg-gradient-to-br from-green-700 to-emerald-600 text-white"
+                    : theme === "dark"
                         ? "bg-muted"
                         : "bg-muted/50"
-                }`}
+                    }`}
             >
                 <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                 <p className={`text-xs mt-1 ${isOwn ? "text-white/70" : "text-muted-foreground"}`}>

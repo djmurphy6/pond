@@ -100,7 +100,7 @@ export type DeleteListingRequest = {
 }
 
 // MESSAGING
-export type ChatRoomListDTO = {
+export type ChatRoom = {
     roomId: string;
     listingGU: string;
     listingTitle: string;
@@ -126,7 +126,7 @@ export type ChatRoomDetailDTO = {
     lastMessageAt: string;
 }
 
-export type MessageResponseDTO = {
+export type Message = {
     id: string;
     roomId: string;
     senderGU: string;
