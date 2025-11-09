@@ -20,7 +20,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
             helper.setTo(to);
-            helper.setSubject("Verify Your Pawnd Account");
+            helper.setSubject("Verify Your Pond Account");
             
             String htmlContent = buildVerificationEmailHtml(verificationCode);
             helper.setText(htmlContent, true);
@@ -48,16 +48,16 @@ public class EmailService {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>Welcome to Pawnd!</h1>
+                        <h1>Welcome to Pond!</h1>
                     </div>
                     <div class="content">
                         <p>Thank you for signing up! Please use the verification code below to verify your email address:</p>
                         <div class="code">%s</div>
                         <p>This code will expire in 15 minutes.</p>
-                        <p>If you didn't create an account with Pawnd, please ignore this email.</p>
+                        <p>If you didn't create an account with Pond, please ignore this email.</p>
                     </div>
                     <div class="footer">
-                        <p>© 2025 Pawnd - University of Oregon</p>
+                        <p>© 2025 Pond - University of Oregon</p>
                     </div>
                 </div>
             </body>
