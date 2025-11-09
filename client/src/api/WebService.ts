@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetailDTO, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -144,16 +144,20 @@ class API {
         return this.Request<ChatRoom[]>("/chat/rooms", "GET", {}, 'GetChatRooms');
     }
 
-    async GetChatRoomDetails(roomId: string): Promise<ChatRoomDetailDTO | ErrorResponse> {
-        return this.Request<ChatRoomDetailDTO>(`/chat/rooms/${roomId}`, "GET", {}, 'GetChatRoomDetails');
+    async InitChatRoom(request: InitChatRoomRequest): Promise<InitChatRoomResponse | ErrorResponse> {
+        return this.Request<InitChatRoomResponse>(`/chat/rooms/init?listingGU=${request.listingGU}&buyerGU=${request.buyerGU}`, "POST", { body: request }, 'InitChatRoom');
+    }
+
+    async GetChatRoomDetails(roomId: string): Promise<ChatRoomDetail | ErrorResponse> {
+        return this.Request<ChatRoomDetail>(`/chat/rooms/${roomId}`, "GET", {}, 'GetChatRoomDetails');
     }
 
     async GetRoomMessages(roomId: string, page: number = 0, size: number = 50): Promise<Message[] | ErrorResponse> {
         return this.Request<Message[]>(`/chat/rooms/${roomId}/messages?page=${page}&size=${size}`, "GET", {}, 'GetRoomMessages');
     }
 
-    async MarkMessagesAsRead(roomId: string): Promise<{ result: string } | ErrorResponse> {
-        return this.Request<{ result: string }>(`/chat/rooms/${roomId}/mark-read`, "POST", {}, 'MarkMessagesAsRead');
+    async MarkMessagesAsRead(request: MarkMessagesAsReadRequest): Promise<MarkMessagesAsReadResponse | ErrorResponse> {
+        return this.Request<MarkMessagesAsReadResponse>(`/chat/rooms/${request.roomID}/mark-read`, "POST", {}, 'MarkMessagesAsRead');
     }
 
     // User Profile

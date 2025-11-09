@@ -187,6 +187,7 @@ export default function ListingPage() {
                             image={listing.picture1_url}
                             title={listing.title}
                             price={listing.price}
+                            onSuccess={(roomId, message) => router.push(`/dashboard/messaging?roomId=${roomId}&message=${message}`)}
                         />
                     )}
 

@@ -50,7 +50,7 @@ public class MessageService {
     public List<MessageResponseDTO> getRoomMessagesPaginated(String roomId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return messageRepository.findByRoomIdOrderByTimestampDesc(roomId, pageable)
+        return messageRepository.findByRoomIdOrderByTimestampAsc(roomId, pageable)
                 .stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
@@ -97,7 +97,7 @@ public class MessageService {
 
 
     public MessageResponseDTO getLastMessage(String roomId) {
-        return messageRepository.findByRoomIdOrderByTimestampDesc(
+        return messageRepository.findByRoomIdOrderByTimestampAsc(
                         roomId,
                         PageRequest.of(0, 1)
                 ).stream()

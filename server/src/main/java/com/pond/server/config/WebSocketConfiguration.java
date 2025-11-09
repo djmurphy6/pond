@@ -33,7 +33,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
     public void registerStompEndpoints(StompEndpointRegistry registry){
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*") // TODO: CHANGE THIS TO THE CORRECT FRONTEND ENDPOINT TO WORK. We will need to switch to setAllowedOrigins.
-                .addInterceptors(jwtHandshakeInterceptor)
+//                .addInterceptors(jwtHandshakeInterceptor) //TODO: for testing backend only without frontend
                 .withSockJS(); // Add handshake interceptor here
     }
 

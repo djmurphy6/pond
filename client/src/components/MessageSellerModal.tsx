@@ -26,9 +26,10 @@ import { ErrorResponse } from "@/api/WebTypes";
 //Internal
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Separator } from "./ui/separator";
+import { useUserInfoStore } from "@/stores/UserInfoStore";
 
 type MessageModalProps = {
-    onSuccess?: () => void,
+    onSuccess?: (roomGU?: string, message?: string) => void,
     listingId: string,
     username: string,
     image: string,
@@ -43,12 +44,26 @@ export function MessageSellerModal(props: MessageModalProps) {
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState("");
+    const { userInfo } = useUserInfoStore();
 
     useEffect(() => {
         if (!open) {
             setMessage("");
         }
     }, [open]);
+
+    async function SendMessage() {
+        setIsLoading(true);
+        let res = await api.InitChatRoom({ listingGU: listingId, buyerGU: userInfo?.userGU || "", });
+        setIsLoading(false);
+        if (res instanceof ErrorResponse) {
+            toast.error(res.body?.error);
+        } else {
+            toast.success("Chat room created successfully");
+            setOpen(false);
+            onSuccess?.(res.roomId, message);
+        }
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -103,6 +118,7 @@ export function MessageSellerModal(props: MessageModalProps) {
                         Cancel
                     </Button>
                     <Button
+                        onClick={SendMessage}
                         disabled={isLoading || !message}
                         className={`cursor-pointer flex-1 text-white bg-[var(--uo-green)] hover:bg-[var(--uo-green)]/70`}
                     >

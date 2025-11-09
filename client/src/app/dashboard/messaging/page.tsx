@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 // API
-import api from "@/api/WebService";
+import api, { appConfig } from "@/api/WebService";
 
 //ShadCN
 import { Button } from "@/components/ui/button";
@@ -32,11 +32,8 @@ import { useUserInfoStore } from "@/stores/UserInfoStore";
 import Image from "next/image";
 
 // Mock data
-import { mockChatRooms, mockMessages, MOCK_CURRENT_USER_GU } from "./mockData";
 import Link from "next/link";
-
-// Toggle this to switch between mock and real data
-const USE_MOCK_DATA = true;
+import { useChatSocket } from "@/stores/ChatSocket";
 
 export default function MessagingPage() {
     const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
@@ -48,6 +45,14 @@ export default function MessagingPage() {
     const [loadingMessages, setLoadingMessages] = useState(false);
     const { theme } = useTheme();
     const { userInfo } = useUserInfoStore();
+
+    const { sendMessage, connected } = useChatSocket(
+        selectedRoomId,
+        appConfig.access_token,
+        (newMessage) => {
+            setMessages((prev) => [...prev, newMessage]);
+        }
+    );
 
     useEffect(() => {
         setMounted(true);
@@ -61,43 +66,32 @@ export default function MessagingPage() {
 
     useEffect(() => {
         if (selectedRoomId) {
-            GetMessages(selectedRoomId);
-            // Mark messages as read when room is selected
-            if (!USE_MOCK_DATA) {
-                api.MarkMessagesAsRead(selectedRoomId);
-            } else {
-                // In mock mode, just clear unread count
-                setChatRooms(prev => prev.map(room =>
-                    room.roomId === selectedRoomId
-                        ? { ...room, unreadCount: 0 }
-                        : room
-                ));
-            }
+            (async () => {
+
+                await GetMessages(selectedRoomId);
+                // Mark messages as read when room is selected
+                let res = await api.MarkMessagesAsRead({ roomID: selectedRoomId });
+                if (res instanceof ErrorResponse) {
+                    toast.error(res.body?.error);
+                } else {
+                    setChatRooms(prev => prev.map(room =>
+                        room.roomId === selectedRoomId
+                            ? { ...room, unreadCount: 0 }
+                            : room
+                    ));
+                }
+            })();
         }
     }, [selectedRoomId]);
 
     async function GetChatRooms() {
         setLoading(true);
-
-        if (USE_MOCK_DATA) {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 500));
-            // setChatRooms(mockChatRooms);
-            // // Auto-select first room if available
-            // if (mockChatRooms.length > 0 && !selectedRoomId) {
-            //     setSelectedRoomId(mockChatRooms[0].roomId);
-            // }
-            setLoading(false);
-            return;
-        }
-
         const res = await api.GetChatRooms();
         setLoading(false);
         if (res instanceof ErrorResponse) {
             toast.error(res.body?.error);
         } else {
             setChatRooms(res);
-            // Auto-select first room if available
             if (res.length > 0 && !selectedRoomId) {
                 setSelectedRoomId(res[0].roomId);
             }
@@ -106,16 +100,6 @@ export default function MessagingPage() {
 
     async function GetMessages(roomId: string) {
         setLoadingMessages(true);
-
-        if (USE_MOCK_DATA) {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 300));
-            // const roomMessages = mockMessages[roomId] || [];
-            // setMessages(roomMessages);
-            setLoadingMessages(false);
-            return;
-        }
-
         const res = await api.GetRoomMessages(roomId);
         setLoadingMessages(false);
         if (res instanceof ErrorResponse) {
@@ -125,36 +109,21 @@ export default function MessagingPage() {
         }
     }
 
-    function handleSendMessage() {
+    async function handleSendMessage() {
         if (!messageInput.trim() || !selectedRoomId) return;
 
-        if (USE_MOCK_DATA) {
-            // Add message to mock data locally
-            // const newMessage: Message = {
-            //     id: `msg-${Date.now()}`,
-            //     roomId: selectedRoomId,
-            //     senderGU: MOCK_CURRENT_USER_GU,
-            //     content: messageInput.trim(),
-            //     timestamp: new Date().toISOString(),
-            //     isRead: false,
-            // };
+        // const newMessage: Message = {
+        //     id: `temp-${Date.now()}`,
+        //     roomId: selectedRoomId,
+        //     senderGU: userInfo?.userGU ?? "",
+        //     content: messageInput.trim(),
+        //     timestamp: new Date().toISOString(),
+        //     isRead: false,
+        // };
+        // setMessages((prev) => [...prev, newMessage]);
 
-            // setMessages(prev => [...prev, newMessage]);
+        sendMessage(messageInput.trim());
 
-            // Update the last message in the chat room list
-            setChatRooms(prev => prev.map(room =>
-                room.roomId === selectedRoomId
-                    ? { ...room, lastMessage: messageInput.trim(), lastMessageAt: new Date().toISOString() }
-                    : room
-            ));
-
-            setMessageInput("");
-            toast.success("Message sent! (Mock mode)");
-            return;
-        }
-
-        // TODO: Implement WebSocket message sending for real backend
-        toast.info("WebSocket messaging not yet implemented");
         setMessageInput("");
     }
 
@@ -267,7 +236,7 @@ export default function MessagingPage() {
                                         <MessageBubble
                                             key={message.id}
                                             message={message}
-                                            isOwn={USE_MOCK_DATA ? message.senderGU === MOCK_CURRENT_USER_GU : message.senderGU === userInfo?.userGU}
+                                            isOwn={message.senderGU === userInfo?.userGU}
                                         />
                                     ))}
                                 </div>

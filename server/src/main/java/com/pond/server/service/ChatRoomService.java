@@ -129,7 +129,7 @@ public class ChatRoomService {
             }
 
             // Get the last message
-            List<Message> messages = messageRepository.findByRoomIdOrderByTimestampDesc(
+            List<Message> messages = messageRepository.findByRoomIdOrderByTimestampAsc(
                     room.getRoomId(),
                     org.springframework.data.domain.PageRequest.of(0,1)
             );

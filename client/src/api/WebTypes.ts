@@ -100,6 +100,14 @@ export type DeleteListingRequest = {
 }
 
 // MESSAGING
+
+export type InitChatRoomRequest = {
+    listingGU: string;
+    buyerGU: string;
+}
+
+export type InitChatRoomResponse = ChatRoomDetail;
+
 export type ChatRoom = {
     roomId: string;
     listingGU: string;
@@ -113,7 +121,7 @@ export type ChatRoom = {
     unreadCount: number;
 }
 
-export type ChatRoomDetailDTO = {
+export type ChatRoomDetail = {
     roomId: string;
     listingGU: string;
     listingTitle: string;
@@ -126,6 +134,15 @@ export type ChatRoomDetailDTO = {
     lastMessageAt: string;
 }
 
+
+export type MarkMessagesAsReadRequest = {
+    roomID: string;
+}
+
+export type MarkMessagesAsReadResponse = {
+    result: string;
+}
+
 export type Message = {
     id: string;
     roomId: string;
@@ -134,6 +151,13 @@ export type Message = {
     timestamp: string;
     isRead: boolean;
 }
+
+export type MessageRequest = {
+    roomId: string;
+    content: string;
+}
+
+//MY ACCOUNT
 
 export type UpdateUserRequest = {
     username?: string;
@@ -186,5 +210,4 @@ export type GetSavedListingsResponse = Listing[];
 
 export type GetSavedListingIdsResponse = {
     savedListingIds: string[];
-
 }

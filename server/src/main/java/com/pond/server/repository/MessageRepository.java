@@ -18,7 +18,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
 
     // Get messages with pagination, most recent first
     // Used for: Loading message history in chunks
-    List<Message> findByRoomIdOrderByTimestampDesc(String roomId, Pageable pageable);
+    List<Message> findByRoomIdOrderByTimestampAsc(String roomId, Pageable pageable);
 
     // Mark all unread messages as read for a specific user in a room
     // Used for: When user opens a chat, mark messages from other person as read
