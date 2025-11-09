@@ -159,7 +159,7 @@ export default function AdminReportsPage() {
                         <Shield className="h-6 w-6 text-amber-600" />
                         <h2 className="text-xl font-semibold">Admin Panel</h2>
                     </div>
-                    <ThemeToggle />
+                    {/* <ThemeToggle /> */}
                 </div>
 
                 <Separator className="my-4" />

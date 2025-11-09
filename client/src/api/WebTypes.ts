@@ -90,6 +90,10 @@ export type GetSpecificListingRequest = {
     listingGU: string
 }
 
+export type GetSpecificListingResponse = Listing & {
+    avatar_url: string
+}
+
 //UPDATE LISTING
 export type UpdateListingRequest = {
     listingGU: string;

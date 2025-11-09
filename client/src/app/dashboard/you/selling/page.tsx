@@ -101,7 +101,7 @@ export default function SellingPage() {
                 {/* Top section */}
                 <div className="flex items-center gap-2 mb-6 justify-between">
                     <h2 className="text-xl font-semibold">Manage Listings</h2>
-                    <ThemeToggle />
+                    {/* <ThemeToggle /> */}
                 </div>
 
                 {/* Account */}
@@ -160,28 +160,6 @@ function ListingCard({ item, openEditModal, openDeleteModal }: { item: Listing, 
         <Card
             className={`${theme !== 'dark' && 'hover:shadow-lg'} relative group hover:-translate-y-1 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]`}
         >
-            {/* Dropdown actions */}
-            {/* <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
-                    >
-                        <MoreVertical className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-32">
-                    <DropdownMenuItem onClick={() => openEditModal(item)}>
-                        <Pencil className="h-4 w-4 mr-2" /> Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => openDeleteModal(item)}>
-                        <Trash2 className="h-4 w-4 mr-2 text-destructive" /> Delete
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu> */}
-
             <Button
                 variant="outline"
                 className="absolute left-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"

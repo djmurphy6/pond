@@ -146,7 +146,7 @@ export default function MessagingPage() {
                 {/* Top section */}
                 <div className="flex items-center gap-2 mb-6 justify-between">
                     <h2 className="text-xl font-semibold">Messages</h2>
-                    <ThemeToggle />
+                    {/* <ThemeToggle /> */}
                 </div>
 
                 {/* Chat Rooms List */}

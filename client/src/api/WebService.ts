@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse, CreateReportRequest, ReportDTO, ReportsPageResponse, UpdateReportRequest } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse, CreateReportRequest, ReportDTO, ReportsPageResponse, UpdateReportRequest, GetSpecificListingResponse } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -123,8 +123,8 @@ class API {
         return this.Request<Listing[]>("/listings", "GET", {}, 'GetListings');
     }
 
-    async GetSpecificListing(request: GetSpecificListingRequest): Promise<Listing | ErrorResponse> {
-        return this.Request<Listing>(`/listings/${request.listingGU}`, "GET", {}, 'GetSpecificListing');
+    async GetSpecificListing(request: GetSpecificListingRequest): Promise<GetSpecificListingResponse | ErrorResponse> {
+        return this.Request<GetSpecificListingResponse>(`/listings/${request.listingGU}`, "GET", {}, 'GetSpecificListing');
     }
 
     async GetMyListings(): Promise<Listing[] | ErrorResponse> {

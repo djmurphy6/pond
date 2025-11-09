@@ -7,13 +7,13 @@ import { useParams } from "next/navigation";
 import { useTheme } from "next-themes";
 
 //React
-import { Bookmark, MessageCircle, MoreHorizontal, Share2, X, Pencil, Trash2, Shield, AlertTriangle } from "lucide-react";
+import { Bookmark, MessageCircle, MoreHorizontal, Share2, X, Pencil, Trash2, Shield, AlertTriangle, ImageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 //API
 import api from "@/api/WebService";
-import { ErrorResponse, Listing } from "@/api/WebTypes";
+import { ErrorResponse, GetSpecificListingResponse, Listing } from "@/api/WebTypes";
 
 //ShadCN
 import { Button } from "@/components/ui/button";
@@ -34,10 +34,11 @@ import DeleteListingModal from "../../you/selling/Components/DeleteListingModal"
 import { useRouter } from "next/navigation";
 import { MessageSellerModal } from "@/components/MessageSellerModal";
 import { ReportListingModal } from "@/components/ReportListingModal";
+import { UserDetailsModal } from "@/components/UserDetailsModal";
 
 export default function ListingPage() {
     const params = useParams() as { id: string };
-    const [listing, setListing] = useState<Listing>();
+    const [listing, setListing] = useState<GetSpecificListingResponse>();
     const { theme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -167,7 +168,7 @@ export default function ListingPage() {
                             </div>
                         )}
                     </div>
-                    <ThemeToggle />
+                    {/* <ThemeToggle /> */}
                 </div>
 
 
@@ -177,9 +178,9 @@ export default function ListingPage() {
                     <div className="flex items-center gap-2 mt-1">
                         <span className="text-lg font-semibold">${listing.price.toLocaleString()}</span>
                     </div>
-                    {listing.username && (
+                    {listing.createdAt && (
                         <p className="text-sm text-muted-foreground mt-2">
-                            Listed by <span className="font-medium text-foreground">@{listing.username}</span>
+                            Listed on {new Date(listing.createdAt).toLocaleDateString()}
                         </p>
                     )}
                 </div>
@@ -222,7 +223,7 @@ export default function ListingPage() {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     className="cursor-pointer text-red-600 focus:text-red-600"
                                     onClick={() => setIsReportModalOpen(true)}
                                 >
@@ -280,6 +281,16 @@ export default function ListingPage() {
                     <p className="text-sm leading-relaxed text-foreground">
                         {listing.description}
                     </p>
+                </div>
+
+                <Separator className="my-4" />
+
+                <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Seller Information</h3>
+                    <UserDetailsModal
+                        username={listing.username}
+                        avatar_url={listing.avatar_url}
+                    />
                 </div>
             </aside>
 

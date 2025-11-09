@@ -16,6 +16,7 @@ public class ListingDetailDTO {
     @JsonProperty("userGU")
     private final UUID usergu;
     private final String username;
+    private final String avatar_url;
     private String title;
     private String description;
     @JsonProperty("picture1_url")
