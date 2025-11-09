@@ -1,14 +1,18 @@
 package com.pond.server.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.pond.server.dto.CreateListingRequest;
 import com.pond.server.dto.ListingDTO;
 import com.pond.server.dto.ListingDetailDTO;
+import com.pond.server.dto.ScoredListing;
 import com.pond.server.dto.UpdateListingRequest;
 import com.pond.server.model.Listing;
 import com.pond.server.model.User;
@@ -112,13 +116,95 @@ public class ListingService {
         List<String> effectiveCategories = (categories != null && !categories.isEmpty()) ? categories : null;
         
         // Trim search query and convert empty to null
-        String effectiveSearchQuery = (searchQuery != null && !searchQuery.trim().isEmpty()) ? searchQuery.trim() : null;
+        String effectiveSearchQuery = (searchQuery != null && !searchQuery.trim().isEmpty()) ? searchQuery.trim().toLowerCase() : null;
         
-        return listingRepository.findFiltered(effectiveCategories, minPrice, maxPrice, effectiveSortBy, effectiveSortOrder, effectiveSearchQuery)
-                .stream()
+        // Fetch listings from database with category and price filters (no search query in DB)
+        List<Listing> listings = listingRepository.findFiltered(effectiveCategories, minPrice, maxPrice, effectiveSortBy, effectiveSortOrder, null);
+        
+        // If search query provided, apply fuzzy matching
+        if (effectiveSearchQuery != null && !effectiveSearchQuery.isEmpty()) {
+            return applyFuzzySearch(listings, effectiveSearchQuery, effectiveSortBy, effectiveSortOrder);
+        }
+        
+        // No search query, return normally sorted results
+        return listings.stream()
                 .map(this::toDto)
                 .toList();
     }
+    
+    private List<ListingDTO> applyFuzzySearch(List<Listing> listings, String searchQuery, String sortBy, String sortOrder) {
+        //Calculator that calculates the similarity between two strings by the number of character replacements required to make the strings the same
+        LevenshteinDistance levenshtein = new LevenshteinDistance();
+        
+        // Score each listing based on similarity to search query
+        List<Listing> filteredListings = listings.stream()
+                .map(listing -> {
+                    String title = listing.getTitle().toLowerCase();
+                    
+                    // Calculate multiple similarity scores
+                    
+                    // 1. Exact substring match (highest priority)
+                    boolean exactMatch = title.contains(searchQuery);
+                    
+                    // 2. Word-level matching (check if any word is similar)
+                    String[] titleWords = title.split("\\s+"); // ["grey", "shirt"]
+                    String[] queryWords = searchQuery.split("\\s+"); // ["gre"]
+                    
+                    double bestScore = 0.0;
+                    
+                    // Check each query word against each title word
+                    for (String queryWord : queryWords) {
+                        for (String titleWord : titleWords) {
+                            // Calculate similarity (normalized)
+                            int distance = levenshtein.apply(queryWord, titleWord); //distance is number of character replacements needed
+                            int maxLength = Math.max(queryWord.length(), titleWord.length()); //which word is longer, the title word or search query word
+                            //For "gre" vs "grey" similarity is 1 - (1 / 4) = 0.75 so they are 75% similar
+                            double similarity = 1.0 - ((double) distance / maxLength); 
+                            bestScore = Math.max(bestScore, similarity); //best score among all words
+                        }
+                    }
+                    
+                    // Boost score if exact match found
+                    if (exactMatch) {
+                        bestScore = Math.max(bestScore, 1.0);
+                    }
+                    
+                    // Also check full title against full query
+                    int fullDistance = levenshtein.apply(searchQuery, title);
+                    int maxFullLength = Math.max(searchQuery.length(), title.length());
+                    double fullSimilarity = 1.0 - ((double) fullDistance / maxFullLength);
+                    bestScore = Math.max(bestScore, fullSimilarity);
+                    
+                    return new ScoredListing(listing, bestScore);
+                })
+                .filter(scored -> scored.score >= 0.5) // Only include reasonably similar results (50% similarity threshold)
+                .map(scored -> scored.listing) // Extract listings after filtering
+                .collect(Collectors.toList());
+        
+        // Apply user's requested sort order
+        Comparator<Listing> comparator = getComparator(sortBy, sortOrder);
+        filteredListings.sort(comparator);
+        
+        // Convert to DTOs
+        return filteredListings.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+    
+    // Helper method to get the appropriate comparator based on sort parameters
+    private Comparator<Listing> getComparator(String sortBy, String sortOrder) {
+        boolean ascending = "asc".equalsIgnoreCase(sortOrder);
+        
+        Comparator<Listing> comparator;
+        if ("price".equalsIgnoreCase(sortBy)) {
+            comparator = Comparator.comparing(Listing::getPrice);
+        } else { // default to date
+            comparator = Comparator.comparing(Listing::getCreatedAt);
+        }
+        
+        return ascending ? comparator : comparator.reversed();
+    }
+    
 
     public List<ListingDTO> mine(User owner) {
         return listingRepository.findByUserGU(owner.getUserGU()).stream().map(this::toDto).toList();
