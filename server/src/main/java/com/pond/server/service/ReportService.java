@@ -79,6 +79,30 @@ public class ReportService {
         return reportRepository.countByStatus(ReportStatus.PENDING);
     }
     
+    // Get reports filed by a user (outgoing reports)
+    public Page<ReportDTO> getUserOutgoingReports(UUID userGU, Pageable pageable) {
+        return reportRepository.findByUserGUOrderByCreatedAtDesc(userGU, pageable)
+            .map(this::mapToDTO);
+    }
+    
+    // Get reports made against a user's listings (incoming reports)
+    public Page<ReportDTO> getUserIncomingReports(UUID userGU, Pageable pageable) {
+        // First get all listings owned by the user
+        var userListings = listingRepository.findByUserGU(userGU);
+        var listingGUs = userListings.stream()
+            .map(listing -> listing.getListingGU())
+            .toList();
+        
+        // If user has no listings, return empty page
+        if (listingGUs.isEmpty()) {
+            return Page.empty(pageable);
+        }
+        
+        // Get all reports for those listings
+        return reportRepository.findByListingGUInOrderByCreatedAtDesc(listingGUs, pageable)
+            .map(this::mapToDTO);
+    }
+    
     private ReportDTO mapToDTO(Report report) {
         // Fetch user and listing details
         var user = userRepository.findById(report.getUserGU()).orElse(null);

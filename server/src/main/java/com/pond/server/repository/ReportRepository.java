@@ -24,6 +24,12 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
     // Get all reports filed by a user
     List<Report> findByUserGU(UUID userGU);
     
+    // Get all reports filed by a user, ordered by creation date
+    Page<Report> findByUserGUOrderByCreatedAtDesc(UUID userGU, Pageable pageable);
+    
+    // Get all reports for listings that belong to a specific user (reports against their listings)
+    Page<Report> findByListingGUInOrderByCreatedAtDesc(List<UUID> listingGUs, Pageable pageable);
+    
     // Check if a user already reported a listing (prevent duplicate reports)
     Optional<Report> findByUserGUAndListingGU(UUID userGU, UUID listingGU);
     

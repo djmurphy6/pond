@@ -206,6 +206,14 @@ class API {
     async UpdateReport(reportGU: string, body: UpdateReportRequest): Promise<ReportDTO | ErrorResponse> {
         return this.Request<ReportDTO>(`/reports/admin/${reportGU}`, "PUT", { body }, 'UpdateReport');
     }
+
+    async GetMyOutgoingReports(page: number = 0, size: number = 20): Promise<ReportsPageResponse | ErrorResponse> {
+        return this.Request<ReportsPageResponse>(`/reports/my-reports/outgoing?page=${page}&size=${size}`, "GET", {}, 'GetMyOutgoingReports');
+    }
+
+    async GetMyIncomingReports(page: number = 0, size: number = 20): Promise<ReportsPageResponse | ErrorResponse> {
+        return this.Request<ReportsPageResponse>(`/reports/my-reports/incoming?page=${page}&size=${size}`, "GET", {}, 'GetMyIncomingReports');
+    }
 }
 
 async function sendRefreshToken() {

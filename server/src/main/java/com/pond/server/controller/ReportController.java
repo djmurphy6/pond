@@ -76,4 +76,28 @@ public class ReportController {
                 user.getUserGU(), 
                 request));
     }
+    
+    @GetMapping("/my-reports/outgoing")
+    public ResponseEntity<Page<ReportDTO>> getMyOutgoingReports(
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        
+        return ResponseEntity.ok(
+            reportService.getUserOutgoingReports(
+                user.getUserGU(), 
+                PageRequest.of(page, size)));
+    }
+    
+    @GetMapping("/my-reports/incoming")
+    public ResponseEntity<Page<ReportDTO>> getMyIncomingReports(
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        
+        return ResponseEntity.ok(
+            reportService.getUserIncomingReports(
+                user.getUserGU(), 
+                PageRequest.of(page, size)));
+    }
 }
