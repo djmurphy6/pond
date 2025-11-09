@@ -49,7 +49,8 @@ public class ListingController {
             req.getMinPrice(), 
             req.getMaxPrice(), 
             req.getSortBy(), 
-            req.getSortOrder()
+            req.getSortOrder(),
+            req.getSearchQuery()
         );
         return ResponseEntity.ok(list);
     }
@@ -57,7 +58,7 @@ public class ListingController {
     @GetMapping
     public ResponseEntity<?> all() {
         // Return all listings with default sorting (date desc)
-        List<ListingDTO> list = listingService.getFiltered(null, null, null, "date", "desc");
+        List<ListingDTO> list = listingService.getFiltered(null, null, null, "date", "desc", null);
         return ResponseEntity.ok(list);
     }
 

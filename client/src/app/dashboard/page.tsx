@@ -55,6 +55,7 @@ export default function DashboardPage() {
     const [sortOption, setSortOption] = useState<string>("date-desc");
     const [minPrice, setMinPrice] = useState<string>("");
     const [maxPrice, setMaxPrice] = useState<string>("");
+    const [searchQuery, setSearchQuery] = useState<string>("");
 
     useEffect(() => {
         setMounted(true);
@@ -66,17 +67,17 @@ export default function DashboardPage() {
         }
     }, [mounted]);
 
-    // Fetch listings when filters change (with debounce for price inputs)
+    // Fetch listings when filters change (with debounce for price inputs and search)
     useEffect(() => {
         if (!mounted) return;
 
-        // Debounce price inputs to avoid too many API calls while typing
+        // Debounce price inputs and search to avoid too many API calls while typing
         const timeoutId = setTimeout(() => {
             GetListings();
         }, 300); // 300ms debounce
 
         return () => clearTimeout(timeoutId);
-    }, [selectedCategories, sortOption, minPrice, maxPrice, mounted]);
+    }, [selectedCategories, sortOption, minPrice, maxPrice, searchQuery, mounted]);
 
     async function GetListings() {
         setLoading(true);
@@ -91,6 +92,7 @@ export default function DashboardPage() {
             maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
             sortBy,
             sortOrder,
+            searchQuery: searchQuery.trim() || undefined,
         };
 
         let res = await api.GetListings(filters);
@@ -125,7 +127,12 @@ export default function DashboardPage() {
 
                 {/* Search + Account + Messaging */}
                 <div className="mb-4">
-                    <Input placeholder="Search" className="mb-3 transition-colors duration-300" />
+                    <Input 
+                        placeholder="Search listings..." 
+                        className="mb-3 transition-colors duration-300"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
 
                     <MyAccountPopover />
 
@@ -182,7 +189,7 @@ export default function DashboardPage() {
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
                             <Label>Filters</Label>
-                            {(selectedCategories.length > 0 || minPrice || maxPrice) && (
+                            {(selectedCategories.length > 0 || minPrice || maxPrice || searchQuery) && (
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -190,6 +197,7 @@ export default function DashboardPage() {
                                         setSelectedCategories([]);
                                         setMinPrice("");
                                         setMaxPrice("");
+                                        setSearchQuery("");
                                     }}
                                     className="h-6 text-xs"
                                 >

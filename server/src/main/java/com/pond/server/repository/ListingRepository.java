@@ -17,7 +17,9 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
     @Query("SELECT l FROM Listing l WHERE " +
            "(COALESCE(:categories, NULL) IS NULL OR l.category IN :categories) AND " +
            "(:minPrice IS NULL OR l.price >= :minPrice) AND " +
-           "(:maxPrice IS NULL OR l.price <= :maxPrice) " +
+           "(:maxPrice IS NULL OR l.price <= :maxPrice) AND " +
+           "(:searchQuery IS NULL OR :searchQuery = '' OR " +
+           "LOWER(l.title) LIKE LOWER(CONCAT('%', :searchQuery, '%'))) " +
            "ORDER BY " +
            "CASE WHEN :sortBy = 'price' AND :sortOrder = 'asc' THEN l.price END ASC, " +
            "CASE WHEN :sortBy = 'price' AND :sortOrder = 'desc' THEN l.price END DESC, " +
@@ -28,6 +30,7 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
         @Param("minPrice") Double minPrice,
         @Param("maxPrice") Double maxPrice,
         @Param("sortBy") String sortBy,
-        @Param("sortOrder") String sortOrder
+        @Param("sortOrder") String sortOrder,
+        @Param("searchQuery") String searchQuery
     );
 }
