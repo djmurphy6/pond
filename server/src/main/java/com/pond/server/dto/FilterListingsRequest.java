@@ -11,5 +11,6 @@ public class FilterListingsRequest {
     private Double maxPrice;
     private String sortBy;
     private String sortOrder;
+    private String searchQuery;
 }
 

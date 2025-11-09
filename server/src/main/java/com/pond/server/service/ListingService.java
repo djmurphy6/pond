@@ -103,7 +103,7 @@ public class ListingService {
         return listingRepository.findAll().stream().map(this::toDto).toList();
     }
 
-    public List<ListingDTO> getFiltered(List<String> categories, Double minPrice, Double maxPrice, String sortBy, String sortOrder) {
+    public List<ListingDTO> getFiltered(List<String> categories, Double minPrice, Double maxPrice, String sortBy, String sortOrder, String searchQuery) {
         // Default sort parameters if not provided
         String effectiveSortBy = (sortBy == null || sortBy.isEmpty()) ? "date" : sortBy;
         String effectiveSortOrder = (sortOrder == null || sortOrder.isEmpty()) ? "desc" : sortOrder;
@@ -111,7 +111,10 @@ public class ListingService {
         // Convert empty list to null for proper JPA query handling
         List<String> effectiveCategories = (categories != null && !categories.isEmpty()) ? categories : null;
         
-        return listingRepository.findFiltered(effectiveCategories, minPrice, maxPrice, effectiveSortBy, effectiveSortOrder)
+        // Trim search query and convert empty to null
+        String effectiveSearchQuery = (searchQuery != null && !searchQuery.trim().isEmpty()) ? searchQuery.trim() : null;
+        
+        return listingRepository.findFiltered(effectiveCategories, minPrice, maxPrice, effectiveSortBy, effectiveSortOrder, effectiveSearchQuery)
                 .stream()
                 .map(this::toDto)
                 .toList();

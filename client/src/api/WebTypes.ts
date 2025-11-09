@@ -65,6 +65,7 @@ export type GetListingsRequest = {
     maxPrice?: number;
     sortBy?: string;
     sortOrder?: string;
+    searchQuery?: string;
 }
 
 export type Listing = {
