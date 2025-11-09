@@ -19,6 +19,7 @@ import {
     Tag,
     MessageCircle,
     Check,
+    Shield,
 } from "lucide-react";
 
 // API
@@ -40,12 +41,14 @@ import { CreateListingModal } from "@/components/CreateListingModal";
 import { ErrorResponse, Listing } from "@/api/WebTypes";
 import { toast } from "sonner";
 import { MyAccountPopover } from "@/components/MyAccountPopover";
+import { useUserInfoStore } from "@/stores/UserInfoStore";
 
 export default function DashboardPage() {
     const [listings, setListings] = useState<Listing[]>([]);
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
     const { theme } = useTheme();
+    const { userInfo } = useUserInfoStore();
 
     // Filtering and sorting state
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -151,6 +154,22 @@ export default function DashboardPage() {
                         <span>Messages</span>
                         <ChevronRight className="transition-colors duration-300" />
                     </Button>
+
+                    {/* Admin Panel Link - Only visible to admins */}
+                    {userInfo?.admin && (
+                        <Button
+                            variant="ghost"
+                            style={{ cursor: 'pointer' }}
+                            className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300 mb-3 mt-3"
+                            onClick={() => window.location.href = 'dashboard/admin/reports'}
+                        >
+                            <div className="h-7 w-7 bg-amber-500/20 rounded-full flex items-center justify-center transition-colors duration-300">
+                                <Shield className="h-4 w-4 text-amber-600 transition-colors duration-300" />
+                            </div>
+                            <span className="text-amber-600 dark:text-amber-400 font-medium">Admin Panel</span>
+                            <ChevronRight className="text-amber-600 dark:text-amber-400 transition-colors duration-300" />
+                        </Button>
+                    )}
                 </div>
 
                 {/* Create Listing */}
