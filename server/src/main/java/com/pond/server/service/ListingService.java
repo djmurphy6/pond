@@ -86,12 +86,20 @@ public class ListingService {
     }
 
     public ListingDetailDTO get(UUID id) {
+        String username = null;
+        String avatar_url = null;
+
         Listing l = listingRepository.findById(id).orElseThrow(() -> new RuntimeException("Listing not found"));
-        String username = userRepository.findById(l.getUserGU()).map(User::getUsername).orElse(null);
+        User user = userRepository.findById(l.getUserGU()).orElse(null);
+        if (user != null) {
+            username = user.getUsername();
+            avatar_url = user.getAvatar_url();
+        }
         return new ListingDetailDTO(
             l.getListingGU(),
             l.getUserGU(),
             username,
+            avatar_url,
             l.getTitle(),
             l.getDescription(),
             l.getPicture1_url(),
