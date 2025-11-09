@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 import { useTheme } from "next-themes";
 
 //React
-import { Bookmark, MessageCircle, MoreHorizontal, Share2, X, Pencil, Trash2, Shield } from "lucide-react";
+import { Bookmark, MessageCircle, MoreHorizontal, Share2, X, Pencil, Trash2, Shield, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -20,6 +20,12 @@ import { Button } from "@/components/ui/button";
 import ImageViewer from "@/components/ImageViewer";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Separator } from "@/components/ui/separator";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 //Internal
 import { useUserInfoStore } from "@/stores/UserInfoStore";
@@ -27,6 +33,7 @@ import EditListingModal from "../../you/selling/Components/EditListingModal";
 import DeleteListingModal from "../../you/selling/Components/DeleteListingModal";
 import { useRouter } from "next/navigation";
 import { MessageSellerModal } from "@/components/MessageSellerModal";
+import { ReportListingModal } from "@/components/ReportListingModal";
 
 export default function ListingPage() {
     const params = useParams() as { id: string };
@@ -41,6 +48,7 @@ export default function ListingPage() {
     const [deleteItem, setDeleteItem] = useState<Listing | undefined>();
     const [isSaved, setIsSaved] = useState(false);
     const [savingInProgress, setSavingInProgress] = useState(false);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
     useEffect(() => {
         (async () => {
@@ -204,6 +212,26 @@ export default function ListingPage() {
                     <Button onClick={handleCopy} variant="outline" size="icon" className="cursor-pointer">
                         <Share2 className="h-4 w-4" />
                     </Button>
+
+                    {/* Three-dot menu - Only show for non-owners */}
+                    {!isOwner && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="icon" className="cursor-pointer">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem 
+                                    className="cursor-pointer text-red-600 focus:text-red-600"
+                                    onClick={() => setIsReportModalOpen(true)}
+                                >
+                                    <AlertTriangle className="mr-2 h-4 w-4" />
+                                    Report
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </div>
 
                 {/* Admin/Owner Controls */}
@@ -265,6 +293,13 @@ export default function ListingPage() {
                 item={deleteItem}
                 onClose={() => setDeleteItem(undefined)}
                 onDelete={handleDeleteSuccess}
+            />
+
+            <ReportListingModal
+                listingId={params.id}
+                listingTitle={listing.title}
+                open={isReportModalOpen}
+                onOpenChange={setIsReportModalOpen}
             />
         </div>
     );

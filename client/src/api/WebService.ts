@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse, CreateReportRequest, ReportDTO, ReportsPageResponse, UpdateReportRequest } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -188,6 +188,23 @@ class API {
 
     async GetSavedListingIds(): Promise<GetSavedListingIdsResponse | ErrorResponse> {
         return this.Request<GetSavedListingIdsResponse>("/saved-listings/ids", "GET", {}, 'GetSavedListingIds');
+    }
+
+    // Reports
+    async CreateReport(body: CreateReportRequest): Promise<ReportDTO | ErrorResponse> {
+        return this.Request<ReportDTO>("/reports", "POST", { body }, 'CreateReport');
+    }
+
+    async GetAllReports(page: number = 0, size: number = 20): Promise<ReportsPageResponse | ErrorResponse> {
+        return this.Request<ReportsPageResponse>(`/reports/admin?page=${page}&size=${size}`, "GET", {}, 'GetAllReports');
+    }
+
+    async GetPendingReportCount(): Promise<number | ErrorResponse> {
+        return this.Request<number>("/reports/admin/pending-count", "GET", {}, 'GetPendingReportCount');
+    }
+
+    async UpdateReport(reportGU: string, body: UpdateReportRequest): Promise<ReportDTO | ErrorResponse> {
+        return this.Request<ReportDTO>(`/reports/admin/${reportGU}`, "PUT", { body }, 'UpdateReport');
     }
 }
 

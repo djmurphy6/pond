@@ -211,3 +211,57 @@ export type GetSavedListingsResponse = Listing[];
 export type GetSavedListingIdsResponse = {
     savedListingIds: string[];
 }
+
+// REPORTS
+export type CreateReportRequest = {
+    listingGU: string;
+    reason: string;
+    message: string;
+}
+
+export type ReportDTO = {
+    reportGU: string;
+    userGU: string;
+    username: string;
+    listingGU: string;
+    listingTitle: string;
+    reason: ReportReason;
+    message: string;
+    status: ReportStatus;
+    createdAt: string;
+    reviewedByAdminGU?: string;
+    reviewedAt?: string;
+    adminNotes?: string;
+}
+
+export enum ReportReason {
+    INAPPROPRIATE_CONTENT = "INAPPROPRIATE_CONTENT",
+    SPAM = "SPAM",
+    FRAUDULENT = "FRAUDULENT",
+    MISLEADING_INFORMATION = "MISLEADING_INFORMATION",
+    PROHIBITED_ITEM = "PROHIBITED_ITEM",
+    DUPLICATE_LISTING = "DUPLICATE_LISTING",
+    OFFENSIVE_LANGUAGE = "OFFENSIVE_LANGUAGE",
+    OTHER = "OTHER"
+}
+
+export enum ReportStatus {
+    PENDING = "PENDING",
+    UNDER_REVIEW = "UNDER_REVIEW",
+    RESOLVED = "RESOLVED",
+    DISMISSED = "DISMISSED",
+    LISTING_REMOVED = "LISTING_REMOVED"
+}
+
+export type UpdateReportRequest = {
+    status: string;
+    adminNotes: string;
+}
+
+export type ReportsPageResponse = {
+    content: ReportDTO[];
+    totalElements: number;
+    totalPages: number;
+    number: number;
+    size: number;
+}
