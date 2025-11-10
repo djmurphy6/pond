@@ -275,3 +275,47 @@ export type ReportsPageResponse = {
     number: number;
     size: number;
 }
+
+// FOLLOWING
+export type FollowUserRequest = {
+    userId: string;
+}
+
+export type FollowUserResponse = {
+    message: string;
+    following: boolean;
+}
+
+export type UnfollowUserRequest = {
+    userId: string;
+}
+
+export type UnfollowUserResponse = {
+    message: string;
+    following: boolean;
+}
+
+export type CheckFollowingStatusRequest = {
+    userId: string;
+}
+
+export type CheckFollowingStatusResponse = {
+    following: boolean;
+}
+
+export type GetFollowingListResponse = {
+    following: string[];
+}
+
+export type GetFollowersListResponse = {
+    followers: string[];
+}
+
+export type GetFollowCountsRequest = {
+    userId: string;
+}
+
+export type GetFollowCountsResponse = {
+    followers: number;
+    following: number;
+}

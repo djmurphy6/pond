@@ -13,19 +13,26 @@ import com.pond.server.dto.UpdateReportRequest;
 import com.pond.server.enums.ReportReason;
 import com.pond.server.enums.ReportStatus;
 import com.pond.server.model.Report;
+import com.pond.server.model.ResolvedReport;
 import com.pond.server.repository.ListingRepository;
 import com.pond.server.repository.ReportRepository;
+import com.pond.server.repository.ResolvedReportRepository;
 import com.pond.server.repository.UserRepository;
 
 @Service
 public class ReportService {
     
     private final ReportRepository reportRepository;
+    private final ResolvedReportRepository resolvedReportRepository;
     private final UserRepository userRepository;
     private final ListingRepository listingRepository;
 
-    public ReportService(ReportRepository reportRepository, UserRepository userRepository, ListingRepository listingRepository) {
+    public ReportService(ReportRepository reportRepository, 
+                         ResolvedReportRepository resolvedReportRepository,
+                         UserRepository userRepository, 
+                         ListingRepository listingRepository) {
         this.reportRepository = reportRepository;
+        this.resolvedReportRepository = resolvedReportRepository;
         this.userRepository = userRepository;
         this.listingRepository = listingRepository;
     }
@@ -103,7 +110,44 @@ public class ReportService {
             .map(this::mapToDTO);
     }
     
+    // Get all resolved (archived) reports - admin only
+    public Page<ReportDTO> getAllResolvedReports(Pageable pageable) {
+        return resolvedReportRepository.findAll(pageable)
+            .map(this::mapResolvedToDTO);
+    }
+    
+    // Get count of reports (for admin dashboard statistics)
+    public long getTotalReportCount() {
+        return reportRepository.count();
+    }
+    
+    public long getTotalResolvedReportCount() {
+        return resolvedReportRepository.count();
+    }
+    
     private ReportDTO mapToDTO(Report report) {
+        // Fetch user and listing details
+        var user = userRepository.findById(report.getUserGU()).orElse(null);
+        var listing = listingRepository.findById(report.getListingGU()).orElse(null);
+        
+        return new ReportDTO(
+            report.getReportGU().toString(),
+            report.getUserGU().toString(),
+            user != null ? user.getUsername() : "Unknown",
+            report.getListingGU().toString(),
+            listing != null ? listing.getTitle() : "Deleted Listing",
+            report.getReason(),
+            report.getMessage(),
+            report.getStatus(),
+            report.getCreatedAt(),
+            report.getReviewedByAdminGU() != null ? 
+                report.getReviewedByAdminGU().toString() : null,
+            report.getReviewedAt(),
+            report.getAdminNotes()
+        );
+    }
+    
+    private ReportDTO mapResolvedToDTO(ResolvedReport report) {
         // Fetch user and listing details
         var user = userRepository.findById(report.getUserGU()).orElse(null);
         var listing = listingRepository.findById(report.getListingGU()).orElse(null);

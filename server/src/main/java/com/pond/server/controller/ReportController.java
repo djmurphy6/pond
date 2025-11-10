@@ -100,4 +100,36 @@ public class ReportController {
                 user.getUserGU(), 
                 PageRequest.of(page, size)));
     }
+    
+    @GetMapping("/admin/resolved")
+    public ResponseEntity<Page<ReportDTO>> getAllResolvedReports(
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        
+        if (!user.getAdmin()) {
+            return ResponseEntity.status(403).build();
+        }
+        
+        return ResponseEntity.ok(
+            reportService.getAllResolvedReports(PageRequest.of(page, size)));
+    }
+    
+    @GetMapping("/admin/statistics")
+    public ResponseEntity<ReportStatistics> getReportStatistics(
+            @AuthenticationPrincipal User user) {
+        
+        if (!user.getAdmin()) {
+            return ResponseEntity.status(403).build();
+        }
+        
+        long activeReports = reportService.getTotalReportCount();
+        long resolvedReports = reportService.getTotalResolvedReportCount();
+        long pendingReports = reportService.getPendingReportCount();
+        
+        return ResponseEntity.ok(new ReportStatistics(activeReports, resolvedReports, pendingReports));
+    }
+    
+    // Inner class for statistics response
+    public record ReportStatistics(long activeReports, long resolvedReports, long pendingReports) {}
 }
