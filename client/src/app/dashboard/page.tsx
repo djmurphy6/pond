@@ -138,24 +138,25 @@ export default function DashboardPage() {
 
                     <MyAccountPopover />
 
+                    <Link href="/dashboard/you/selling" className="w-full">
                     <Button
                         variant="ghost"
                         style={{ cursor: 'pointer' }}
                         className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300 mb-3"
-
                     >
                         <div className="h-7 w-7 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
                             <Tag className="h-4 w-4 text-primary transition-colors duration-300" />
                         </div>
-                        <a href="dashboard/you/selling">Selling</a>
+                        <span>Selling</span>
                         <ChevronRight className="transition-colors duration-300" />
                     </Button>
+                </Link>
 
+                <Link href="/dashboard/messaging" className="w-full">
                     <Button
                         variant="ghost"
                         style={{ cursor: 'pointer' }}
                         className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300"
-                        onClick={() => window.location.href = 'dashboard/messaging'}
                     >
                         <div className="h-7 w-7 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
                             <MessageCircle className="h-4 w-4 text-primary transition-colors duration-300" />
@@ -163,12 +164,13 @@ export default function DashboardPage() {
                         <span>Messages</span>
                         <ChevronRight className="transition-colors duration-300" />
                     </Button>
+                </Link>
 
+                <Link href="/dashboard/you/reports" className="w-full">
                     <Button
                         variant="ghost"
                         style={{ cursor: 'pointer' }}
                         className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300 mt-3"
-                        onClick={() => window.location.href = 'dashboard/you/reports'}
                     >
                         <div className="h-7 w-7 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
                             <AlertCircle className="h-4 w-4 text-primary transition-colors duration-300" />
@@ -176,14 +178,15 @@ export default function DashboardPage() {
                         <span>Reports</span>
                         <ChevronRight className="transition-colors duration-300" />
                     </Button>
+                </Link>
 
-                    {/* Admin Panel Link - Only visible to admins */}
-                    {userInfo?.admin && (
+                {/* Admin Panel Link - Only visible to admins */}
+                {userInfo?.admin && (
+                    <Link href="/dashboard/admin/reports" className="w-full">
                         <Button
                             variant="ghost"
                             style={{ cursor: 'pointer' }}
                             className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300 mb-3 mt-3"
-                            onClick={() => window.location.href = 'dashboard/admin/reports'}
                         >
                             <div className="h-7 w-7 bg-amber-500/20 rounded-full flex items-center justify-center transition-colors duration-300">
                                 <Shield className="h-4 w-4 text-amber-600 transition-colors duration-300" />
@@ -191,8 +194,10 @@ export default function DashboardPage() {
                             <span className="text-amber-600 dark:text-amber-400 font-medium">Admin Panel</span>
                             <ChevronRight className="text-amber-600 dark:text-amber-400 transition-colors duration-300" />
                         </Button>
-                    )}
+                    </Link>
+                )}
                 </div>
+
 
                 {/* Create Listing */}
                 <CreateListingModal onSuccess={GetListings} />

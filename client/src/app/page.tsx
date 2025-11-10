@@ -4,6 +4,7 @@
 import React, { CSSProperties, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 //Internal
 import ThemeToggle from "@/components/ThemeToggle";
 import Duck from "../components/LandingPage/duck/duck";
@@ -30,6 +31,8 @@ import Water from "@/components/LandingPage/water/water";
 const textBorder = 4;
 
 export default function App() {
+  const router = useRouter();
+  
   return (
     <div className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-[var(--background)]" style={{ zIndex: 0 }}>
       <Background />
@@ -59,7 +62,7 @@ export default function App() {
         >
           <Button
             style={{ ...styles.button, backgroundColor: 'var(--uo-green)', color: 'white' }}
-            onClick={() => { window.location.href = "/register"; }}
+            onClick={() => router.push("/register")}
             className="px-6 py-3 text-lg rounded-full shadow-md text-white 
              hover:-translate-y-1 hover:shadow-[0_0_10px_var(--uo-green)] 
              transition-all duration-300 ease-in-out"
@@ -68,7 +71,7 @@ export default function App() {
           </Button>
           <Button
             style={{ ...styles.button, backgroundColor: 'var(--uo-yellow)', color: 'var(--background)' }}
-            onClick={() => { window.location.href = "/login"; }}
+            onClick={() => router.push("/login")}
             className="px-6 py-3 text-lg rounded-full shadow-md text-white 
              hover:-translate-y-1 hover:shadow-[0_0_10px_var(--uo-yellow)] 
              transition-all duration-300 ease-in-out"
