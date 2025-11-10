@@ -71,7 +71,7 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-3xl">
-                <div className="w-32 h-32 rounded-full overflow-hidden">
+                <div className="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center border-3 border-primary">
                     {avatar_url ? (
                         <img
                             src={avatar_url}
