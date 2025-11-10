@@ -218,6 +218,10 @@ public class ListingService {
         return listingRepository.findByUserGU(owner.getUserGU()).stream().map(this::toDto).toList();
     }
 
+    public List<ListingDTO> getUserListings(UUID gu) {
+        return listingRepository.findByUserGU(gu).stream().map(this::toDto).toList();
+    }
+
     public ListingDTO update(UUID id, UpdateListingRequest req, User currentUser) {
         // Admins can edit any listing, regular users can only edit their own
         Listing l;

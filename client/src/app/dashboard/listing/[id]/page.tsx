@@ -288,6 +288,7 @@ export default function ListingPage() {
                 <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Seller Information</h3>
                     <UserDetailsModal
+                        userGU={listing.userGU}
                         username={listing.username}
                         avatar_url={listing.avatar_url}
                     />

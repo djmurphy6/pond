@@ -72,9 +72,10 @@ public class ListingController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> get(@PathVariable("id") UUID id) {
-        return ResponseEntity.ok(listingService.get(id));
-    }
+    public ResponseEntity<?> get(@PathVariable("id") UUID id) {return ResponseEntity.ok(listingService.get(id));}
+
+    @GetMapping("user/{id}")
+    public ResponseEntity<?> getByUser(@PathVariable("id") UUID userGU) {return ResponseEntity.ok(listingService.getUserListings(userGU));}
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable("id") UUID id, @RequestBody UpdateListingRequest req) {

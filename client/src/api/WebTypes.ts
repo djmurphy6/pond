@@ -94,6 +94,11 @@ export type GetSpecificListingResponse = Listing & {
     avatar_url: string
 }
 
+//GET SPECIFIC USER LISTINGS
+export type GetSpecificUserListingsRequest = {
+    userGU: string
+}
+
 //UPDATE LISTING
 export type UpdateListingRequest = {
     listingGU: string;
