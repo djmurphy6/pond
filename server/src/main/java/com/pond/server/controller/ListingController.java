@@ -71,6 +71,25 @@ public class ListingController {
         return ResponseEntity.ok(listingService.mine(currentUser));
     }
 
+    @PostMapping("/following")
+    public ResponseEntity<?> following(@RequestBody FilterListingsRequest req) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User currentUser)) {
+            return ResponseEntity.status(401).body(java.util.Map.of("error", "Unauthorized"));
+        }
+        
+        List<ListingDTO> list = listingService.getFollowingListings(
+            currentUser,
+            req.getCategories(), 
+            req.getMinPrice(), 
+            req.getMaxPrice(), 
+            req.getSortBy(), 
+            req.getSortOrder(),
+            req.getSearchQuery()
+        );
+        return ResponseEntity.ok(list);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable("id") UUID id) {return ResponseEntity.ok(listingService.get(id));}
 

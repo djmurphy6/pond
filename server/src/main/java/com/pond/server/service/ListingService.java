@@ -17,6 +17,7 @@ import com.pond.server.dto.UpdateListingRequest;
 import com.pond.server.model.Listing;
 import com.pond.server.model.User;
 import com.pond.server.repository.ListingRepository;
+import com.pond.server.repository.UserFollowingRepository;
 import com.pond.server.repository.UserRepository;
 
 @Service
@@ -25,6 +26,7 @@ public class ListingService {
     private final ImageService imageService;
     private final SupabaseStorage supabaseStorage;
     private final UserRepository userRepository;
+    private final UserFollowingRepository userFollowingRepository;
     
     @Value("${supabase.listing-bucket}")
     private String listingBucket;
@@ -32,11 +34,13 @@ public class ListingService {
     public ListingService(ListingRepository listingRepository,
                           ImageService imageService,
                           SupabaseStorage supabaseStorage,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          UserFollowingRepository userFollowingRepository) {
         this.listingRepository = listingRepository;
         this.imageService = imageService;
         this.supabaseStorage = supabaseStorage;
         this.userRepository = userRepository;
+        this.userFollowingRepository = userFollowingRepository;
     }
 
     public ListingDTO create(CreateListingRequest req, User owner) {
@@ -220,6 +224,59 @@ public class ListingService {
 
     public List<ListingDTO> getUserListings(UUID gu) {
         return listingRepository.findByUserGU(gu).stream().map(this::toDto).toList();
+    }
+
+    /**
+     * Get listings from users that the current user follows
+     * Supports filtering and sorting just like getFiltered()
+     */
+    public List<ListingDTO> getFollowingListings(User currentUser, List<String> categories, 
+                                                  Double minPrice, Double maxPrice, 
+                                                  String sortBy, String sortOrder, String searchQuery) {
+        // Get list of users that current user follows
+        List<UUID> followingUserIds = userFollowingRepository.findByFollowerGU(currentUser.getUserGU())
+            .stream()
+            .map(uf -> uf.getFollowingGU())
+            .collect(Collectors.toList());
+        
+        // If not following anyone, return empty list
+        if (followingUserIds.isEmpty()) {
+            return List.of();
+        }
+        
+        // Get all listings from followed users
+        List<Listing> followedListings = listingRepository.findAll().stream()
+            .filter(listing -> followingUserIds.contains(listing.getUserGU()))
+            .collect(Collectors.toList());
+        
+        // Apply filters
+        List<Listing> filteredListings = followedListings.stream()
+            // Category filter
+            .filter(listing -> categories == null || categories.isEmpty() || categories.contains(listing.getCategory()))
+            // Price filters
+            .filter(listing -> minPrice == null || listing.getPrice() >= minPrice)
+            .filter(listing -> maxPrice == null || listing.getPrice() <= maxPrice)
+            .collect(Collectors.toList());
+        
+        // Default sort parameters if not provided
+        String effectiveSortBy = (sortBy == null || sortBy.isEmpty()) ? "date" : sortBy;
+        String effectiveSortOrder = (sortOrder == null || sortOrder.isEmpty()) ? "desc" : sortOrder;
+        
+        // Trim search query and convert empty to null
+        String effectiveSearchQuery = (searchQuery != null && !searchQuery.trim().isEmpty()) ? searchQuery.trim().toLowerCase() : null;
+        
+        // If search query provided, apply fuzzy matching
+        if (effectiveSearchQuery != null && !effectiveSearchQuery.isEmpty()) {
+            return applyFuzzySearch(filteredListings, effectiveSearchQuery, effectiveSortBy, effectiveSortOrder);
+        }
+        
+        // No search query, return normally sorted results
+        Comparator<Listing> comparator = getComparator(effectiveSortBy, effectiveSortOrder);
+        filteredListings.sort(comparator);
+        
+        return filteredListings.stream()
+            .map(this::toDto)
+            .collect(Collectors.toList());
     }
 
     public ListingDTO update(UUID id, UpdateListingRequest req, User currentUser) {

@@ -13,13 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader2, X, ImageIcon } from "lucide-react";
+import { Loader2, X, ImageIcon, UserPlus, UserMinus } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/api/WebService";
 import { CreateListingRequest, ErrorResponse, Listing } from "@/api/WebTypes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Separator } from "./ui/separator";
 import ListingCard from "./ListingCard";
+import { useUserInfoStore } from "@/stores/UserInfoStore";
 
 type UserDetailsModalProps = {
     userGU: string;
@@ -33,8 +34,17 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
 
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [isFollowLoading, setIsFollowLoading] = useState(false);
+    const [isStatusLoading, setIsStatusLoading] = useState(true);
+    const [followerCount, setFollowerCount] = useState(0);
+    const [followingCount, setFollowingCount] = useState(0);
 
     const [listings, setListings] = useState<Listing[]>([]);
+    const { userInfo } = useUserInfoStore();
+
+    // Check if viewing own profile
+    const isOwnProfile = userInfo?.userGU === userGU;
 
     useEffect(() => {
         async function fetchListings() {
@@ -50,6 +60,66 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
         }
         fetchListings();
     }, [userGU]);
+
+    // Fetch following status and counts when modal opens
+    useEffect(() => {
+        if (open && !isOwnProfile) {
+            setIsStatusLoading(true);
+            async function fetchFollowingStatus() {
+                const response = await api.CheckFollowingStatus({ userId: userGU });
+                if (!(response instanceof ErrorResponse)) {
+                    setIsFollowing(response.following);
+                }
+                setIsStatusLoading(false);
+            }
+            fetchFollowingStatus();
+        } else if (open && isOwnProfile) {
+            // If viewing own profile, no need to check following status
+            setIsStatusLoading(false);
+        }
+    }, [open, userGU, isOwnProfile]);
+
+    useEffect(() => {
+        if (open) {
+            async function fetchFollowCounts() {
+                const response = await api.GetFollowCounts({ userId: userGU });
+                if (!(response instanceof ErrorResponse)) {
+                    setFollowerCount(response.followers);
+                    setFollowingCount(response.following);
+                }
+            }
+            fetchFollowCounts();
+        }
+    }, [open, userGU]);
+
+    const handleFollowToggle = async () => {
+        setIsFollowLoading(true);
+        try {
+            if (isFollowing) {
+                const response = await api.UnfollowUser({ userId: userGU });
+                if (response instanceof ErrorResponse) {
+                    toast.error(response.body?.error || "Failed to unfollow");
+                } else {
+                    setIsFollowing(false);
+                    setFollowerCount(prev => Math.max(0, prev - 1));
+                    toast.success(`Unfollowed ${username}`);
+                }
+            } else {
+                const response = await api.FollowUser({ userId: userGU });
+                if (response instanceof ErrorResponse) {
+                    toast.error(response.body?.error || "Failed to follow");
+                } else {
+                    setIsFollowing(true);
+                    setFollowerCount(prev => prev + 1);
+                    toast.success(`Now following ${username}`);
+                }
+            }
+        } catch (error) {
+            toast.error("An error occurred");
+        } finally {
+            setIsFollowLoading(false);
+        }
+    };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -71,19 +141,56 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-3xl">
-                <div className="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center border-3 border-primary">
-                    {avatar_url ? (
-                        <img
-                            src={avatar_url}
-                            alt="Profile"
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <ImageIcon style={{ width: '40px', height: '40px' }} className="text-primary" />
-                    )}
+                <div className="flex flex-row items-start gap-6">
+                    <div className="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center border-3 border-primary flex-shrink-0">
+                        {avatar_url ? (
+                            <img
+                                src={avatar_url}
+                                alt="Profile"
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <ImageIcon style={{ width: '40px', height: '40px' }} className="text-primary" />
+                        )}
+                    </div>
+                    <div className="flex-1">
+                        <DialogTitle className="text-3xl font-bold mb-2">{username}'s Profile</DialogTitle>
+                        <div className="flex items-center gap-4 mb-3">
+                            <span className="text-muted-foreground">
+                                <span className="font-bold text-primary">{listings.length}</span> active listing{listings.length === 1 ? '' : 's'}
+                            </span>
+                            <span className="text-muted-foreground">
+                                <span className="font-bold text-primary">{followerCount}</span> follower{followerCount === 1 ? '' : 's'}
+                            </span>
+                            <span className="text-muted-foreground">
+                                <span className="font-bold text-primary">{followingCount}</span> following
+                            </span>
+                        </div>
+                        {!isOwnProfile && (
+                            <Button
+                                onClick={handleFollowToggle}
+                                disabled={isFollowLoading || isStatusLoading}
+                                variant={isFollowing ? "outline" : "default"}
+                                size="sm"
+                                className="gap-2"
+                            >
+                                {isStatusLoading || isFollowLoading ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : isFollowing ? (
+                                    <>
+                                        <UserMinus className="h-4 w-4" />
+                                        Unfollow
+                                    </>
+                                ) : (
+                                    <>
+                                        <UserPlus className="h-4 w-4" />
+                                        Follow
+                                    </>
+                                )}
+                            </Button>
+                        )}
+                    </div>
                 </div>
-                <DialogTitle className="text-3xl font-bold">{username}'s Profile</DialogTitle>
-                <span className="text-muted-foreground"><span className="font-bold text-primary">{listings.length}</span> active listing{listings.length === 1 ? '' : 's'}</span>
 
                 <Separator className="" />
 

@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse, CreateReportRequest, ReportDTO, ReportsPageResponse, UpdateReportRequest, GetSpecificListingResponse, GetSpecificUserListingsRequest } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse, CreateReportRequest, ReportDTO, ReportsPageResponse, UpdateReportRequest, GetSpecificListingResponse, GetSpecificUserListingsRequest, FollowUserRequest, FollowUserResponse, UnfollowUserRequest, UnfollowUserResponse, CheckFollowingStatusRequest, CheckFollowingStatusResponse, GetFollowingListResponse, GetFollowersListResponse, GetFollowCountsRequest, GetFollowCountsResponse } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -217,6 +217,35 @@ class API {
 
     async GetMyIncomingReports(page: number = 0, size: number = 20): Promise<ReportsPageResponse | ErrorResponse> {
         return this.Request<ReportsPageResponse>(`/reports/my-reports/incoming?page=${page}&size=${size}`, "GET", {}, 'GetMyIncomingReports');
+    }
+
+    // Following
+    async FollowUser(request: FollowUserRequest): Promise<FollowUserResponse | ErrorResponse> {
+        return this.Request<FollowUserResponse>(`/following/${request.userId}`, "POST", {}, 'FollowUser');
+    }
+
+    async UnfollowUser(request: UnfollowUserRequest): Promise<UnfollowUserResponse | ErrorResponse> {
+        return this.Request<UnfollowUserResponse>(`/following/${request.userId}`, "DELETE", {}, 'UnfollowUser');
+    }
+
+    async CheckFollowingStatus(request: CheckFollowingStatusRequest): Promise<CheckFollowingStatusResponse | ErrorResponse> {
+        return this.Request<CheckFollowingStatusResponse>(`/following/${request.userId}/status`, "GET", {}, 'CheckFollowingStatus');
+    }
+
+    async GetFollowingList(): Promise<GetFollowingListResponse | ErrorResponse> {
+        return this.Request<GetFollowingListResponse>("/following/me", "GET", {}, 'GetFollowingList');
+    }
+
+    async GetFollowersList(): Promise<GetFollowersListResponse | ErrorResponse> {
+        return this.Request<GetFollowersListResponse>("/following/me/followers", "GET", {}, 'GetFollowersList');
+    }
+
+    async GetFollowCounts(request: GetFollowCountsRequest): Promise<GetFollowCountsResponse | ErrorResponse> {
+        return this.Request<GetFollowCountsResponse>(`/following/${request.userId}/counts`, "GET", {}, 'GetFollowCounts');
+    }
+
+    async GetFollowingListings(filters?: GetListingsRequest): Promise<Listing[] | ErrorResponse> {
+        return this.Request<Listing[]>("/listings/following", "POST", { body: filters || {} }, 'GetFollowingListings');
     }
 }
 
