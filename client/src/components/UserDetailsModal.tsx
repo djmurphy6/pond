@@ -19,6 +19,8 @@ import api from "@/api/WebService";
 import { CreateListingRequest, ErrorResponse, Listing } from "@/api/WebTypes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Separator } from "./ui/separator";
+import { Skeleton } from "./ui/skeleton";
+import { Card, CardContent } from "./ui/card";
 import ListingCard from "./ListingCard";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
 
@@ -196,11 +198,30 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
 
                 <span className="text-primary">{username}'s Listings</span>
 
-                <div className="grid grid-cols-3 gap-4">
-                    {listings.map((listing) => (
-                        <ListingCard key={listing.listingGU} item={listing} />
-                    ))}
-                </div>
+                {isLoading ? (
+                    <div className="grid grid-cols-3 gap-4">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <Card key={i} className="transition-colors duration-300">
+                                <Skeleton className="h-40 w-full rounded-t-md transition-colors duration-300" />
+                                <CardContent className="p-3">
+                                    <Skeleton className="h-4 w-3/4 mb-2 transition-colors duration-300" />
+                                    <Skeleton className="h-4 w-1/2 transition-colors duration-300" />
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                ) : listings.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
+                        <ImageIcon className="h-12 w-12 mb-2" />
+                        <p>No active listings</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-3 gap-4">
+                        {listings.map((listing) => (
+                            <ListingCard key={listing.listingGU} item={listing} />
+                        ))}
+                    </div>
+                )}
 
             </DialogContent>
         </Dialog>

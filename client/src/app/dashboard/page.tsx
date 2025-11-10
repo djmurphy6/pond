@@ -308,10 +308,16 @@ export default function DashboardPage() {
                             </Card>
                         ))}
                     </div>
+                ) : listings.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+                        <ImageIcon className="h-16 w-16 mb-4" />
+                        <p className="text-lg">No listings found</p>
+                        <p className="text-sm">Try adjusting your filters</p>
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {listings.map((item) => (
-                            <ListingCard key={item.listingGU} item={item} />
+                        {listings.map((item, index) => (
+                            <ListingCard key={item.listingGU} item={item} index={index} />
                         ))}
                     </div>
                 )}

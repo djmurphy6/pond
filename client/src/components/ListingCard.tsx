@@ -43,9 +43,13 @@ import { toast } from "sonner";
 import { MyAccountPopover } from "@/components/MyAccountPopover";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
 
-export default function ListingCard({ item }: { item: Listing }) {
+export default function ListingCard({ item, index = 0 }: { item: Listing; index?: number }) {
     const [hasError, setHasError] = useState(false);
+    const [imageLoading, setImageLoading] = useState(true);
     const { theme } = useTheme();
+
+    // Only prioritize first 4 images (above the fold)
+    const isPriority = index < 4;
 
     return (
         <Card className={`${theme !== 'dark' && 'hover:shadow-lg'} hover:underline hover:-translate-y-1 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}>
@@ -57,6 +61,9 @@ export default function ListingCard({ item }: { item: Listing }) {
                         transition: "background-color 300ms ease-in-out",
                     }}
                 >
+                    {imageLoading && !hasError && item.picture1_url && (
+                        <Skeleton className="absolute inset-0 rounded-none" />
+                    )}
                     {!item.picture1_url || hasError ? (
                         <ImageIcon className="h-10 w-10 text-muted-foreground transition-colors duration-300" />
                     ) : (
@@ -65,8 +72,13 @@ export default function ListingCard({ item }: { item: Listing }) {
                             alt={item.title}
                             fill
                             className="object-cover transition-colors duration-300"
-                            onError={() => setHasError(true)}
-                            priority
+                            onError={() => {
+                                setHasError(true);
+                                setImageLoading(false);
+                            }}
+                            onLoad={() => setImageLoading(false)}
+                            priority={isPriority}
+                            loading={isPriority ? undefined : "lazy"}
                         />
                     )}
                 </div>
