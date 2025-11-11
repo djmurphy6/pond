@@ -1,7 +1,7 @@
 "use client";
 
 //React
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 
 //Icons
@@ -39,18 +39,28 @@ export default function MessagingPage() {
     const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
     const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
-    const [messageInput, setMessageInput] = useState("");
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
     const [loadingMessages, setLoadingMessages] = useState(false);
     const { theme } = useTheme();
     const { userInfo } = useUserInfoStore();
 
-    const { sendMessage, connected } = useChatSocket(
+    const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+    const { connected } = useChatSocket(
         selectedRoomId,
         appConfig.access_token,
         (newMessage) => {
             setMessages((prev) => [...prev, newMessage]);
+            if (selectedRoomId) {
+                setChatRooms(prev => prev.map(room => {
+                    if (room.roomId === selectedRoomId) {
+                        return ({ ...room, lastMessage: newMessage.content, lastMessageAt: newMessage.timestamp });
+                    } else {
+                        return room;
+                    }
+                }))
+            }
         }
     );
 
@@ -63,6 +73,10 @@ export default function MessagingPage() {
             GetChatRooms();
         }
     }, [mounted]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     useEffect(() => {
         if (selectedRoomId) {
@@ -109,30 +123,17 @@ export default function MessagingPage() {
         }
     }
 
-    async function handleSendMessage() {
-        if (!messageInput.trim() || !selectedRoomId) return;
-
-        // const newMessage: Message = {
-        //     id: `temp-${Date.now()}`,
-        //     roomId: selectedRoomId,
-        //     senderGU: userInfo?.userGU ?? "",
-        //     content: messageInput.trim(),
-        //     timestamp: new Date().toISOString(),
-        //     isRead: false,
-        // };
-        // setMessages((prev) => [...prev, newMessage]);
-
-        sendMessage(messageInput.trim());
-
-        setMessageInput("");
+    function scrollToBottom() {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
+
 
     const selectedRoom = chatRooms.find(room => room.roomId === selectedRoomId);
 
     if (!mounted) return null;
 
     return (
-        <div className="flex h-screen bg-background transition-colors duration-300">
+        <div className="flex max-h-screen bg-background transition-colors duration-300">
             {/* Sidebar */}
             <aside className={`w-80 border-r bg-muted/10 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
                 {/* Header */}
@@ -150,7 +151,7 @@ export default function MessagingPage() {
                 </div>
 
                 {/* Chat Rooms List */}
-                <ScrollArea className="flex-1">
+                <ScrollArea className="flex-1 overflow-y-auto">
                     {loading ? (
                         <div className="p-2 space-y-2">
                             {Array.from({ length: 5 }).map((_, i) => (
@@ -217,8 +218,8 @@ export default function MessagingPage() {
                         </div>
 
                         {/* Messages */}
-                        <ScrollArea className="flex-1 p-4">
-                            {loadingMessages ? (
+                        <ScrollArea className="flex-1 overflow-y-auto px-4">
+                            {(loadingMessages || !connected) ? (
                                 <div className="space-y-4">
                                     {Array.from({ length: 5 }).map((_, i) => (
                                         <div key={i} className={`flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}>
@@ -231,7 +232,7 @@ export default function MessagingPage() {
                                     <p>No messages yet. Start the conversation!</p>
                                 </div>
                             ) : (
-                                <div className="space-y-4">
+                                <div className="space-y-4 pt-4">
                                     {messages.map((message) => (
                                         <MessageBubble
                                             key={message.id}
@@ -239,34 +240,13 @@ export default function MessagingPage() {
                                             isOwn={message.senderGU === userInfo?.userGU}
                                         />
                                     ))}
+                                    <div ref={messagesEndRef} />
                                 </div>
                             )}
                         </ScrollArea>
 
                         {/* Message Input */}
-                        <div className={`p-4 border-t bg-muted/10 transition-colors duration-300 ${theme !== "dark" && "shadow-[0_-2px_10px_rgba(0,0,0,0.05)]"}`}>
-                            <div className="flex gap-2">
-                                <Input
-                                    placeholder="Type a message..."
-                                    value={messageInput}
-                                    onChange={(e) => setMessageInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter" && !e.shiftKey) {
-                                            e.preventDefault();
-                                            handleSendMessage();
-                                        }
-                                    }}
-                                    className="flex-1"
-                                />
-                                <Button
-                                    onClick={handleSendMessage}
-                                    disabled={!messageInput.trim()}
-                                    size="icon"
-                                >
-                                    <Send className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </div>
+                        <MessageInput selectedRoomId={selectedRoomId} />
                     </>
                 ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -280,6 +260,58 @@ export default function MessagingPage() {
             </main>
         </div>
     );
+}
+
+function MessageInput({ selectedRoomId }: { selectedRoomId: string | null }) {
+
+    const { theme } = useTheme();
+
+    const [messageInput, setMessageInput] = useState("");
+    const [mounted, setMounted] = useState(false);
+
+    const { sendMessage } = useChatSocket(
+        selectedRoomId,
+        appConfig.access_token,
+    );
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    async function handleSendMessage() {
+        if (!messageInput.trim() || !selectedRoomId) return;
+
+        sendMessage(messageInput.trim());
+
+        setMessageInput("");
+    }
+
+    if (!mounted) return null;
+    return (
+        <div className={`p-4 border-t bg-muted/10 transition-colors duration-300 ${theme !== "dark" && "shadow-[0_-2px_10px_rgba(0,0,0,0.05)]"}`}>
+            <div className="flex gap-2">
+                <Input
+                    placeholder="Type a message..."
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage();
+                        }
+                    }}
+                    className="flex-1"
+                />
+                <Button
+                    onClick={handleSendMessage}
+                    disabled={!messageInput.trim()}
+                    size="icon"
+                >
+                    <Send className="h-4 w-4" />
+                </Button>
+            </div>
+        </div>
+    )
 }
 
 function ChatRoomItem({ room, isSelected, onClick }: { room: ChatRoom; isSelected: boolean; onClick: () => void }) {
@@ -310,7 +342,7 @@ function ChatRoomItem({ room, isSelected, onClick }: { room: ChatRoom; isSelecte
                         </div>
                     )}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div style={{ width: 185 }}>
                     <div className="flex items-center justify-between mb-1">
                         <h4 className="font-semibold text-sm truncate">{room.listingTitle}</h4>
                         {room.unreadCount > 0 && (
@@ -343,7 +375,7 @@ function MessageBubble({ message, isOwn }: { message: Message; isOwn: boolean })
                     }`}
             >
                 <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-                <p className={`text-xs mt-1 ${isOwn ? "text-white/70" : "text-muted-foreground"}`}>
+                <p className={`text-xs mt-1 ${isOwn ? "text-white/70 text-right" : "text-muted-foreground"}`}>
                     {new Date(message.timestamp).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
