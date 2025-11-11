@@ -133,7 +133,7 @@ export default function MessagingPage() {
     if (!mounted) return null;
 
     return (
-        <div className="flex max-h-screen bg-background transition-colors duration-300">
+        <div className="flex max-h-screen bg-background transition-colors duration-300 min-h-[100vh]">
             {/* Sidebar */}
             <aside className={`w-80 border-r bg-muted/10 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
                 {/* Header */}
