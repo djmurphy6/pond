@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse, CreateReportRequest, ReportDTO, ReportsPageResponse, UpdateReportRequest, GetSpecificListingResponse, GetSpecificUserListingsRequest, FollowUserRequest, FollowUserResponse, UnfollowUserRequest, UnfollowUserResponse, CheckFollowingStatusRequest, CheckFollowingStatusResponse, GetFollowingListResponse, GetFollowersListResponse, GetFollowCountsRequest, GetFollowCountsResponse } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse, CreateReportRequest, ReportDTO, ReportsPageResponse, UpdateReportRequest, GetSpecificListingResponse, GetSpecificUserListingsRequest, FollowUserRequest, FollowUserResponse, UnfollowUserRequest, UnfollowUserResponse, CheckFollowingStatusRequest, CheckFollowingStatusResponse, GetFollowingListResponse, GetFollowersListResponse, GetFollowCountsRequest, GetFollowCountsResponse, UnreadCountResponse } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -162,6 +162,10 @@ class API {
 
     async MarkMessagesAsRead(request: MarkMessagesAsReadRequest): Promise<MarkMessagesAsReadResponse | ErrorResponse> {
         return this.Request<MarkMessagesAsReadResponse>(`/chat/rooms/${request.roomID}/mark-read`, "POST", {}, 'MarkMessagesAsRead');
+    }
+
+    async GetUnreadCount(): Promise<UnreadCountResponse | ErrorResponse> {
+        return this.Request<UnreadCountResponse>("/chat/unread-count", "GET", {}, 'GetUnreadCount');
     }
 
     // User Profile

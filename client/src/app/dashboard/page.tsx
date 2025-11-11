@@ -44,6 +44,8 @@ import { toast } from "sonner";
 import { MyAccountPopover } from "@/components/MyAccountPopover";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
 import ListingCard from "@/components/ListingCard";
+import { useUnreadCount } from "@/stores/UnreadCountStore";
+import { appConfig } from "@/api/WebService";
 
 export default function DashboardPage() {
     const [listings, setListings] = useState<Listing[]>([]);
@@ -51,6 +53,7 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const { theme } = useTheme();
     const { userInfo } = useUserInfoStore();
+    const { unreadCount } = useUnreadCount(userInfo?.userGU, appConfig.access_token);
 
     // Filtering and sorting state
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -156,10 +159,17 @@ export default function DashboardPage() {
                     <Button
                         variant="ghost"
                         style={{ cursor: 'pointer' }}
-                        className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300"
+                        className="!p-0.5 !px- !py-0 w-full justify-between transition-colors duration-300 relative"
                     >
-                        <div className="h-7 w-7 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
+                        <div className="h-7 w-7 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300 relative">
                             <MessageCircle className="h-4 w-4 text-primary transition-colors duration-300" />
+                            {unreadCount > 0 && (
+                                <div className="absolute -top-1 -right-1 h-4 min-w-4 px-1 bg-red-500 rounded-full flex items-center justify-center">
+                                    <span className="text-[10px] font-semibold text-white">
+                                        {unreadCount > 99 ? '99+' : unreadCount}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                         <span>Messages</span>
                         <ChevronRight className="transition-colors duration-300" />

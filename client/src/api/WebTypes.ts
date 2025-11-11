@@ -167,6 +167,10 @@ export type MessageRequest = {
     content: string;
 }
 
+export type UnreadCountResponse = {
+    unreadCount: number;
+}
+
 //MY ACCOUNT
 
 export type UpdateUserRequest = {

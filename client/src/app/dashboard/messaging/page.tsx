@@ -34,6 +34,7 @@ import Image from "next/image";
 // Mock data
 import Link from "next/link";
 import { useChatSocket } from "@/stores/ChatSocket";
+import { useUnreadCount } from "@/stores/UnreadCountStore";
 
 export default function MessagingPage() {
     const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
@@ -64,6 +65,9 @@ export default function MessagingPage() {
         }
     );
 
+    // Listen to unread count updates
+    const { refreshUnreadCount } = useUnreadCount(userInfo?.userGU, appConfig.access_token);
+
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -93,6 +97,7 @@ export default function MessagingPage() {
                             ? { ...room, unreadCount: 0 }
                             : room
                     ));
+                    refreshUnreadCount();
                 }
             })();
         }

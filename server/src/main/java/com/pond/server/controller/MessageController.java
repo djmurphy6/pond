@@ -1,6 +1,14 @@
 
 package com.pond.server.controller;
 
+import java.security.Principal;
+import java.util.UUID;
+
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+
 import com.pond.server.dto.MessageDTO;
 import com.pond.server.dto.MessageResponseDTO;
 import com.pond.server.dto.NotificationDTO;
@@ -12,13 +20,6 @@ import com.pond.server.repository.ListingRepository;
 import com.pond.server.repository.UserRepository;
 import com.pond.server.service.ChatRoomService;
 import com.pond.server.service.MessageService;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.stereotype.Controller;
-
-import java.security.Principal;
-import java.util.UUID;
 
 @Controller
 public class MessageController {
@@ -95,16 +96,21 @@ public class MessageController {
             );
             System.out.println("✅ 9. Message broadcasted to room subscribers");
 
-//            // Send notification to the other user
-//            UUID recipientGU = room.getSellerGU().equals(senderGU) ?
-//                    room.getBuyerGU() : room.getSellerGU();
-//
-//            messagingTemplate.convertAndSendToUser(
-//                    recipientGU.toString(),
-//                    "/queue/notifications",
-//                    new NotificationDTO("New message in chat", messageDTO.getRoomId())
-//            );
-//            System.out.println("✅ 10. Notification sent to recipient");
+            // Send unread count notification to the other user
+            UUID recipientGU = room.getSellerGU().equals(senderGU) ?
+                    room.getBuyerGU() : room.getSellerGU();
+
+            // Get recipient's username for WebSocket routing (Spring uses username, not UUID)
+            User recipient = userRepository.findById(recipientGU)
+                    .orElseThrow(() -> new RuntimeException("Recipient not found"));
+
+            long recipientUnreadCount = messageService.getTotalUnreadCount(recipientGU);
+            messagingTemplate.convertAndSendToUser(
+                    recipient.getUsername(),  // Use username instead of UUID
+                    "/queue/unread-count",
+                    java.util.Map.of("unreadCount", recipientUnreadCount)
+            );
+            System.out.println("✅ 10. Unread count notification sent to recipient: " + recipient.getUsername() + " (GU: " + recipientGU + ")");
 
         } catch (Exception e) {
             // Log error and send error notification

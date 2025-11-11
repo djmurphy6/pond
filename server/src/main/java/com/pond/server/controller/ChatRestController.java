@@ -102,4 +102,16 @@ public class ChatRestController {
 
         return ResponseEntity.ok(Map.of("result", "Success"));
     }
+
+    // Get total unread message count for the authenticated user
+    @GetMapping("/unread-count")
+    public ResponseEntity<?> getUnreadMessageCount() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User currentUser)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
+        }
+
+        long unreadCount = messageService.getTotalUnreadCount(currentUser.getUserGU());
+        return ResponseEntity.ok(Map.of("unreadCount", unreadCount));
+    }
 }
