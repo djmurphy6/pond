@@ -11,6 +11,7 @@ import {
     ChevronLeft,
     MessageCircle,
     ArrowLeft,
+    Menu,
 } from "lucide-react";
 
 // API
@@ -34,6 +35,7 @@ import Image from "next/image";
 // Mock data
 import Link from "next/link";
 import { useChatSocket } from "@/stores/ChatSocket";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 export default function MessagingPage() {
     const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
@@ -44,6 +46,7 @@ export default function MessagingPage() {
     const [loadingMessages, setLoadingMessages] = useState(false);
     const { theme } = useTheme();
     const { userInfo } = useUserInfoStore();
+    const [showSidebar, setShowSidebar] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -130,69 +133,93 @@ export default function MessagingPage() {
 
     const selectedRoom = chatRooms.find(room => room.roomId === selectedRoomId);
 
+    const SideBar = () => (
+        <aside className={`w-80 border-r bg-muted/30 p-4 flex flex-col transition-colors duration-300 min-h-screen ${theme !== "dark" && "md:shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
+            {/* Header */}
+            <Button variant={'link'} style={{ color: 'gray', justifyContent: 'flex-start' }} className="!p-0 !px-0 !py-0 hover:underline hover:bg-none cursor-pointer">
+                <Link style={{ flexDirection: 'row' }} className="flex items-center gap-1" href="/dashboard">
+                    <ArrowLeft />
+                    back to dashboard
+                </Link>
+            </Button>
+
+            {/* Top section */}
+            <div className="flex items-center gap-2 mb-6 justify-between">
+                <h2 className="text-xl font-semibold">Messages</h2>
+                {/* <ThemeToggle /> */}
+            </div>
+
+            {/* Chat Rooms List */}
+            <ScrollArea className="flex-1 overflow-y-auto">
+                {loading ? (
+                    <div className="p-2 space-y-2">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="p-3">
+                                <div className="flex gap-3">
+                                    <Skeleton className="h-12 w-12 rounded-full" />
+                                    <div className="flex-1 space-y-2">
+                                        <Skeleton className="h-4 w-3/4" />
+                                        <Skeleton className="h-3 w-1/2" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : chatRooms.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full p-8 text-center text-muted-foreground">
+                        <MessageCircle className="h-16 w-16 mb-4 opacity-50" />
+                        <p className="text-lg font-medium mb-2">No messages yet</p>
+                        <p className="text-sm">Start a conversation by messaging a seller</p>
+                    </div>
+                ) : (
+                    <div className="p-2 space-y-1">
+                        {chatRooms.map((room) => (
+                            <ChatRoomItem
+                                key={room.roomId}
+                                room={room}
+                                isSelected={room.roomId === selectedRoomId}
+                                onClick={() => setSelectedRoomId(room.roomId)}
+                            />
+                        ))}
+                    </div>
+                )}
+            </ScrollArea>
+        </aside>
+    )
+
     if (!mounted) return null;
 
     return (
-        <div className="flex max-h-screen bg-background transition-colors duration-300 min-h-[100vh]">
+        <div className="flex flex-col md:flex-row max-h-screen bg-background transition-colors duration-300 min-h-screen">
             {/* Sidebar */}
-            <aside className={`w-80 border-r bg-muted/10 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
-                {/* Header */}
-                <Button variant={'link'} style={{ color: 'gray', justifyContent: 'flex-start' }} className="!p-0 !px-0 !py-0 hover:underline hover:bg-none cursor-pointer">
-                    <Link style={{ flexDirection: 'row' }} className="flex items-center gap-1" href="/dashboard">
-                        <ArrowLeft />
-                        back to dashboard
-                    </Link>
-                </Button>
+            <div className="hidden md:flex">
+                <SideBar />
+            </div>
 
-                {/* Top section */}
-                <div className="flex items-center gap-2 mb-6 justify-between">
-                    <h2 className="text-xl font-semibold">Messages</h2>
-                    {/* <ThemeToggle /> */}
-                </div>
+            <Sheet open={showSidebar} onOpenChange={setShowSidebar}>
+                <SheetTitle className="sr-only">Messages</SheetTitle>
+                <SheetContent side="left" className="w-80">
+                    <SideBar />
+                </SheetContent>
+            </Sheet>
 
-                {/* Chat Rooms List */}
-                <ScrollArea className="flex-1 overflow-y-auto">
-                    {loading ? (
-                        <div className="p-2 space-y-2">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                                <div key={i} className="p-3">
-                                    <div className="flex gap-3">
-                                        <Skeleton className="h-12 w-12 rounded-full" />
-                                        <div className="flex-1 space-y-2">
-                                            <Skeleton className="h-4 w-3/4" />
-                                            <Skeleton className="h-3 w-1/2" />
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : chatRooms.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full p-8 text-center text-muted-foreground">
-                            <MessageCircle className="h-16 w-16 mb-4 opacity-50" />
-                            <p className="text-lg font-medium mb-2">No messages yet</p>
-                            <p className="text-sm">Start a conversation by messaging a seller</p>
-                        </div>
-                    ) : (
-                        <div className="p-2 space-y-1">
-                            {chatRooms.map((room) => (
-                                <ChatRoomItem
-                                    key={room.roomId}
-                                    room={room}
-                                    isSelected={room.roomId === selectedRoomId}
-                                    onClick={() => setSelectedRoomId(room.roomId)}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </ScrollArea>
-            </aside>
+            <div className="flex md:hidden items-center justify-between p-4 border-b bg-muted/40 sticky top-0 z-20">
+                <button onClick={() => setShowSidebar(true)} className="flex items-center gap-2">
+                    <Menu className="h-8 w-8" />
+                </button>
+                <span className="font-bold text-2xl">Pond</span>
+                <ThemeToggle />
+            </div>
 
             {/* Main Chat Area */}
-            <main className={`flex-1 flex flex-col transition-colors duration-300`}>
+            <main className="flex-1 flex flex-col min-h-0 transition-colors duration-300">
                 {selectedRoom ? (
                     <>
                         {/* Chat Header */}
-                        <div className={`p-4 border-b bg-muted/10 transition-colors duration-300 ${theme !== "dark" && "shadow-sm"}`}>
+                        <div
+                            className={`sticky top-0 z-10 p-4 border-b bg-muted/20 backdrop-blur-sm transition-colors duration-300 ${theme !== "dark" && "shadow-sm"
+                                }`}
+                        >
                             <div className="flex items-center gap-3">
                                 <div className="relative h-10 w-10 rounded-full bg-muted overflow-hidden flex-shrink-0">
                                     {selectedRoom.listingImage ? (
@@ -217,8 +244,8 @@ export default function MessagingPage() {
                             </div>
                         </div>
 
-                        {/* Messages */}
-                        <ScrollArea className="flex-1 overflow-y-auto px-4">
+                        {/* Messages area */}
+                        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
                             {(loadingMessages || !connected) ? (
                                 <div className="space-y-4">
                                     {Array.from({ length: 5 }).map((_, i) => (
@@ -228,11 +255,11 @@ export default function MessagingPage() {
                                     ))}
                                 </div>
                             ) : messages.length === 0 ? (
-                                <div className="flex items-center justify-center h-full mt-[40vh] text-muted-foreground">
+                                <div className="flex items-center justify-center h-full text-muted-foreground">
                                     <p>No messages yet. Start the conversation!</p>
                                 </div>
                             ) : (
-                                <div className="space-y-4 pt-4">
+                                <div className="space-y-4 pt-2">
                                     {messages.map((message) => (
                                         <MessageBubble
                                             key={message.id}
@@ -243,10 +270,15 @@ export default function MessagingPage() {
                                     <div ref={messagesEndRef} />
                                 </div>
                             )}
-                        </ScrollArea>
+                        </div>
 
                         {/* Message Input */}
-                        <MessageInput selectedRoomId={selectedRoomId} />
+                        <div
+                            className={`sticky bottom-0 z-10 border-t transition-colors duration-300 ${theme !== "dark" && "shadow-[0_-2px_10px_rgba(0,0,0,0.05)]"
+                                }`}
+                        >
+                            <MessageInput selectedRoomId={selectedRoomId} />
+                        </div>
                     </>
                 ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -258,6 +290,7 @@ export default function MessagingPage() {
                     </div>
                 )}
             </main>
+
         </div>
     );
 }
@@ -288,7 +321,7 @@ function MessageInput({ selectedRoomId }: { selectedRoomId: string | null }) {
 
     if (!mounted) return null;
     return (
-        <div className={`p-4 border-t bg-muted/10 transition-colors duration-300 ${theme !== "dark" && "shadow-[0_-2px_10px_rgba(0,0,0,0.05)]"}`}>
+        <div className={`p-4 border-t bg-muted/40 transition-colors duration-300 ${theme !== "dark" && "shadow-[0_-2px_10px_rgba(0,0,0,0.05)]"}`}>
             <div className="flex gap-2">
                 <Input
                     placeholder="Type a message..."

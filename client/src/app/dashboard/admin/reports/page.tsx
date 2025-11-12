@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 
 //React
 import { useEffect, useState } from "react";
-import { Shield, AlertTriangle, Eye, CheckCircle, XCircle, Clock, Trash2, ArrowLeft } from "lucide-react";
+import { Shield, AlertTriangle, Eye, CheckCircle, XCircle, Clock, Trash2, ArrowLeft, Menu } from "lucide-react";
 import { toast } from "sonner";
 
 //API
@@ -33,6 +33,7 @@ import { Textarea } from "@/components/ui/textarea";
 //Internal
 import ThemeToggle from "@/components/ThemeToggle";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 const REPORT_REASON_LABELS: Record<ReportReason, string> = {
     [ReportReason.INAPPROPRIATE_CONTENT]: "Inappropriate Content",
@@ -69,6 +70,8 @@ export default function AdminReportsPage() {
     // Pagination
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+
+    const [showSidebar, setShowSidebar] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -143,33 +146,54 @@ export default function AdminReportsPage() {
         );
     }
 
+    const SideBar = () => (
+        <aside className={`w-64 border-r bg-muted/30 p-6 flex flex-col transition-colors duration-300 min-h-screen`}>
+            <Button variant={'link'} style={{ color: 'gray', justifyContent: 'flex-start' }} className="!p-0 !px-0 !py-0 hover:underline hover:bg-none cursor-pointer mb-4">
+                <Link style={{ flexDirection: 'row' }} className="flex items-center gap-1" href="/dashboard">
+                    <ArrowLeft />
+                    back to dashboard
+                </Link>
+            </Button>
+
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                    <Shield className="h-6 w-6 text-amber-600" />
+                    <h2 className="text-xl font-semibold">Admin Panel</h2>
+                </div>
+                {/* <ThemeToggle /> */}
+            </div>
+
+            <Separator className="my-4" />
+
+            <div className="mt-auto pt-6">
+                <p className="text-xs text-muted-foreground">
+                    Logged in as <span className="font-medium">@{userInfo.username}</span>
+                </p>
+            </div>
+        </aside>
+    )
+
     return (
-        <div className="flex h-screen bg-background transition-colors duration-300">
+        <div className="flex flex-col md:flex-row h-screen bg-background transition-colors duration-300">
             {/* Sidebar */}
-            <aside className={`w-80 border-r bg-muted/10 p-6 flex flex-col transition-colors duration-300`}>
-                <Button variant={'link'} style={{ color: 'gray', justifyContent: 'flex-start' }} className="!p-0 !px-0 !py-0 hover:underline hover:bg-none cursor-pointer mb-4">
-                    <Link style={{ flexDirection: 'row' }} className="flex items-center gap-1" href="/dashboard">
-                        <ArrowLeft />
-                        back to dashboard
-                    </Link>
-                </Button>
+            <div className="hidden md:flex ">
+                <SideBar />
+            </div>
 
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-2">
-                        <Shield className="h-6 w-6 text-amber-600" />
-                        <h2 className="text-xl font-semibold">Admin Panel</h2>
-                    </div>
-                    {/* <ThemeToggle /> */}
-                </div>
+            <Sheet open={showSidebar} onOpenChange={setShowSidebar}>
+                <SheetTitle className="sr-only">Admin Panel</SheetTitle>
+                <SheetContent side="left" className="w-64">
+                    <SideBar />
+                </SheetContent>
+            </Sheet>
 
-                <Separator className="my-4" />
-
-                <div className="mt-auto pt-6">
-                    <p className="text-xs text-muted-foreground">
-                        Logged in as <span className="font-medium">@{userInfo.username}</span>
-                    </p>
-                </div>
-            </aside>
+            <div className="flex md:hidden items-center justify-between p-4 border-b bg-muted/40 sticky top-0 z-20">
+                <button onClick={() => setShowSidebar(true)} className="flex items-center gap-2">
+                    <Menu className="h-8 w-8" />
+                </button>
+                <span className="font-bold text-2xl">Pond</span>
+                <ThemeToggle />
+            </div>
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col">

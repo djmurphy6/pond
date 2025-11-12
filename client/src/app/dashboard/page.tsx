@@ -181,7 +181,7 @@ export default function DashboardPage() {
             {/* Main content */}
             <main className="flex-1 overflow-y-auto p-6 transition-colors duration-300">
                 {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                         {Array.from({ length: 12 }).map((_, i) => (
                             <Card key={i} className="transition-colors duration-300 py-0">
                                 <Skeleton className="h-40 w-full rounded-t-md transition-colors duration-300" />
@@ -237,7 +237,7 @@ const SideBar = (props: SideBarProps) => {
     const { userInfo } = useUserInfoStore()
 
     return (
-        <aside className={`w-64 border-r bg-muted/10 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
+        <aside className={`w-64 border-r bg-muted/30 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
             {/* Top section */}
             <div className="flex items-center gap-2 mb-6 justify-between">
                 <h2 className="text-xl font-semibold">Pond</h2>
