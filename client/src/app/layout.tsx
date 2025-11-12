@@ -34,6 +34,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme-initializing suppressHydrationWarning>
+      <head className="transition-colors duration-300">
+        <meta name="theme-color" content="#ffffff" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{
@@ -44,8 +47,8 @@ export default function RootLayout({
           minHeight: "100dvh",
         }}
       >
-        <ThemeInit />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ThemeInit />
           {children}
           <Toaster position="bottom-right" richColors />
         </ThemeProvider>

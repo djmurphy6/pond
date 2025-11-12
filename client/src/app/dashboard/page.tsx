@@ -21,6 +21,7 @@ import {
     Check,
     Shield,
     AlertCircle,
+    Menu,
 } from "lucide-react";
 
 // API
@@ -44,6 +45,7 @@ import { toast } from "sonner";
 import { MyAccountPopover } from "@/components/MyAccountPopover";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
 import ListingCard from "@/components/ListingCard";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 export default function DashboardPage() {
     const [listings, setListings] = useState<Listing[]>([]);
@@ -58,6 +60,9 @@ export default function DashboardPage() {
     const [minPrice, setMinPrice] = useState<string>("");
     const [maxPrice, setMaxPrice] = useState<string>("");
     const [searchQuery, setSearchQuery] = useState<string>("");
+
+    //Mobile
+    const [showSidebar, setShowSidebar] = useState<boolean>(false);
 
     useEffect(() => {
         setMounted(true);
@@ -82,28 +87,34 @@ export default function DashboardPage() {
     }, [selectedCategories, sortOption, minPrice, maxPrice, searchQuery, mounted]);
 
     async function GetListings() {
-        setLoading(true);
+        try {
 
-        // Parse sort option (e.g., "date-desc" -> sortBy: "date", sortOrder: "desc")
-        const [sortBy, sortOrder] = sortOption.split('-');
+            setLoading(true);
 
-        // Prepare filter parameters
-        const filters = {
-            categories: selectedCategories.length > 0 ? selectedCategories : undefined,
-            minPrice: minPrice ? parseFloat(minPrice) : undefined,
-            maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
-            sortBy,
-            sortOrder,
-            searchQuery: searchQuery.trim() || undefined,
-        };
+            // Parse sort option (e.g., "date-desc" -> sortBy: "date", sortOrder: "desc")
+            const [sortBy, sortOrder] = sortOption.split('-');
 
-        let res = await api.GetListings(filters);
-        setLoading(false);
-        if (res instanceof ErrorResponse) {
-            toast.error(res.body?.error);
-        } else {
-            console.log(JSON.stringify(res))
-            setListings(res);
+            // Prepare filter parameters
+            const filters = {
+                categories: selectedCategories.length > 0 ? selectedCategories : undefined,
+                minPrice: minPrice ? parseFloat(minPrice) : undefined,
+                maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+                sortBy,
+                sortOrder,
+                searchQuery: searchQuery.trim() || undefined,
+            };
+
+            let res = await api.GetListings(filters);
+            setLoading(false);
+            if (res instanceof ErrorResponse) {
+                toast.error(res.body?.error);
+            } else {
+                console.log(JSON.stringify(res))
+                setListings(res);
+            }
+        } catch (error) {
+            setLoading(false);
+            toast.error("Failed to fetch listings. Please try again.");
         }
     }
 
@@ -118,27 +129,135 @@ export default function DashboardPage() {
 
     if (!mounted) return null;
     return (
-        <div className="flex h-screen bg-background transition-colors duration-300">
+        <div className="flex flex-col md:flex-row h-screen bg-background transition-colors duration-300">
             {/* Sidebar */}
-            <aside className={`w-64 border-r bg-muted/10 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
-                {/* Top section */}
-                <div className="flex items-center gap-2 mb-6 justify-between">
-                    <h2 className="text-xl font-semibold">Pond</h2>
+            <div className="hidden md:flex">
+                <SideBar
+                    theme={theme}
+                    GetListings={GetListings}
+                    toggleCategory={toggleCategory}
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    selectedCategories={selectedCategories}
+                    setSelectedCategories={setSelectedCategories}
+                    sortOption={sortOption}
+                    setSortOption={setSortOption}
+                    minPrice={minPrice}
+                    setMinPrice={setMinPrice}
+                    maxPrice={maxPrice}
+                    setMaxPrice={setMaxPrice}
+                />
+            </div>
+
+            <Sheet open={showSidebar} onOpenChange={setShowSidebar}>
+                <SheetTitle className="sr-only">Pond</SheetTitle>
+                <SheetContent side="left" className="w-64">
+                    <SideBar
+                        theme={theme}
+                        GetListings={GetListings}
+                        toggleCategory={toggleCategory}
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        selectedCategories={selectedCategories}
+                        setSelectedCategories={setSelectedCategories}
+                        sortOption={sortOption}
+                        setSortOption={setSortOption}
+                        minPrice={minPrice}
+                        setMinPrice={setMinPrice}
+                        maxPrice={maxPrice}
+                        setMaxPrice={setMaxPrice}
+                    />
+                </SheetContent>
+            </Sheet>
+
+            <div className="flex md:hidden items-center justify-between p-4 border-b bg-muted/40 sticky top-0 z-20">
+                <button onClick={() => setShowSidebar(true)} className="flex items-center gap-2">
+                    <Menu className="h-8 w-8" />
+                </button>
+                <span className="font-bold text-2xl">Pond</span>
+                <ThemeToggle />
+            </div>
+
+            {/* Main content */}
+            <main className="flex-1 overflow-y-auto p-6 transition-colors duration-300">
+                {loading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {Array.from({ length: 12 }).map((_, i) => (
+                            <Card key={i} className="transition-colors duration-300 py-0">
+                                <Skeleton className="h-40 w-full rounded-t-md transition-colors duration-300" />
+                                <CardContent className="p-3">
+                                    <Skeleton className="h-4 w-3/4 mb-2 transition-colors duration-300" />
+                                    <Skeleton className="h-4 w-1/2 transition-colors duration-300" />
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                ) : listings.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+                        <ImageIcon className="h-16 w-16 mb-4" />
+                        <p className="text-lg">No listings found</p>
+                        <p className="text-sm">Try adjusting your filters</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {listings.map((item, index) => (
+                            <ListingCard key={item.listingGU} item={item} index={index} />
+                        ))}
+                    </div>
+                )}
+            </main>
+        </div>
+    );
+}
+
+type SideBarProps = {
+    theme?: string;
+    GetListings: () => Promise<void>;
+    toggleCategory: (category: string) => void;
+
+    searchQuery: string;
+    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+
+    selectedCategories: string[];
+    setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
+
+    sortOption: string
+    setSortOption: React.Dispatch<React.SetStateAction<string>>
+
+    minPrice: string
+    setMinPrice: React.Dispatch<React.SetStateAction<string>>
+
+    maxPrice: string
+    setMaxPrice: React.Dispatch<React.SetStateAction<string>>
+}
+
+const SideBar = (props: SideBarProps) => {
+    const { theme, GetListings, toggleCategory, searchQuery, setSearchQuery, selectedCategories, setSelectedCategories, sortOption, setSortOption, minPrice, setMinPrice, maxPrice, setMaxPrice } = props;
+
+    const { userInfo } = useUserInfoStore()
+
+    return (
+        <aside className={`w-64 border-r bg-muted/10 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
+            {/* Top section */}
+            <div className="flex items-center gap-2 mb-6 justify-between">
+                <h2 className="text-xl font-semibold">Pond</h2>
+                <div className="hidden md:block">
                     <ThemeToggle />
                 </div>
+            </div>
 
-                {/* Search + Account + Messaging */}
-                <div className="mb-4">
-                    <Input
-                        placeholder="Search listings..."
-                        className="mb-3 transition-colors duration-300"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+            {/* Search + Account + Messaging */}
+            <div className="mb-4">
+                <Input
+                    placeholder="Search listings..."
+                    className="mb-3 transition-colors duration-300"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
 
-                    <MyAccountPopover />
+                <MyAccountPopover />
 
-                    <Link href="/dashboard/you/selling" className="w-full">
+                <Link href="/dashboard/you/selling" className="w-full">
                     <Button
                         variant="ghost"
                         style={{ cursor: 'pointer' }}
@@ -196,132 +315,102 @@ export default function DashboardPage() {
                         </Button>
                     </Link>
                 )}
+            </div>
+
+
+            {/* Create Listing */}
+            <CreateListingModal onSuccess={GetListings} />
+
+            <Separator className="my-4 transition-colors duration-300" />
+
+            {/* Filters */}
+            <ScrollArea className="flex-1 pr-2 transition-colors duration-300">
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <Label>Filters</Label>
+                        {(selectedCategories.length > 0 || minPrice || maxPrice || searchQuery) && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    setSelectedCategories([]);
+                                    setMinPrice("");
+                                    setMaxPrice("");
+                                    setSearchQuery("");
+                                }}
+                                className="h-6 text-xs"
+                            >
+                                Clear
+                            </Button>
+                        )}
+                    </div>
+
+                    <div>
+                        <Label className="mb-2">Sort by</Label>
+                        <Select value={sortOption} onValueChange={setSortOption}>
+                            <SelectTrigger className="w-full mt-2">
+                                <SelectValue placeholder="Sort by" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="date-desc">Date Listed (Newest)</SelectItem>
+                                <SelectItem value="date-asc">Date Listed (Oldest)</SelectItem>
+                                <SelectItem value="price-asc">Price (Low → High)</SelectItem>
+                                <SelectItem value="price-desc">Price (High → Low)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div>
+                        <Label>Price</Label>
+                        <div className="flex gap-2 mt-2">
+                            <Input
+                                type="number"
+                                placeholder="Min"
+                                className="w-1/2 transition-colors duration-300"
+                                value={minPrice}
+                                onChange={(e) => setMinPrice(e.target.value)}
+                            />
+                            <Input
+                                type="number"
+                                placeholder="Max"
+                                className="w-1/2 transition-colors duration-300"
+                                value={maxPrice}
+                                onChange={(e) => setMaxPrice(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Categories */}
+                    <div>
+                        <Label>Category</Label>
+                        <div className="flex flex-col gap-1 mt-2">
+                            {[
+                                { name: "Furniture", icon: Sofa },
+                                { name: "Clothing", icon: Shirt },
+                                { name: "Housing", icon: Home },
+                                { name: "Tech", icon: Laptop },
+                                { name: "School", icon: GraduationCap },
+                            ].map(({ name, icon: Icon }) => {
+                                const isSelected = selectedCategories.includes(name);
+                                return (
+                                    <button
+                                        key={name}
+                                        onClick={() => toggleCategory(name)}
+                                        className={`flex items-center gap-2 text-sm py-1 px-2 rounded-md hover:bg-muted transition-colors duration-300 ${isSelected ? 'bg-muted' : ''
+                                            }`}
+                                    >
+                                        <Icon className="h-4 w-4 text-muted-foreground transition-colors duration-300" />
+                                        <span className="flex-1 text-left">{name}</span>
+                                        {isSelected && (
+                                            <Check className="h-4 w-4 text-primary transition-colors duration-300" />
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
-
-
-                {/* Create Listing */}
-                <CreateListingModal onSuccess={GetListings} />
-
-                <Separator className="my-4 transition-colors duration-300" />
-
-                {/* Filters */}
-                <ScrollArea className="flex-1 pr-2 transition-colors duration-300">
-                    <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                            <Label>Filters</Label>
-                            {(selectedCategories.length > 0 || minPrice || maxPrice || searchQuery) && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                        setSelectedCategories([]);
-                                        setMinPrice("");
-                                        setMaxPrice("");
-                                        setSearchQuery("");
-                                    }}
-                                    className="h-6 text-xs"
-                                >
-                                    Clear
-                                </Button>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label className="mb-2">Sort by</Label>
-                            <Select value={sortOption} onValueChange={setSortOption}>
-                                <SelectTrigger className="w-full mt-2">
-                                    <SelectValue placeholder="Sort by" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="date-desc">Date Listed (Newest)</SelectItem>
-                                    <SelectItem value="date-asc">Date Listed (Oldest)</SelectItem>
-                                    <SelectItem value="price-asc">Price (Low → High)</SelectItem>
-                                    <SelectItem value="price-desc">Price (High → Low)</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div>
-                            <Label>Price</Label>
-                            <div className="flex gap-2 mt-2">
-                                <Input
-                                    type="number"
-                                    placeholder="Min"
-                                    className="w-1/2 transition-colors duration-300"
-                                    value={minPrice}
-                                    onChange={(e) => setMinPrice(e.target.value)}
-                                />
-                                <Input
-                                    type="number"
-                                    placeholder="Max"
-                                    className="w-1/2 transition-colors duration-300"
-                                    value={maxPrice}
-                                    onChange={(e) => setMaxPrice(e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Categories */}
-                        <div>
-                            <Label>Category</Label>
-                            <div className="flex flex-col gap-1 mt-2">
-                                {[
-                                    { name: "Furniture", icon: Sofa },
-                                    { name: "Clothing", icon: Shirt },
-                                    { name: "Housing", icon: Home },
-                                    { name: "Tech", icon: Laptop },
-                                    { name: "School", icon: GraduationCap },
-                                ].map(({ name, icon: Icon }) => {
-                                    const isSelected = selectedCategories.includes(name);
-                                    return (
-                                        <button
-                                            key={name}
-                                            onClick={() => toggleCategory(name)}
-                                            className={`flex items-center gap-2 text-sm py-1 px-2 rounded-md hover:bg-muted transition-colors duration-300 ${isSelected ? 'bg-muted' : ''
-                                                }`}
-                                        >
-                                            <Icon className="h-4 w-4 text-muted-foreground transition-colors duration-300" />
-                                            <span className="flex-1 text-left">{name}</span>
-                                            {isSelected && (
-                                                <Check className="h-4 w-4 text-primary transition-colors duration-300" />
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                </ScrollArea>
-            </aside>
-
-            {/* Main content */}
-            <main className="flex-1 overflow-y-auto p-6 transition-colors duration-300">
-                {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {Array.from({ length: 12 }).map((_, i) => (
-                            <Card key={i} className="transition-colors duration-300">
-                                <Skeleton className="h-40 w-full rounded-t-md transition-colors duration-300" />
-                                <CardContent className="p-3">
-                                    <Skeleton className="h-4 w-3/4 mb-2 transition-colors duration-300" />
-                                    <Skeleton className="h-4 w-1/2 transition-colors duration-300" />
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                ) : listings.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
-                        <ImageIcon className="h-16 w-16 mb-4" />
-                        <p className="text-lg">No listings found</p>
-                        <p className="text-sm">Try adjusting your filters</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {listings.map((item, index) => (
-                            <ListingCard key={item.listingGU} item={item} index={index} />
-                        ))}
-                    </div>
-                )}
-            </main>
-        </div>
-    );
+            </ScrollArea>
+        </aside>
+    )
 }

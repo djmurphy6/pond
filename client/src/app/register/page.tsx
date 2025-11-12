@@ -46,7 +46,7 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-[100dvh] flex items-center justify-center bg-muted/20">
+        <div className="min-h-[100dvh] flex items-center justify-center bg-background">
             <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
                 <ThemeToggle />
             </div>
