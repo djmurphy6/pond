@@ -23,6 +23,7 @@ import { Skeleton } from "./ui/skeleton";
 import { Card, CardContent } from "./ui/card";
 import ListingCard from "./ListingCard";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
+import { ScrollArea } from "./ui/scroll-area";
 
 type UserDetailsModalProps = {
     userGU: string;
@@ -126,7 +127,7 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <button onClick={() => { }} className="flex flex-row items-center hover:underline cursor-pointer">
+                <button onClick={() => { }} className="flex flex-row w-full items-center hover:underline cursor-pointer">
                     <div className="h-10 w-10 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
                         {avatar_url ? (
                             <img
@@ -142,8 +143,8 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                 </button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-3xl">
-                <div className="flex flex-row items-start gap-6">
+            <DialogContent className="max-w-full  sm:max-w-3xl">
+                <div className="flex flex-col md:flex-row items-center gap-6">
                     <div className="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center border-3 border-primary flex-shrink-0">
                         {avatar_url ? (
                             <img
@@ -199,7 +200,7 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                 <span className="text-primary">{username}'s Listings</span>
 
                 {isLoading ? (
-                    <div className="grid grid-cols-3 gap-4">
+                    <ScrollArea className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {Array.from({ length: 6 }).map((_, i) => (
                             <Card key={i} className="transition-colors duration-300">
                                 <Skeleton className="h-40 w-full rounded-t-md transition-colors duration-300" />
@@ -209,18 +210,20 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                                 </CardContent>
                             </Card>
                         ))}
-                    </div>
+                    </ScrollArea>
                 ) : listings.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
                         <ImageIcon className="h-12 w-12 mb-2" />
                         <p>No active listings</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-3 gap-4">
-                        {listings.map((listing) => (
-                            <ListingCard key={listing.listingGU} item={listing} />
-                        ))}
-                    </div>
+                    <ScrollArea className="max-h-[50vh] w-full">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {listings.map((listing) => (
+                                <ListingCard key={listing.listingGU} item={listing} />
+                            ))}
+                        </div>
+                    </ScrollArea>
                 )}
 
             </DialogContent>
