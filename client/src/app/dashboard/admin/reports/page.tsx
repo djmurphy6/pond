@@ -288,7 +288,7 @@ export default function AdminReportsPage() {
                                                 <Button
                                                     variant="default"
                                                     size="sm"
-                                                    className="cursor-pointer"
+                                                    className="cursor-pointer bg-uo-green text-white hover:bg-uo-green/90"
                                                     onClick={() => handleReviewClick(report)}
                                                 >
                                                     <CheckCircle className="h-4 w-4 mr-2" />
@@ -406,7 +406,7 @@ export default function AdminReportsPage() {
                         <Button
                             onClick={handleUpdateReport}
                             disabled={isUpdating || !newStatus}
-                            className="cursor-pointer"
+                            className="cursor-pointer bg-uo-green text-white hover:bg-uo-green/90"
                         >
                             {isUpdating ? "Updating..." : "Update Report"}
                         </Button>

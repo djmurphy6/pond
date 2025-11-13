@@ -377,6 +377,7 @@ function MessageInput({ selectedRoomId }: { selectedRoomId: string | null }) {
                     onClick={handleSendMessage}
                     disabled={!messageInput.trim()}
                     size="icon"
+                    className="bg-uo-green text-white hover:bg-uo-green/90"
                 >
                     <Send className="h-4 w-4" />
                 </Button>
