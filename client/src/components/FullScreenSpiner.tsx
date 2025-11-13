@@ -7,7 +7,7 @@ export default function FullScreenSpinner({ className }: { className?: string })
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm",
+        "absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm",
         className
       )}
     >

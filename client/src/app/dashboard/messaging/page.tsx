@@ -247,7 +247,7 @@ export default function MessagingPage() {
             </div>
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col min-h-0 transition-colors duration-300">
+            <main className="relative flex-1 flex flex-col min-h-0 transition-colors duration-300">
                 {selectedRoom ? (
                     <>
                         {/* Chat Header */}
