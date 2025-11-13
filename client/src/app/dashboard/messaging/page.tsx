@@ -36,10 +36,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useChatSocket } from "@/stores/ChatSocket";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { useSearchParams, useRouter } from "next/navigation";
+import FullScreenSpinner from "@/components/FullScreenSpiner";
 
 export default function MessagingPage() {
+
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const roomId = searchParams.get("roomId");
+    const message = searchParams.get("message");
+
     const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
-    const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+    const [selectedRoomId, setSelectedRoomId] = useState<string | null>(roomId || null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -50,7 +58,7 @@ export default function MessagingPage() {
 
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-    const { connected } = useChatSocket(
+    const { connected, sendMessage } = useChatSocket(
         selectedRoomId,
         appConfig.access_token,
         (newMessage) => {
@@ -79,6 +87,13 @@ export default function MessagingPage() {
 
     useEffect(() => {
         scrollToBottom();
+        console.log(message, roomId, selectedRoomId, messages.length);
+        if (message && roomId === selectedRoomId && messages.length === 0) { 
+            //TODO: need to send message even if the chat room exists and not empty 
+            sendMessage(message);
+
+            // router.replace(`?roomId=${roomId}`, { scroll: false });
+        }
     }, [messages]);
 
     useEffect(() => {
@@ -280,15 +295,18 @@ export default function MessagingPage() {
                             <MessageInput selectedRoomId={selectedRoomId} />
                         </div>
                     </>
-                ) : (
-                    <div className="flex items-center justify-center h-full text-muted-foreground">
-                        <div className="text-center">
-                            <MessageCircle className="h-24 w-24 mx-auto mb-4 opacity-50" />
-                            <p className="text-xl font-medium">Select a conversation</p>
-                            <p className="text-sm mt-2">Choose from your existing messages</p>
+                ) : loading ?
+                    (
+                        <FullScreenSpinner />
+                    ) : (
+                        <div className="flex items-center justify-center h-full text-muted-foreground">
+                            <div className="text-center pt-[30vh] md:pt-[0vh]">
+                                <MessageCircle className="h-24 w-24 mx-auto mb-4 opacity-50" />
+                                <p className="text-xl font-medium">Select a conversation</p>
+                                <p className="text-sm mt-2">Choose from your existing messages</p>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
             </main>
 
         </div>
