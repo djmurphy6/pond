@@ -66,26 +66,16 @@ public class SavedListingService {
     
     /**
      * Get all saved listings for a user (returns full listing details)
+     * OPTIMIZED: Uses single JOIN query instead of fetching separately and filtering
      */
     public List<ListingDTO> getSavedListings(User user) {
-        List<SavedListing> savedListings = savedListingRepository
-                .findByUserGUOrderBySavedAtDesc(user.getUserGU());
+        // Single query with JOIN - much faster than fetching separately
+        List<Listing> listings = savedListingRepository
+                .findSavedListingsWithDetails(user.getUserGU());
         
-        // Get the actual listings
-        List<UUID> listingGUs = savedListings.stream()
-                .map(SavedListing::getListingGU)
-                .collect(Collectors.toList());
-        
-        List<Listing> listings = listingRepository.findAllById(listingGUs);
-        
-        // Convert to DTOs and return in saved order
-        return savedListings.stream()
-                .map(saved -> listings.stream()
-                        .filter(listing -> listing.getListingGU().equals(saved.getListingGU()))
-                        .findFirst()
-                        .map(this::toDto)
-                        .orElse(null))
-                .filter(dto -> dto != null)
+        // Convert to DTOs (already sorted by savedAt DESC from query)
+        return listings.stream()
+                .map(this::toDto)
                 .collect(Collectors.toList());
     }
     

@@ -7,6 +7,8 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.pond.server.enums.ReportStatus;
@@ -29,6 +31,13 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
     
     // Get all reports for listings that belong to a specific user (reports against their listings)
     Page<Report> findByListingGUInOrderByCreatedAtDesc(List<UUID> listingGUs, Pageable pageable);
+    
+    // OPTIMIZED: Get reports for user's listings using JOIN (avoids fetching all listings first)
+    @Query("SELECT r FROM Report r " +
+           "JOIN Listing l ON r.listingGU = l.listingGU " +
+           "WHERE l.userGU = :userGU " +
+           "ORDER BY r.createdAt DESC")
+    Page<Report> findReportsByListingOwner(@Param("userGU") UUID userGU, Pageable pageable);
     
     // Check if a user already reported a listing (prevent duplicate reports)
     Optional<Report> findByUserGUAndListingGU(UUID userGU, UUID listingGU);

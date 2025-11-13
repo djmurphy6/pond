@@ -58,6 +58,7 @@ export default function MessagingPage() {
     const [showSidebar, setShowSidebar] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
+    const initialMessageSentRef = useRef<string | null>(null); // Track the message content that was sent
 
     const { connected, sendMessage } = useChatSocket(
         selectedRoomId,
@@ -89,16 +90,30 @@ export default function MessagingPage() {
         }
     }, [mounted]);
 
+    // Scroll to bottom whenever messages change
     useEffect(() => {
         scrollToBottom();
-        console.log(message, roomId, selectedRoomId, messages.length);
-        if (message && roomId === selectedRoomId && messages.length === 0) { 
-            //TODO: need to send message even if the chat room exists and not empty 
-            sendMessage(message);
-
-            // router.replace(`?roomId=${roomId}`, { scroll: false });
-        }
     }, [messages]);
+
+    // Handle initial message from URL params
+    useEffect(() => {
+        // Create a unique key for this message send attempt
+        const messageKey = message && roomId ? `${roomId}:${message}` : null;
+        
+        if (
+            message &&
+            roomId &&
+            roomId === selectedRoomId &&
+            connected &&
+            initialMessageSentRef.current !== messageKey
+        ) {
+            console.log("Sending initial message:", message);
+            sendMessage(message);
+            initialMessageSentRef.current = messageKey;
+            // Clear the message from URL to prevent re-sending
+            router.replace(`/dashboard/messaging?roomId=${roomId}`, { scroll: false });
+        }
+    }, [message, roomId, selectedRoomId, connected, router]);
 
     useEffect(() => {
         if (selectedRoomId) {

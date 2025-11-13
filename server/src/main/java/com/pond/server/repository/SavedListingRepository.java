@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.pond.server.model.Listing;
 import com.pond.server.model.SavedListing;
 
 @Repository
@@ -29,5 +30,12 @@ public interface SavedListingRepository extends JpaRepository<SavedListing, UUID
     // Get list of listing GUIDs that user has saved (useful for bulk checking)
     @Query("SELECT s.listingGU FROM SavedListing s WHERE s.userGU = :userGU")
     List<UUID> findListingGUsByUserGU(@Param("userGU") UUID userGU);
+    
+    // OPTIMIZED: Get saved listings with full listing details in a single JOIN query
+    @Query("SELECT l FROM Listing l " +
+           "JOIN SavedListing s ON l.listingGU = s.listingGU " +
+           "WHERE s.userGU = :userGU " +
+           "ORDER BY s.savedAt DESC")
+    List<Listing> findSavedListingsWithDetails(@Param("userGU") UUID userGU);
 }
 

@@ -229,6 +229,7 @@ public class ListingService {
     /**
      * Get listings from users that the current user follows
      * Supports filtering and sorting just like getFiltered()
+     * OPTIMIZED: Uses database query instead of loading all listings into memory
      */
     public List<ListingDTO> getFollowingListings(User currentUser, List<String> categories, 
                                                   Double minPrice, Double maxPrice, 
@@ -244,23 +245,22 @@ public class ListingService {
             return List.of();
         }
         
-        // Get all listings from followed users
-        List<Listing> followedListings = listingRepository.findAll().stream()
-            .filter(listing -> followingUserIds.contains(listing.getUserGU()))
-            .collect(Collectors.toList());
-        
-        // Apply filters
-        List<Listing> filteredListings = followedListings.stream()
-            // Category filter
-            .filter(listing -> categories == null || categories.isEmpty() || categories.contains(listing.getCategory()))
-            // Price filters
-            .filter(listing -> minPrice == null || listing.getPrice() >= minPrice)
-            .filter(listing -> maxPrice == null || listing.getPrice() <= maxPrice)
-            .collect(Collectors.toList());
-        
         // Default sort parameters if not provided
         String effectiveSortBy = (sortBy == null || sortBy.isEmpty()) ? "date" : sortBy;
         String effectiveSortOrder = (sortOrder == null || sortOrder.isEmpty()) ? "desc" : sortOrder;
+        
+        // Convert empty list to null for proper JPA query handling
+        List<String> effectiveCategories = (categories != null && !categories.isEmpty()) ? categories : null;
+        
+        // USE OPTIMIZED DATABASE QUERY - prevents N+1 problem by filtering in database
+        List<Listing> filteredListings = listingRepository.findFollowingFiltered(
+            followingUserIds,
+            effectiveCategories,
+            minPrice,
+            maxPrice,
+            effectiveSortBy,
+            effectiveSortOrder
+        );
         
         // Trim search query and convert empty to null
         String effectiveSearchQuery = (searchQuery != null && !searchQuery.trim().isEmpty()) ? searchQuery.trim().toLowerCase() : null;
@@ -271,9 +271,6 @@ public class ListingService {
         }
         
         // No search query, return normally sorted results
-        Comparator<Listing> comparator = getComparator(effectiveSortBy, effectiveSortOrder);
-        filteredListings.sort(comparator);
-        
         return filteredListings.stream()
             .map(this::toDto)
             .collect(Collectors.toList());

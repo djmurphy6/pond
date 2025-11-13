@@ -59,7 +59,7 @@ export function MessageSellerModal(props: MessageModalProps) {
         if (res instanceof ErrorResponse) {
             toast.error(res.body?.error);
         } else {
-            toast.success("Chat room created successfully");
+            // toast.success("Chat room created successfully");
             setOpen(false);
             onSuccess?.(res.roomId, message);
         }
