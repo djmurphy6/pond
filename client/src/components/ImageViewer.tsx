@@ -21,7 +21,7 @@ export default function ImageViewer({ images }: { images: string[] }) {
                         alt={`Listing image ${index + 1}`}
                         fill
                         priority
-                        className="py-20 object-contain transition-all duration-300 ease-in-out select-none"
+                        className="py-4 md:py-20 object-contain transition-all duration-300 ease-in-out select-none"
                     />
                 )}
 
@@ -68,7 +68,7 @@ export default function ImageViewer({ images }: { images: string[] }) {
                         <button
                             key={i}
                             onClick={() => setIndex(i)}
-                            className={`relative w-20 h-14 rounded-md overflow-hidden border transition-all ${i === index ? "border-white scale-105" : "border-transparent opacity-70"
+                            className={`relative w-15 h-10 md:w-20 md:h-14 rounded-md overflow-hidden border transition-all ${i === index ? "border-white scale-105" : "border-transparent opacity-70"
                                 }`}
                         >
                             <Image src={img} alt={`Thumbnail ${i + 1}`} fill className="object-cover" />

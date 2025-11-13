@@ -52,7 +52,7 @@ export default function ListingCard({ item, index = 0 }: { item: Listing; index?
     const isPriority = index < 4;
 
     return (
-        <Card className={`${theme !== 'dark' && 'hover:shadow-lg'} hover:underline hover:-translate-y-1 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}>
+        <Card className={`${theme !== 'dark' && 'hover:shadow-lg'} hover:underline hover:-translate-y-1 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer py-0 overflow-hidden`}>
             <Link href={`/dashboard/listing/${item.listingGU}`}>
                 <div
                     className="relative h-40 w-full flex items-center justify-center overflow-hidden transition-colors duration-300"

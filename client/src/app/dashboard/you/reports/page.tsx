@@ -14,6 +14,7 @@ import {
     CheckCircle,
     XCircle,
     Trash2,
+    Menu,
 } from "lucide-react";
 
 // API
@@ -29,6 +30,8 @@ import { Separator } from "@/components/ui/separator";
 
 //Internal
 import { MyAccountPopover } from "@/components/MyAccountPopover";
+import ThemeToggle from "@/components/ThemeToggle";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 export default function ReportsPage() {
     const [outgoingReports, setOutgoingReports] = useState<ReportDTO[]>([]);
@@ -37,6 +40,7 @@ export default function ReportsPage() {
     const [loadingOutgoing, setLoadingOutgoing] = useState(true);
     const [loadingIncoming, setLoadingIncoming] = useState(true);
     const { theme } = useTheme();
+    const [showSidebar, setShowSidebar] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -70,37 +74,58 @@ export default function ReportsPage() {
         }
     }
 
+    const SideBar = () => (
+        <aside className={`w-64 border-r bg-muted/30 p-4 flex flex-col transition-colors duration-300 min-h-screen ${theme !== "dark" && "md:shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
+            <Button variant={'link'} style={{ color: 'gray', justifyContent: 'flex-start' }} className="!p-0 !px-0 !py-0 hover:underline hover:bg-none cursor-pointer mb-4">
+                <Link style={{ flexDirection: 'row' }} className="flex items-center gap-1" href="/dashboard">
+                    <ArrowLeft />
+                    back to dashboard
+                </Link>
+            </Button>
+
+            {/* Top section */}
+            <div className="flex items-center gap-2 mb-6 justify-between">
+                <h2 className="text-xl font-semibold">My Reports</h2>
+            </div>
+
+            {/* Account */}
+            <div className="mb-4">
+                <MyAccountPopover />
+            </div>
+
+            {/* Stats */}
+            <div className="space-y-2">
+                <div className="text-md text-muted-foreground">
+                    <p>Outgoing: <span className="font-semibold text-foreground">{outgoingReports.length}</span></p>
+                    <p>Incoming: <span className="font-semibold text-foreground">{incomingReports.length}</span></p>
+                </div>
+            </div>
+        </aside>
+    )
+
     if (!mounted) return null;
 
     return (
-        <div className="flex h-screen bg-background transition-colors duration-300">
+        <div className="flex flex-col md:flex-row h-screen bg-background transition-colors duration-300">
             {/* Sidebar */}
-            <aside className={`w-64 border-r bg-muted/10 p-4 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
-                <Button variant={'link'} style={{ color: 'gray', justifyContent: 'flex-start' }} className="!p-0 !px-0 !py-0 hover:underline hover:bg-none cursor-pointer mb-4">
-                    <Link style={{ flexDirection: 'row' }} className="flex items-center gap-1" href="/dashboard">
-                        <ArrowLeft />
-                        back to dashboard
-                    </Link>
-                </Button>
+            <div className="hidden md:flex">
+                <SideBar />
+            </div>
 
-                {/* Top section */}
-                <div className="flex items-center gap-2 mb-6 justify-between">
-                    <h2 className="text-xl font-semibold">My Reports</h2>
-                </div>
+            <Sheet open={showSidebar} onOpenChange={setShowSidebar}>
+                <SheetTitle className="sr-only">My Reports</SheetTitle>
+                <SheetContent side="left" className="w-64">
+                    <SideBar />
+                </SheetContent>
+            </Sheet>
 
-                {/* Account */}
-                <div className="mb-4">
-                    <MyAccountPopover />
-                </div>
-
-                {/* Stats */}
-                <div className="space-y-2">
-                    <div className="text-md text-muted-foreground">
-                        <p>Outgoing: <span className="font-semibold text-foreground">{outgoingReports.length}</span></p>
-                        <p>Incoming: <span className="font-semibold text-foreground">{incomingReports.length}</span></p>
-                    </div>
-                </div>
-            </aside>
+            <div className="flex md:hidden items-center justify-between p-4 border-b bg-muted/40 sticky top-0 z-20">
+                <button onClick={() => setShowSidebar(true)} className="flex items-center gap-2">
+                    <Menu className="h-8 w-8" />
+                </button>
+                <span className="font-bold text-2xl">Pond</span>
+                <ThemeToggle />
+            </div>
 
             {/* Main content */}
             <main className="flex-1 overflow-y-auto p-6 transition-colors duration-300">
@@ -114,7 +139,7 @@ export default function ReportsPage() {
                         <p className="text-muted-foreground mb-6 text-base">
                             These are reports you've filed against other listings.
                         </p>
-                        
+
                         {loadingOutgoing ? (
                             <div className="space-y-4">
                                 {Array.from({ length: 3 }).map((_, i) => (
@@ -154,7 +179,7 @@ export default function ReportsPage() {
                         <p className="text-muted-foreground mb-6 text-base">
                             These are reports that others have filed against your listings.
                         </p>
-                        
+
                         {loadingIncoming ? (
                             <div className="space-y-4">
                                 {Array.from({ length: 3 }).map((_, i) => (
@@ -226,16 +251,16 @@ function ReportCard({ report, type }: { report: ReportDTO; type: "outgoing" | "i
     };
 
     const formatReason = (reason: ReportReason) => {
-        return reason.split('_').map(word => 
+        return reason.split('_').map(word =>
             word.charAt(0) + word.slice(1).toLowerCase()
         ).join(' ');
     };
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
@@ -250,7 +275,7 @@ function ReportCard({ report, type }: { report: ReportDTO; type: "outgoing" | "i
                         <div className="flex items-center gap-2 mb-2">
                             <h3 className="font-semibold text-lg">
                                 {type === "outgoing" ? "Against: " : "Your listing: "}
-                                <Link 
+                                <Link
                                     href={`/dashboard/listing/${report.listingGU}`}
                                     className="text-primary hover:underline"
                                 >
@@ -258,13 +283,13 @@ function ReportCard({ report, type }: { report: ReportDTO; type: "outgoing" | "i
                                 </Link>
                             </h3>
                         </div>
-                        
+
                         {type === "incoming" && (
                             <p className="text-sm text-muted-foreground mb-2">
                                 Reported by: <span className="font-medium">{report.username}</span>
                             </p>
                         )}
-                        
+
                         <div className="flex flex-wrap items-center gap-2 mb-3">
                             <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
                                 {getStatusIcon(report.status)}
@@ -274,13 +299,13 @@ function ReportCard({ report, type }: { report: ReportDTO; type: "outgoing" | "i
                                 {formatReason(report.reason)}
                             </span>
                         </div>
-                        
+
                         {report.message && (
                             <p className="text-sm text-muted-foreground mb-2">
                                 <span className="font-medium">Details:</span> {report.message}
                             </p>
                         )}
-                        
+
                         {report.adminNotes && (
                             <div className="mt-3 p-3 bg-muted/50 rounded-md">
                                 <p className="text-sm font-medium mb-1">Admin Notes:</p>
@@ -289,7 +314,7 @@ function ReportCard({ report, type }: { report: ReportDTO; type: "outgoing" | "i
                         )}
                     </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>Reported: {formatDate(report.createdAt)}</span>
                     {report.reviewedAt && (
