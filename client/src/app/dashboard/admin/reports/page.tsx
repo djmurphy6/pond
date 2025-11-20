@@ -34,6 +34,8 @@ import { Textarea } from "@/components/ui/textarea";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import MobileHeader from "@/components/MobileHeader";
+import { SideBarAside } from "@/components/SideBarAside";
 
 const REPORT_REASON_LABELS: Record<ReportReason, string> = {
     [ReportReason.INAPPROPRIATE_CONTENT]: "Inappropriate Content",
@@ -147,7 +149,7 @@ export default function AdminReportsPage() {
     }
 
     const SideBar = () => (
-        <aside className={`w-64 border-r bg-muted/30 p-6 flex flex-col transition-colors duration-300 min-h-screen`}>
+        <SideBarAside>
             <Button variant={'link'} style={{ color: 'gray', justifyContent: 'flex-start' }} className="!p-0 !px-0 !py-0 hover:underline hover:bg-none cursor-pointer mb-4">
                 <Link style={{ flexDirection: 'row' }} className="flex items-center gap-1" href="/dashboard">
                     <ArrowLeft />
@@ -170,7 +172,7 @@ export default function AdminReportsPage() {
                     Logged in as <span className="font-medium">@{userInfo.username}</span>
                 </p>
             </div>
-        </aside>
+        </SideBarAside>
     )
 
     return (
@@ -187,17 +189,12 @@ export default function AdminReportsPage() {
                 </SheetContent>
             </Sheet>
 
-            <div className="flex md:hidden items-center justify-between p-4 border-b bg-muted/40 sticky top-0 z-20">
-                <button onClick={() => setShowSidebar(true)} className="flex items-center gap-2">
-                    <Menu className="h-8 w-8" />
-                </button>
-                <span className="font-bold text-2xl">Pond</span>
-                <ThemeToggle />
-            </div>
+            <MobileHeader onPress={setShowSidebar} />
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col">
-                <div className="border-b bg-background p-6">
+                <div className={`sticky top-0 z-10 p-6 border-b bg-muted/40 backdrop-blur-sm transition-colors duration-300 ${theme !== "dark" && "shadow-sm"
+                                }`}>
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-3xl font-bold flex items-center gap-2">

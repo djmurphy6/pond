@@ -290,8 +290,8 @@ export default function ListingPage() {
     )
 
     return (
-        <div className="flex flex-col md:flex-row h-screen bg-background transition-colors duration-300">
-            <Button variant={"ghost"} style={{ zIndex: 2, top: 10, left: 10, height: 50, width: 50, backgroundColor: 'var(--accent)', }} className="absolute border rounded-full cursor-pointer hover:opacity-80">
+        <div className={`flex flex-col md:flex-row h-screen bg-background transition-colors duration-300`}>
+            <Button variant={"ghost"} style={{ zIndex: 2, top: 10, left: 10, height: 50, width: 50, backgroundColor: theme !== "dark" ? "#cccccc" : "var(--accent)", }} className="absolute border rounded-full cursor-pointer hover:opacity-80">
                 <Link href={'/dashboard'}>
                     <X style={{ height: 25, width: 25, }} />
                 </Link>

@@ -39,6 +39,8 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useSearchParams, useRouter } from "next/navigation";
 import FullScreenSpinner from "@/components/FullScreenSpiner";
 import { useUnreadCount } from "@/stores/UnreadCountStore";
+import MobileHeader from "@/components/MobileHeader";
+import { SideBarAside } from "@/components/SideBarAside";
 
 export default function MessagingPage() {
 
@@ -99,7 +101,7 @@ export default function MessagingPage() {
     useEffect(() => {
         // Create a unique key for this message send attempt
         const messageKey = message && roomId ? `${roomId}:${message}` : null;
-        
+
         if (
             message &&
             roomId &&
@@ -169,7 +171,7 @@ export default function MessagingPage() {
     const selectedRoom = chatRooms.find(room => room.roomId === selectedRoomId);
 
     const SideBar = () => (
-        <aside className={`w-80 border-r bg-muted/30 p-4 flex flex-col transition-colors duration-300 min-h-screen ${theme !== "dark" && "md:shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
+        <SideBarAside className="w-80">
             {/* Header */}
             <Button variant={'link'} style={{ color: 'gray', justifyContent: 'flex-start' }} className="!p-0 !px-0 !py-0 hover:underline hover:bg-none cursor-pointer">
                 <Link style={{ flexDirection: 'row' }} className="flex items-center gap-1" href="/dashboard">
@@ -219,7 +221,7 @@ export default function MessagingPage() {
                     </div>
                 )}
             </ScrollArea>
-        </aside>
+        </SideBarAside>
     )
 
     if (!mounted) return null;
@@ -238,13 +240,7 @@ export default function MessagingPage() {
                 </SheetContent>
             </Sheet>
 
-            <div className="flex md:hidden items-center justify-between p-4 border-b bg-muted/40 sticky top-0 z-20">
-                <button onClick={() => setShowSidebar(true)} className="flex items-center gap-2">
-                    <Menu className="h-8 w-8" />
-                </button>
-                <span className="font-bold text-2xl">Pond</span>
-                <ThemeToggle />
-            </div>
+            <MobileHeader onPress={setShowSidebar} />
 
             {/* Main Chat Area */}
             <main className="relative flex-1 flex flex-col min-h-0 transition-colors duration-300">
@@ -252,7 +248,7 @@ export default function MessagingPage() {
                     <>
                         {/* Chat Header */}
                         <div
-                            className={`sticky top-0 z-10 p-4 border-b bg-muted/20 backdrop-blur-sm transition-colors duration-300 ${theme !== "dark" && "shadow-sm"
+                            className={`sticky top-0 z-10 p-4 border-b bg-muted/30 backdrop-blur-sm transition-colors duration-300 ${theme !== "dark" && "shadow-sm"
                                 }`}
                         >
                             <div className="flex items-center gap-3">
@@ -393,9 +389,9 @@ function ChatRoomItem({ room, isSelected, onClick }: { room: ChatRoom; isSelecte
     return (
         <button
             onClick={onClick}
-            className={`w-full p-3 rounded-lg text-left transition-all duration-200 ${isSelected
+            className={`w-full p-3 rounded-lg text-left transition-all duration-200 cursor-pointer ${isSelected
                 ? "bg-primary/10 border border-primary/20"
-                : "hover:bg-muted/50"
+                : theme !== "dark" ? "hover:bg-background" : "hover:bg-muted/70"
                 }`}
         >
             <div className="flex gap-3">
@@ -443,7 +439,7 @@ function MessageBubble({ message, isOwn }: { message: Message; isOwn: boolean })
                     ? "bg-gradient-to-br from-green-700 to-emerald-600 text-white"
                     : theme === "dark"
                         ? "bg-muted"
-                        : "bg-muted/50"
+                        : "bg-[#ffffff]"
                     }`}
             >
                 <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>

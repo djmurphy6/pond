@@ -45,6 +45,8 @@ import EditListingModal from "./Components/EditListingModal";
 import DeleteListingModal from "./Components/DeleteListingModal";
 import { MyAccountPopover } from "@/components/MyAccountPopover";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import MobileHeader from "@/components/MobileHeader";
+import { SideBarAside } from "@/components/SideBarAside";
 
 export default function SellingPage() {
     const [listings, setListings] = useState<Listing[]>([]);
@@ -91,7 +93,7 @@ export default function SellingPage() {
     }
 
     const SideBar = () => (
-        <aside className={`w-64 border-r bg-muted/30 p-4 flex flex-col min-h-screen transition-colors duration-300 ${theme !== "dark" && "md:shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
+        <SideBarAside>
             <Button variant={'link'} style={{ color: 'gray', justifyContent: 'flex-start' }} className="!p-0 !px-0 !py-0 hover:underline hover:bg-none cursor-pointer">
                 <Link style={{ flexDirection: 'row' }} className="flex items-center gap-1" href="/dashboard">
                     <ArrowLeft />
@@ -112,12 +114,12 @@ export default function SellingPage() {
 
             {/* Create Listing */}
             <CreateListingModal onSuccess={GetMyListings} />
-        </aside>
+        </SideBarAside>
     )
 
     if (!mounted) return null;
     return (
-        <div className="flex flex-col md:flex-row h-screen bg-background transition-colors duration-300">
+        <div className={`flex flex-col md:flex-row h-screen ${theme !== "dark" ? "bg-[#ffffff]" : "bg-muted/30"} transition-colors duration-300`}>
             {/* Sidebar */}
             <div className="hidden md:flex">
                 <SideBar />
@@ -130,16 +132,10 @@ export default function SellingPage() {
                 </SheetContent>
             </Sheet>
 
-            <div className="flex md:hidden items-center justify-between p-4 border-b bg-muted/40 sticky top-0 z-20">
-                <button onClick={() => setShowSidebar(true)} className="flex items-center gap-2">
-                    <Menu className="h-8 w-8" />
-                </button>
-                <span className="font-bold text-2xl">Pond</span>
-                <ThemeToggle />
-            </div>
+            <MobileHeader onPress={setShowSidebar} />
 
             {/* Main content */}
-            <main className="flex-1 overflow-y-auto p-6 transition-colors duration-300">
+            <main className="flex-1 overflow-y-auto p-6 bg-background transition-colors duration-300">
                 {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                         {Array.from({ length: 12 }).map((_, i) => (

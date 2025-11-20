@@ -48,6 +48,8 @@ import ListingCard from "@/components/ListingCard";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useUnreadCount } from "@/stores/UnreadCountStore";
 import { appConfig } from "@/api/WebService";
+import MobileHeader from "@/components/MobileHeader";
+import { SideBarAside } from "@/components/SideBarAside";
 
 export default function DashboardPage() {
     const [listings, setListings] = useState<Listing[]>([]);
@@ -167,13 +169,7 @@ export default function DashboardPage() {
                 </SheetContent>
             </Sheet>
 
-            <div className="flex md:hidden items-center justify-between p-4 border-b bg-muted/40 sticky top-0 z-20">
-                <button onClick={() => setShowSidebar(true)} className="flex items-center gap-2">
-                    <Menu className="h-8 w-8" />
-                </button>
-                <span className="font-bold text-2xl">Pond</span>
-                <ThemeToggle />
-            </div>
+            <MobileHeader onPress={setShowSidebar} />
 
             {/* Main content */}
             <main className="flex-1 overflow-y-auto p-6 transition-colors duration-300">
@@ -234,7 +230,7 @@ const SideBar = (props: SideBarProps) => {
     const { userInfo } = useUserInfoStore()
 
     return (
-        <aside className={`w-64 h-full border-r bg-muted/30 p-0 flex flex-col transition-colors duration-300 ${theme !== "dark" && "shadow-[2px_0_10px_rgba(0,0,0,0.15)]"}`}>
+        <SideBarAside className="p-0">
             {/* Top section */}
             <div className="flex items-center gap-2 justify-between p-4">
                 <h2 className="text-xl font-semibold">Pond</h2>
@@ -409,6 +405,6 @@ const SideBar = (props: SideBarProps) => {
                     </div>
                 </div>
             </div>
-        </aside>
+        </SideBarAside>
     )
 }

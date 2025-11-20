@@ -57,7 +57,7 @@ export default function ListingCard({ item, index = 0 }: { item: Listing; index?
                 <div
                     className="relative h-40 w-full flex items-center justify-center overflow-hidden transition-colors duration-300"
                     style={{
-                        backgroundColor: theme === "dark" ? "#111111" : "#ededed",
+                        backgroundColor: theme === "dark" ? "#111111" : "#f3f3f3",
                         transition: "background-color 300ms ease-in-out",
                     }}
                 >
