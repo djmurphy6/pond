@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pond.server.dto.CreateListingRequest;
@@ -43,22 +44,27 @@ public class ListingController {
     }
 
     @PostMapping("/filter")
-    public ResponseEntity<?> filter(@RequestBody FilterListingsRequest req) {
-        List<ListingDTO> list = listingService.getFiltered(
+    public ResponseEntity<?> filter(@RequestBody FilterListingsRequest req,
+                                    @RequestParam(name = "page", defaultValue = "0") int page,
+                                    @RequestParam(name = "size", defaultValue = "2") int size) {
+        List<ListingDTO> list = listingService.getFilteredPaged(
             req.getCategories(), 
             req.getMinPrice(), 
             req.getMaxPrice(), 
             req.getSortBy(), 
             req.getSortOrder(),
-            req.getSearchQuery()
+            req.getSearchQuery(),
+            page,
+            size
         );
         return ResponseEntity.ok(list);
     }
 
     @GetMapping
-    public ResponseEntity<?> all() {
+    public ResponseEntity<?> all(@RequestParam(name = "page", defaultValue = "0") int page,
+                                 @RequestParam(name = "size", defaultValue = "2") int size) {
         // Return all listings with default sorting (date desc)
-        List<ListingDTO> list = listingService.getFiltered(null, null, null, "date", "desc", null);
+        List<ListingDTO> list = listingService.getFilteredPaged(null, null, null, "date", "desc", null, page, size);
         return ResponseEntity.ok(list);
     }
 
@@ -72,20 +78,24 @@ public class ListingController {
     }
 
     @PostMapping("/following")
-    public ResponseEntity<?> following(@RequestBody FilterListingsRequest req) {
+    public ResponseEntity<?> following(@RequestBody FilterListingsRequest req,
+                                       @RequestParam(name = "page", defaultValue = "0") int page,
+                                       @RequestParam(name = "size", defaultValue = "24") int size) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof User currentUser)) {
             return ResponseEntity.status(401).body(java.util.Map.of("error", "Unauthorized"));
         }
         
-        List<ListingDTO> list = listingService.getFollowingListings(
+        List<ListingDTO> list = listingService.getFollowingListingsPaged(
             currentUser,
             req.getCategories(), 
             req.getMinPrice(), 
             req.getMaxPrice(), 
             req.getSortBy(), 
             req.getSortOrder(),
-            req.getSearchQuery()
+            req.getSearchQuery(),
+            page,
+            size
         );
         return ResponseEntity.ok(list);
     }

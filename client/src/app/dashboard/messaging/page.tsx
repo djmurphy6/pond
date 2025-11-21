@@ -147,7 +147,15 @@ export default function MessagingPage() {
         } else {
             setChatRooms(res);
             if (res.length > 0 && !selectedRoomId) {
-                setSelectedRoomId(res[0].roomId);
+                // Select first room by default (selling rooms first, then buying)
+                const sellingRooms = res.filter(room => room.isSeller);
+                const buyingRooms = res.filter(room => !room.isSeller);
+                
+                if (sellingRooms.length > 0) {
+                    setSelectedRoomId(sellingRooms[0].roomId);
+                } else if (buyingRooms.length > 0) {
+                    setSelectedRoomId(buyingRooms[0].roomId);
+                }
             }
         }
     }
@@ -169,6 +177,10 @@ export default function MessagingPage() {
 
 
     const selectedRoom = chatRooms.find(room => room.roomId === selectedRoomId);
+
+    // Separate chat rooms by role
+    const sellingRooms = chatRooms.filter(room => room.isSeller);
+    const buyingRooms = chatRooms.filter(room => !room.isSeller);
 
     const SideBar = () => (
         <SideBarAside className="w-80">
@@ -209,15 +221,48 @@ export default function MessagingPage() {
                         <p className="text-sm">Start a conversation by messaging a seller</p>
                     </div>
                 ) : (
-                    <div className="p-2 space-y-1">
-                        {chatRooms.map((room) => (
-                            <ChatRoomItem
-                                key={room.roomId}
-                                room={room}
-                                isSelected={room.roomId === selectedRoomId}
-                                onClick={() => setSelectedRoomId(room.roomId)}
-                            />
-                        ))}
+                    <div className="space-y-4">
+                        {/* Selling Section */}
+                        {sellingRooms.length > 0 && (
+                            <div>
+                                <div className="px-3 pb-2">
+                                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                        Selling ({sellingRooms.length})
+                                    </h3>
+                                </div>
+                                <div className="p-2 space-y-1">
+                                    {sellingRooms.map((room) => (
+                                        <ChatRoomItem
+                                            key={room.roomId}
+                                            room={room}
+                                            isSelected={room.roomId === selectedRoomId}
+                                            onClick={() => setSelectedRoomId(room.roomId)}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Buying Section */}
+                        {buyingRooms.length > 0 && (
+                            <div>
+                                <div className="px-3 pb-2">
+                                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                        Buying ({buyingRooms.length})
+                                    </h3>
+                                </div>
+                                <div className="p-2 space-y-1">
+                                    {buyingRooms.map((room) => (
+                                        <ChatRoomItem
+                                            key={room.roomId}
+                                            room={room}
+                                            isSelected={room.roomId === selectedRoomId}
+                                            onClick={() => setSelectedRoomId(room.roomId)}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </ScrollArea>

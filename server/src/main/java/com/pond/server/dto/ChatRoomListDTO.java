@@ -1,16 +1,18 @@
 package com.pond.server.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 // LiST ALL ACTIVE CHAT ROOMS
 @Getter
 @AllArgsConstructor
 public class ChatRoomListDTO {
+
     @JsonProperty("roomId")
     private String roomId;
 
@@ -40,4 +42,7 @@ public class ChatRoomListDTO {
 
     @JsonProperty("unreadCount")
     private long unreadCount;
+
+    @JsonProperty("isSeller")
+    private boolean isSeller;
 }

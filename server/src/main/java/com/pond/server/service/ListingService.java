@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.pond.server.dto.CreateListingRequest;
@@ -111,7 +112,9 @@ public class ListingService {
             l.getPrice(),
             l.getCondition(),
             l.getCategory(),
-            l.getCreatedAt()
+            l.getCreatedAt(),
+            l.getSold(),
+            l.getSoldTo()
         );
     }
 
@@ -130,18 +133,39 @@ public class ListingService {
         // Trim search query and convert empty to null
         String effectiveSearchQuery = (searchQuery != null && !searchQuery.trim().isEmpty()) ? searchQuery.trim().toLowerCase() : null;
         
-        // Fetch listings from database with category and price filters (no search query in DB)
-        List<Listing> listings = listingRepository.findFiltered(effectiveCategories, minPrice, maxPrice, effectiveSortBy, effectiveSortOrder, null);
-        
-        // If search query provided, apply fuzzy matching
+        // If search query provided, we need entities for fuzzy matching
         if (effectiveSearchQuery != null && !effectiveSearchQuery.isEmpty()) {
+            List<Listing> listings = listingRepository.findFiltered(effectiveCategories, minPrice, maxPrice, effectiveSortBy, effectiveSortOrder, null);
             return applyFuzzySearch(listings, effectiveSearchQuery, effectiveSortBy, effectiveSortOrder);
         }
         
-        // No search query, return normally sorted results
-        return listings.stream()
-                .map(this::toDto)
-                .toList();
+        // No search query: directly return DTO projection (avoids entity materialization and mapping)
+        return listingRepository.findFilteredDTOWithLimit(
+            effectiveCategories, minPrice, maxPrice, effectiveSortBy, effectiveSortOrder,
+            PageRequest.of(0, 500)
+        );
+    }
+
+    // Paginated variant for filtered listings
+    public List<ListingDTO> getFilteredPaged(List<String> categories, Double minPrice, Double maxPrice, String sortBy, String sortOrder, String searchQuery, int page, int size) {
+        String effectiveSortBy = (sortBy == null || sortBy.isEmpty()) ? "date" : sortBy;
+        String effectiveSortOrder = (sortOrder == null || sortOrder.isEmpty()) ? "desc" : sortOrder;
+        List<String> effectiveCategories = (categories != null && !categories.isEmpty()) ? categories : null;
+        String effectiveSearchQuery = (searchQuery != null && !searchQuery.trim().isEmpty()) ? searchQuery.trim().toLowerCase() : null;
+
+        if (effectiveSearchQuery != null && !effectiveSearchQuery.isEmpty()) {
+            // For fuzzy search, fetch a page of entities then apply fuzzy scoring
+            List<Listing> listings = listingRepository.findFilteredWithLimit(
+                effectiveCategories, minPrice, maxPrice, effectiveSortBy, effectiveSortOrder, null,
+                PageRequest.of(page, size)
+            );
+            return applyFuzzySearch(listings, effectiveSearchQuery, effectiveSortBy, effectiveSortOrder);
+        }
+
+        return listingRepository.findFilteredDTOWithLimit(
+            effectiveCategories, minPrice, maxPrice, effectiveSortBy, effectiveSortOrder,
+            PageRequest.of(page, size)
+        );
     }
     
     private List<ListingDTO> applyFuzzySearch(List<Listing> listings, String searchQuery, String sortBy, String sortOrder) {
@@ -252,28 +276,74 @@ public class ListingService {
         // Convert empty list to null for proper JPA query handling
         List<String> effectiveCategories = (categories != null && !categories.isEmpty()) ? categories : null;
         
-        // USE OPTIMIZED DATABASE QUERY - prevents N+1 problem by filtering in database
-        List<Listing> filteredListings = listingRepository.findFollowingFiltered(
-            followingUserIds,
-            effectiveCategories,
-            minPrice,
-            maxPrice,
-            effectiveSortBy,
-            effectiveSortOrder
-        );
-        
         // Trim search query and convert empty to null
         String effectiveSearchQuery = (searchQuery != null && !searchQuery.trim().isEmpty()) ? searchQuery.trim().toLowerCase() : null;
         
         // If search query provided, apply fuzzy matching
         if (effectiveSearchQuery != null && !effectiveSearchQuery.isEmpty()) {
+            // need entities for fuzzy matching
+            List<Listing> filteredListings = listingRepository.findFollowingFiltered(
+                followingUserIds,
+                effectiveCategories,
+                minPrice,
+                maxPrice,
+                effectiveSortBy,
+                effectiveSortOrder
+            );
             return applyFuzzySearch(filteredListings, effectiveSearchQuery, effectiveSortBy, effectiveSortOrder);
         }
         
-        // No search query, return normally sorted results
-        return filteredListings.stream()
-            .map(this::toDto)
+        // No search query: use DTO projection with limit
+        return listingRepository.findFollowingFilteredDTOWithLimit(
+            followingUserIds,
+            effectiveCategories,
+            minPrice,
+            maxPrice,
+            effectiveSortBy,
+            effectiveSortOrder,
+            PageRequest.of(0, 500)
+        );
+    }
+
+    // Paginated variant for following listings
+    public List<ListingDTO> getFollowingListingsPaged(User currentUser, List<String> categories,
+                                                      Double minPrice, Double maxPrice,
+                                                      String sortBy, String sortOrder, String searchQuery,
+                                                      int page, int size) {
+        List<UUID> followingUserIds = userFollowingRepository.findByFollowerGU(currentUser.getUserGU())
+            .stream()
+            .map(uf -> uf.getFollowingGU())
             .collect(Collectors.toList());
+        if (followingUserIds.isEmpty()) {
+            return List.of();
+        }
+        String effectiveSortBy = (sortBy == null || sortBy.isEmpty()) ? "date" : sortBy;
+        String effectiveSortOrder = (sortOrder == null || sortOrder.isEmpty()) ? "desc" : sortOrder;
+        List<String> effectiveCategories = (categories != null && !categories.isEmpty()) ? categories : null;
+        String effectiveSearchQuery = (searchQuery != null && !searchQuery.trim().isEmpty()) ? searchQuery.trim().toLowerCase() : null;
+
+        if (effectiveSearchQuery != null && !effectiveSearchQuery.isEmpty()) {
+            List<Listing> filteredListings = listingRepository.findFollowingFilteredWithLimit(
+                followingUserIds,
+                effectiveCategories,
+                minPrice,
+                maxPrice,
+                effectiveSortBy,
+                effectiveSortOrder,
+                PageRequest.of(page, size)
+            );
+            return applyFuzzySearch(filteredListings, effectiveSearchQuery, effectiveSortBy, effectiveSortOrder);
+        }
+
+        return listingRepository.findFollowingFilteredDTOWithLimit(
+            followingUserIds,
+            effectiveCategories,
+            minPrice,
+            maxPrice,
+            effectiveSortBy,
+            effectiveSortOrder,
+            PageRequest.of(page, size)
+        );
     }
 
     public ListingDTO update(UUID id, UpdateListingRequest req, User currentUser) {
@@ -382,7 +452,9 @@ public class ListingService {
             l.getPrice(),
             l.getCondition(),
             l.getCategory(),
-            l.getCreatedAt()
+            l.getCreatedAt(),
+            l.getSold(),
+            l.getSoldTo()
     );
     }
 }

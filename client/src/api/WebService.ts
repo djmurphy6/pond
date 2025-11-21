@@ -114,13 +114,13 @@ class API {
         return this.Request<CreateListingResponse>("/listings/create", "POST", { body }, 'CreateListing');
     }
 
-    async GetListings(filters?: GetListingsRequest): Promise<Listing[] | ErrorResponse> {
+    async GetListings(filters?: GetListingsRequest, page: number = 0, size: number = 20): Promise<Listing[] | ErrorResponse> {
         // If filters are provided, use POST /listings/filter
         if (filters) {
-            return this.Request<Listing[]>("/listings/filter", "POST", { body: filters }, 'GetListings');
+            return this.Request<Listing[]>(`/listings/filter?page=${page}&size=${size}`, "POST", { body: filters }, 'GetListings');
         }
         // Otherwise, use GET /listings for all listings
-        return this.Request<Listing[]>("/listings", "GET", {}, 'GetListings');
+        return this.Request<Listing[]>(`/listings?page=${page}&size=${size}`, "GET", {}, 'GetListings');
     }
 
     async GetSpecificListing(request: GetSpecificListingRequest): Promise<GetSpecificListingResponse | ErrorResponse> {
@@ -248,8 +248,8 @@ class API {
         return this.Request<GetFollowCountsResponse>(`/following/${request.userId}/counts`, "GET", {}, 'GetFollowCounts');
     }
 
-    async GetFollowingListings(filters?: GetListingsRequest): Promise<Listing[] | ErrorResponse> {
-        return this.Request<Listing[]>("/listings/following", "POST", { body: filters || {} }, 'GetFollowingListings');
+    async GetFollowingListings(filters?: GetListingsRequest, page: number = 0, size: number = 20): Promise<Listing[] | ErrorResponse> {
+        return this.Request<Listing[]>(`/listings/following?page=${page}&size=${size}`, "POST", { body: filters || {} }, 'GetFollowingListings');
     }
 }
 

@@ -28,5 +28,8 @@ public class ListingDetailDTO {
     private String category;
     @JsonProperty("createdAt")
     private LocalDateTime createdAt;
+    private Boolean sold;
+    @JsonProperty("soldTo")
+    private UUID soldTo;
 }
 

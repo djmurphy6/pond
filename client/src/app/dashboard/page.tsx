@@ -7,7 +7,7 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
 
 //React and Other
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     ImageIcon,
     Sofa,
@@ -53,6 +53,11 @@ import { SideBarAside } from "@/components/SideBarAside";
 
 export default function DashboardPage() {
     const [listings, setListings] = useState<Listing[]>([]);
+    const PAGE_SIZE = 20; 
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
     const { theme } = useTheme();
@@ -79,16 +84,21 @@ export default function DashboardPage() {
 
         // Debounce price inputs and search to avoid too many API calls while typing
         const timeoutId = setTimeout(() => {
-            GetListings();
+            ResetAndFetch();
         }, 300); // 300ms debounce
 
         return () => clearTimeout(timeoutId);
     }, [selectedCategories, sortOption, minPrice, maxPrice, searchQuery, mounted]);
 
-    async function GetListings() {
+    async function GetListings(nextPage?: number) {
         try {
 
-            setLoading(true);
+            const isInitial = nextPage === undefined || nextPage === 0;
+            if (isInitial) {
+                setLoading(true);
+            } else {
+                setIsLoadingMore(true);
+            }
 
             // Parse sort option (e.g., "date-desc" -> sortBy: "date", sortOrder: "desc")
             const [sortBy, sortOrder] = sortOption.split('-');
@@ -103,19 +113,51 @@ export default function DashboardPage() {
                 searchQuery: searchQuery.trim() || undefined,
             };
 
-            let res = await api.GetListings(filters);
-            setLoading(false);
+            const targetPage = nextPage ?? 0;
+            let res = await api.GetListings(filters, targetPage, PAGE_SIZE);
+            if (isInitial) setLoading(false); else setIsLoadingMore(false);
             if (res instanceof ErrorResponse) {
                 toast.error(res.body?.error);
             } else {
-                console.log(JSON.stringify(res))
-                setListings(res);
+                const newItems = res;
+                setHasMore(newItems.length === PAGE_SIZE);
+                setListings(prev => {
+                    if (targetPage === 0) return newItems;
+                    const existing = new Set(prev.map(l => l.listingGU));
+                    const appended = newItems.filter(i => !existing.has(i.listingGU));
+                    return [...prev, ...appended];
+                });
+                setPage(targetPage);
             }
         } catch (error) {
             setLoading(false);
+            setIsLoadingMore(false);
             toast.error("Failed to fetch listings. Please try again.");
         }
     }
+
+    function ResetAndFetch() {
+        setPage(0);
+        setHasMore(true);
+        setListings([]);
+        GetListings(0);
+    }
+
+    // Infinite scroll sentinel
+    useEffect(() => {
+        if (loading || !hasMore) return;
+        const sentinel = document.getElementById("infinite-sentinel");
+        const root = scrollContainerRef.current ?? null;
+        if (!sentinel) return;
+        const observer = new IntersectionObserver((entries) => {
+            const first = entries[0];
+            if (first.isIntersecting && !isLoadingMore && hasMore) {
+                GetListings(page + 1);
+            }
+        }, { root, rootMargin: "200px" });
+        observer.observe(sentinel);
+        return () => observer.disconnect();
+    }, [page, hasMore, isLoadingMore, loading]);
 
     // Toggle category selection
     const toggleCategory = (category: string) => {
@@ -172,7 +214,7 @@ export default function DashboardPage() {
             <MobileHeader onPress={setShowSidebar} />
 
             {/* Main content */}
-            <main className="flex-1 overflow-y-auto p-6 transition-colors duration-300">
+            <main ref={scrollContainerRef} className="flex-1 overflow-y-auto p-6 transition-colors duration-300">
                 {loading ? (
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                         {Array.from({ length: 12 }).map((_, i) => (
@@ -196,6 +238,21 @@ export default function DashboardPage() {
                         {listings.map((item, index) => (
                             <ListingCard key={item.listingGU} item={item} index={index} />
                         ))}
+                        {/* Sentinel for infinite scroll */}
+                        <div id="infinite-sentinel" className="col-span-full h-8" />
+                        {isLoadingMore && (
+                            <div className="col-span-full grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {Array.from({ length: 8 }).map((_, i) => (
+                                    <Card key={`more-${i}`} className="transition-colors duration-300 py-0">
+                                        <Skeleton className="h-40 w-full rounded-t-md transition-colors duration-300" />
+                                        <CardContent className="p-3">
+                                            <Skeleton className="h-4 w-3/4 mb-2 transition-colors duration-300" />
+                                            <Skeleton className="h-4 w-1/2 transition-colors duration-300" />
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
             </main>

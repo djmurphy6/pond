@@ -50,7 +50,14 @@ public class Listing {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "sold", nullable = false)
+    private Boolean sold;
+
+    @Column(name = "sold_to")
+    private UUID soldTo;
+
     public Listing() {
         this.createdAt = LocalDateTime.now();
+        this.sold = false;
     }
 }

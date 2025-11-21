@@ -97,7 +97,9 @@ public class SavedListingService {
             l.getPrice(),
             l.getCondition(),
             l.getCategory(),
-            l.getCreatedAt()
+            l.getCreatedAt(),
+            l.getSold(),
+            l.getSoldTo()
         );
     }
 }

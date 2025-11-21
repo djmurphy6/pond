@@ -80,6 +80,8 @@ export type Listing = {
     category?: string;
     title: string;
     createdAt: string; // ISO date string
+    sold: boolean;
+    soldTo?: string; // UUID of the user who bought the listing
     //only update
     picture1_base64?: string;
     picture2_base64?: string;
@@ -129,6 +131,7 @@ export type ChatRoom = {
     lastMessage: string;
     lastMessageAt: string;
     unreadCount: number;
+    isSeller: boolean;
 }
 
 export type ChatRoomDetail = {

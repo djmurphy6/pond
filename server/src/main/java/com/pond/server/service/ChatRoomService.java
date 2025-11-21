@@ -1,5 +1,13 @@
 package com.pond.server.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.pond.server.dto.ChatRoomDetailDTO;
 import com.pond.server.dto.ChatRoomListDTO;
 import com.pond.server.model.ChatRoom;
@@ -10,13 +18,6 @@ import com.pond.server.repository.ChatRoomRepository;
 import com.pond.server.repository.ListingRepository;
 import com.pond.server.repository.MessageRepository;
 import com.pond.server.repository.UserRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class ChatRoomService {
@@ -139,6 +140,9 @@ public class ChatRoomService {
             // Get unread message count
             long unreadCount = messageRepository.countUnreadMessages(room.getRoomId(), currentUserGU);
 
+            // Determine if current user is the seller
+            boolean isSeller = room.getSellerGU().equals(currentUserGU);
+
             return new ChatRoomListDTO(
                     room.getRoomId(),
                     listing.getListingGU(),
@@ -149,7 +153,8 @@ public class ChatRoomService {
                     otherUser.getAvatar_url(),
                     lastMessage,
                     room.getLastMessageAt(),
-                    unreadCount
+                    unreadCount,
+                    isSeller
             );
         }).filter(dto -> dto != null).collect(Collectors.toList());
     }
