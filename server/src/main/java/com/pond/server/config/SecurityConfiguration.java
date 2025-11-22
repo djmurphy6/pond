@@ -57,6 +57,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/ws").permitAll()
                         .requestMatchers("/ws-test/*").permitAll() // Make sure websockets are working and its just security blocking
                         .requestMatchers("/chat/**").permitAll()
+                        .requestMatchers("/reviews/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
