@@ -15,7 +15,6 @@ import java.util.UUID;
 @Table(name = "reviews")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
 public class Review {
 
