@@ -3,19 +3,39 @@ package com.pond.server.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.pond.server.dto.UpdateUserRequest;
 import com.pond.server.dto.UserProfileDTO;
+import com.pond.server.model.Listing;
 import com.pond.server.model.User;
+import com.pond.server.repository.ListingRepository;
 import com.pond.server.repository.UserRepository;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    public UserService(UserRepository userRepository){
+    private final ListingRepository listingRepository;
+    private final ListingService listingService;
+    private final SupabaseStorage supabaseStorage;
+    
+    @Value("${supabase.pfp-bucket}")
+    private String pfpBucket;
+    
+    public UserService(
+            UserRepository userRepository,
+            ListingRepository listingRepository,
+            ListingService listingService,
+            SupabaseStorage supabaseStorage
+    ) {
         this.userRepository = userRepository;
+        this.listingRepository = listingRepository;
+        this.listingService = listingService;
+        this.supabaseStorage = supabaseStorage;
     }
 
     public List<User> allUsers(){
@@ -52,6 +72,49 @@ public class UserService {
             savedUser.getBio(), 
             savedUser.getAdmin()
         );
+    }
+
+    @Transactional
+    public void deleteAccount(User user) {
+        UUID userGU = user.getUserGU();
+        
+        // 1. Delete user's avatar from Supabase storage
+        deleteUserAvatar(user);
+        
+        // 2. Delete all listings owned by the user (this handles Supabase image deletion)
+        List<Listing> userListings = listingRepository.findByUserGU(userGU);
+        for (Listing listing : userListings) {
+            listingService.delete(listing.getListingGU(), user);
+        }
+        
+        // 3. Delete the user - database CASCADE will automatically delete:
+        //    - Chat rooms (via seller_gu/buyer_gu foreign keys)
+        //    - Messages (via sender_gu foreign key)
+        //    - Saved listings (via user_gu foreign key)
+        //    - User following relationships (via follower_gu/following_gu foreign keys)
+        // Note: Reports are kept for record-keeping purposes
+        userRepository.delete(user);
+    }
+
+    private void deleteUserAvatar(User user) {
+        String avatarUrl = user.getAvatar_url();
+        if (avatarUrl == null || avatarUrl.isBlank()) {
+            return;
+        }
+        
+        // Extract the key from the avatar URL
+        // Format: {storageUrl}/storage/v1/object/public/{bucket}/{userGU}/{uuid}.jpg
+        String marker = "/storage/v1/object/public/" + pfpBucket + "/";
+        int idx = avatarUrl.indexOf(marker);
+        if (idx >= 0) {
+            String key = avatarUrl.substring(idx + marker.length());
+            try {
+                supabaseStorage.deleteObject(pfpBucket, key);
+            } catch (Exception e) {
+                // Log but don't fail the entire operation if avatar deletion fails
+                System.err.println("Warning: Failed to delete avatar " + avatarUrl + ": " + e.getMessage());
+            }
+        }
     }
 
 }

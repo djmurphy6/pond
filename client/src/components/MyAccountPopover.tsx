@@ -10,17 +10,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Camera, ChevronRight, Loader2, ImageIcon, User } from "lucide-react";
+import { Camera, ChevronRight, Loader2, ImageIcon, User, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/api/WebService";
 import { ErrorResponse, UpdateUserRequest, UploadAvatarRequest } from "@/api/WebTypes";
 import { Separator } from "@/components/ui/separator";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
+import { DeleteAccountModal } from "./DeleteAccountModal";
 
 
 export function MyAccountPopover(props: { onSuccess?: () => void }) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
   const { userInfo, setUserInfo } = useUserInfoStore();
 
@@ -257,7 +259,27 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
             "Save"
           )}
         </Button>
+
+        <Separator className="my-4 transition-colors duration-300" />
+
+        <Button
+          variant="destructive"
+          onClick={() => {
+            setOpen(false);
+            setDeleteAccountOpen(true);
+          }}
+          className="w-full cursor-pointer"
+          disabled={isLoading}
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete Account
+        </Button>
       </PopoverContent>
+
+      <DeleteAccountModal
+        open={deleteAccountOpen}
+        onOpenChange={setDeleteAccountOpen}
+      />
     </Popover>
   );
 }

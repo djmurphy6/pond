@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -60,6 +61,20 @@ public class UserController {
         try {
             UserProfileDTO updatedProfile = userService.updateUserProfile(currentUser, updateRequest);
             return ResponseEntity.ok(updatedProfile);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deleteAccount() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User currentUser)) {
+            return ResponseEntity.status(401).body(java.util.Map.of("error", "Unauthorized"));
+        }
+        try {
+            userService.deleteAccount(currentUser);
+            return ResponseEntity.ok(java.util.Map.of("message", "Account deleted successfully"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
         }

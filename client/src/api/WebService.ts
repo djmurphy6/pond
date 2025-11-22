@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse, CreateReportRequest, ReportDTO, ReportsPageResponse, UpdateReportRequest, GetSpecificListingResponse, GetSpecificUserListingsRequest, FollowUserRequest, FollowUserResponse, UnfollowUserRequest, UnfollowUserResponse, CheckFollowingStatusRequest, CheckFollowingStatusResponse, GetFollowingListResponse, GetFollowersListResponse, GetFollowCountsRequest, GetFollowCountsResponse, UnreadCountResponse } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse, CreateReportRequest, ReportDTO, ReportsPageResponse, UpdateReportRequest, GetSpecificListingResponse, GetSpecificUserListingsRequest, FollowUserRequest, FollowUserResponse, UnfollowUserRequest, UnfollowUserResponse, CheckFollowingStatusRequest, CheckFollowingStatusResponse, GetFollowingListResponse, GetFollowersListResponse, GetFollowCountsRequest, GetFollowCountsResponse, UnreadCountResponse, MarkListingAsSoldRequest, MarkListingAsSoldResponse, DeleteAccountRequest, DeleteAccountResponse } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -143,6 +143,15 @@ class API {
         return this.Request<Listing[]>(`/listings/${request.listingGU}`, "DELETE", {}, 'DeleteListing');
     }
 
+    async MarkListingAsSold(request: MarkListingAsSoldRequest): Promise<MarkListingAsSoldResponse | ErrorResponse> {
+        return this.Request<MarkListingAsSoldResponse>(`/listings/${request.listingGU}/sold`, "PUT", { 
+            body: { 
+                sold: request.sold, 
+                soldTo: request.soldTo 
+            } 
+        }, 'MarkListingAsSold');
+    }
+
     // Messaging
     async GetChatRooms(): Promise<ChatRoom[] | ErrorResponse> {
         return this.Request<ChatRoom[]>("/chat/rooms", "GET", {}, 'GetChatRooms');
@@ -171,6 +180,10 @@ class API {
     // User Profile
     async UpdateUserProfile(body: UpdateUserRequest): Promise<UpdateUserResponse | ErrorResponse> {
         return this.Request<UpdateUserResponse>("/users/me/update", "PUT", { body }, 'UpdateUserProfile');
+    }
+
+    async DeleteAccount(request: DeleteAccountRequest = {}): Promise<DeleteAccountResponse | ErrorResponse> {
+        return this.Request<DeleteAccountResponse>("/users/me", "DELETE", {}, 'DeleteAccount');
     }
 
     async UploadAvatar(body: UploadAvatarRequest): Promise<UploadAvatarResponse | ErrorResponse> {

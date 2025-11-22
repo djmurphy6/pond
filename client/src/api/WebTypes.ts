@@ -111,6 +111,15 @@ export type DeleteListingRequest = {
     listingGU: string;
 }
 
+//MARK LISTING AS SOLD
+export type MarkListingAsSoldRequest = {
+    listingGU: string;
+    sold: boolean;
+    soldTo?: string; // UUID of the buyer (optional)
+}
+
+export type MarkListingAsSoldResponse = Listing;
+
 // MESSAGING
 
 export type InitChatRoomRequest = {
@@ -325,4 +334,13 @@ export type GetFollowCountsRequest = {
 export type GetFollowCountsResponse = {
     followers: number;
     following: number;
+}
+
+//DELETE ACCOUNT
+export type DeleteAccountRequest = {
+    // Empty - authentication handled by token
+}
+
+export type DeleteAccountResponse = {
+    message: string;
 }

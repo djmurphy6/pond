@@ -13,11 +13,14 @@ import org.springframework.stereotype.Service;
 import com.pond.server.dto.CreateListingRequest;
 import com.pond.server.dto.ListingDTO;
 import com.pond.server.dto.ListingDetailDTO;
+import com.pond.server.dto.MarkListingAsSoldRequest;
 import com.pond.server.dto.ScoredListing;
 import com.pond.server.dto.UpdateListingRequest;
 import com.pond.server.model.Listing;
 import com.pond.server.model.User;
 import com.pond.server.repository.ListingRepository;
+import com.pond.server.repository.ReportRepository;
+import com.pond.server.repository.ResolvedReportRepository;
 import com.pond.server.repository.UserFollowingRepository;
 import com.pond.server.repository.UserRepository;
 
@@ -28,6 +31,8 @@ public class ListingService {
     private final SupabaseStorage supabaseStorage;
     private final UserRepository userRepository;
     private final UserFollowingRepository userFollowingRepository;
+    private final ReportRepository reportRepository;
+    private final ResolvedReportRepository resolvedReportRepository;
     
     @Value("${supabase.listing-bucket}")
     private String listingBucket;
@@ -36,12 +41,16 @@ public class ListingService {
                           ImageService imageService,
                           SupabaseStorage supabaseStorage,
                           UserRepository userRepository,
-                          UserFollowingRepository userFollowingRepository) {
+                          UserFollowingRepository userFollowingRepository,
+                          ReportRepository reportRepository,
+                          ResolvedReportRepository resolvedReportRepository) {
         this.listingRepository = listingRepository;
         this.imageService = imageService;
         this.supabaseStorage = supabaseStorage;
         this.userRepository = userRepository;
         this.userFollowingRepository = userFollowingRepository;
+        this.reportRepository = reportRepository;
+        this.resolvedReportRepository = resolvedReportRepository;
     }
 
     public ListingDTO create(CreateListingRequest req, User owner) {
@@ -410,6 +419,38 @@ public class ListingService {
                 return toDto(l);
     }
 
+    public ListingDTO markAsSold(UUID listingId, MarkListingAsSoldRequest req, User currentUser) {
+        // Admins can mark any listing as sold, regular users can only mark their own
+        Listing l;
+        if (currentUser.getAdmin()) {
+            l = listingRepository.findById(listingId)
+                    .orElseThrow(() -> new RuntimeException("Listing not found"));
+        } else {
+            l = listingRepository.findByListingGUAndUserGU(listingId, currentUser.getUserGU())
+                    .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
+        }
+
+        // Update sold status
+        if (req.getSold() != null) {
+            l.setSold(req.getSold());
+            
+            // If marking as sold, set soldTo if provided
+            // If marking as unsold, clear soldTo
+            if (req.getSold()) {
+                l.setSoldTo(req.getSoldTo()); // Can be null if not specified
+            } else {
+                l.setSoldTo(null); // Clear soldTo when marking as unsold
+            }
+        } else if (req.getSoldTo() != null) {
+            // If only soldTo is provided (without sold flag), assume marking as sold
+            l.setSold(true);
+            l.setSoldTo(req.getSoldTo());
+        }
+
+        l = listingRepository.save(l);
+        return toDto(l);
+    }
+
     public void delete(UUID id, User currentUser) {
         // Admins can delete any listing, regular users can only delete their own
         Listing l;
@@ -420,6 +461,12 @@ public class ListingService {
             l = listingRepository.findByListingGUAndUserGU(id, currentUser.getUserGU())
                     .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
         }
+        
+        // Delete reports and resolved reports before deleting listing
+        // (This will be handled by CASCADE DELETE after migration, but keeping it for safety)
+        reportRepository.findByListingGU(id).forEach(report -> reportRepository.delete(report));
+        resolvedReportRepository.findByListingGU(id).forEach(resolvedReport -> resolvedReportRepository.delete(resolvedReport));
+        
         deleteListingImage(l.getPicture1_url());
         deleteListingImage(l.getPicture2_url());
         listingRepository.delete(l);
