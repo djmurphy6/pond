@@ -1,0 +1,166 @@
+### Environment variables
+@baseUrl = http://localhost:8080
+@contentType = application/json
+
+### Variables to store tokens and IDs
+# These will be populated automatically by the scripts in the requests below
+@sellerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZWxsZXJfcmV2QHRlc3QuY29tIiwiaWF0IjoxNzYzODc1NTUzLCJleHAiOjE3NjM4NzU4NTN9.4UD7jLsfk8CXAw4X1SJztZwX5OaZKeUowSYmrAgaf-I
+@buyerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllcl9yZXZAdGVzdC5jb20iLCJpYXQiOjE3NjM4NzU1NzgsImV4cCI6MTc2Mzg3NTg3OH0.Egter3Kzd54mCzcUHrL4D8c0OfdDWCRYAv9-7pEzVp4
+@sellerGU = aa238d78-b8a4-41e6-b43d-0b47c8c56da9
+@buyerGU = 25ee22e4-8bf6-42b7-8dfa-3a8b625c5ac8
+@listingGU = 854f1497-2e65-4c99-afdd-c5f2a8eab8ce
+@reviewId = 45e67b83-8232-4200-9679-4eccd0dd301b
+
+###############################################
+### 1. SETUP USERS & AUTH
+###############################################
+
+### 1.1 Register Seller
+# @name registerSeller
+POST {{baseUrl}}/auth/signup
+Content-Type: {{contentType}}
+
+{
+  "username": "review_seller",
+  "email": "seller_rev@test.com",
+  "password": "password123"
+}
+
+### 1.2 Register Buyer
+# @name registerBuyer
+POST {{baseUrl}}/auth/signup
+Content-Type: {{contentType}}
+
+{
+  "username": "review_buyer",
+  "email": "buyer_rev@test.com",
+  "password": "password123"
+}
+
+### 1.3 Verify Seller (You'll need to grab the code from the console logs)
+# Replace '123456' with the code printed in your Spring Boot console
+POST {{baseUrl}}/auth/verify
+Content-Type: {{contentType}}
+
+{
+  "email": "seller_rev@test.com",
+  "verificationCode": "227637"
+}
+
+### 1.4 Verify Buyer (You'll need to grab the code from the console logs)
+# Replace '123456' with the code printed in your Spring Boot console
+POST {{baseUrl}}/auth/verify
+Content-Type: {{contentType}}
+
+{
+  "email": "buyer_rev@test.com",
+  "verificationCode": "170854"
+}
+
+### 1.5 Login Seller
+# @name loginSeller
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "seller_rev@test.com",
+  "password": "password123"
+}
+
+### 1.6 Login Buyer
+# @name loginBuyer
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "buyer_rev@test.com",
+  "password": "password123"
+}
+
+###############################################
+### 2. SETUP TRANSACTION (Required for Review)
+###############################################
+
+### 2.1 Create Listing (as Seller)
+# @name createListing
+POST {{baseUrl}}/listings/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{sellerToken}}
+
+{
+  "title": "Reviewable Item",
+  "description": "An item specifically for testing reviews",
+  "price": 50,
+  "condition": "New",
+  "category": "Tech"
+}
+
+### 2.2 Mark Listing as Sold to Buyer (as Seller)
+# CRITICAL STEP: This establishes the relationship required to leave a review
+PUT {{baseUrl}}/listings/{{listingGU}}/sold
+Content-Type: {{contentType}}
+Authorization: Bearer {{sellerToken}}
+
+{
+  "sold": true,
+  "soldTo": "{{buyerGU}}"
+}
+
+###############################################
+### 3. REVIEW OPERATIONS
+###############################################
+
+### 3.1 Create Review (Buyer reviews Seller)
+# @name createReview
+POST {{baseUrl}}/reviews
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+{
+  "listingGU": "{{listingGU}}",
+  "rating": 5,
+  "comment": "Smooth transaction, item as described!"
+}
+
+### 3.2 Get Reviews for Seller
+# Check if the review appears on the seller's profile
+GET {{baseUrl}}/reviews/user/{{sellerGU}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+### 3.3 Get Rating Stats for Seller
+# Check aggregate stats
+GET {{baseUrl}}/reviews/stats/{{sellerGU}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+### 3.4 Update Review (as Buyer)
+PUT {{baseUrl}}/reviews/{{reviewId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+{
+  "rating": 4,
+  "comment": "Actually, shipping was a bit slow, but still good."
+}
+
+### 3.5 Try to Create Duplicate Review (Should Fail)
+POST {{baseUrl}}/reviews
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+{
+  "listingGU": "{{listingGU}}",
+  "rating": 1,
+  "comment": "Trying to spam reviews"
+}
+
+### 3.6 Delete Review (as Buyer)
+DELETE {{baseUrl}}/reviews/{{reviewId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
+
+### 3.7 Verify Deletion (Get Reviews again)
+GET {{baseUrl}}/reviews/user/{{sellerGU}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{buyerToken}}
