@@ -1,11 +1,12 @@
 package com.pond.server.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 // GET A SPECIFiC CHAT ROOM
 @Getter
@@ -40,4 +41,10 @@ public class ChatRoomDetailDTO {
 
     @JsonProperty("lastMessageAt")
     private LocalDateTime lastMessageAt;
+
+    @JsonProperty("listingSold")
+    private Boolean listingSold;
+
+    @JsonProperty("isSeller")
+    private Boolean isSeller;
 }

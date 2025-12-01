@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pond.server.dto.CreateListingRequest;
 import com.pond.server.dto.FilterListingsRequest;
 import com.pond.server.dto.ListingDTO;
-import com.pond.server.dto.MarkListingAsSoldRequest;
 import com.pond.server.dto.UpdateListingRequest;
 import com.pond.server.model.User;
 import com.pond.server.service.ListingService;
@@ -116,13 +115,13 @@ public class ListingController {
 
     }
 
-    @PutMapping("/{id}/sold")
-    public ResponseEntity<?> markAsSold(@PathVariable("id") UUID id, @RequestBody MarkListingAsSoldRequest req) {
+    @PostMapping("/{id}/toggle-sold")
+    public ResponseEntity<?> toggleSold(@PathVariable("id") UUID id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof User currentUser)) {
             return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
         }
-        return ResponseEntity.ok(listingService.markAsSold(id, req, currentUser));
+        return ResponseEntity.ok(listingService.toggleSold(id, currentUser));
     }
 
     @DeleteMapping("/{id}")

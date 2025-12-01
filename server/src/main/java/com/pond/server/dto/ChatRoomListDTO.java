@@ -45,4 +45,7 @@ public class ChatRoomListDTO {
 
     @JsonProperty("isSeller")
     private boolean isSeller;
+
+    @JsonProperty("listingSold")
+    private boolean listingSold;
 }

@@ -141,6 +141,7 @@ export type ChatRoom = {
     lastMessageAt: string;
     unreadCount: number;
     isSeller: boolean;
+    listingSold: boolean;
 }
 
 export type ChatRoomDetail = {
@@ -154,6 +155,8 @@ export type ChatRoomDetail = {
     otherUserAvatar: string;
     createdAt: string;
     lastMessageAt: string;
+    listingSold: boolean;
+    isSeller: boolean;
 }
 
 

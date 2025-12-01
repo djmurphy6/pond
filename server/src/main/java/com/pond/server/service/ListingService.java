@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.pond.server.dto.CreateListingRequest;
 import com.pond.server.dto.ListingDTO;
 import com.pond.server.dto.ListingDetailDTO;
-import com.pond.server.dto.MarkListingAsSoldRequest;
 import com.pond.server.dto.ScoredListing;
 import com.pond.server.dto.UpdateListingRequest;
 import com.pond.server.model.Listing;
@@ -419,38 +418,6 @@ public class ListingService {
                 return toDto(l);
     }
 
-    public ListingDTO markAsSold(UUID listingId, MarkListingAsSoldRequest req, User currentUser) {
-        // Admins can mark any listing as sold, regular users can only mark their own
-        Listing l;
-        if (currentUser.getAdmin()) {
-            l = listingRepository.findById(listingId)
-                    .orElseThrow(() -> new RuntimeException("Listing not found"));
-        } else {
-            l = listingRepository.findByListingGUAndUserGU(listingId, currentUser.getUserGU())
-                    .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
-        }
-
-        // Update sold status
-        if (req.getSold() != null) {
-            l.setSold(req.getSold());
-            
-            // If marking as sold, set soldTo if provided
-            // If marking as unsold, clear soldTo
-            if (req.getSold()) {
-                l.setSoldTo(req.getSoldTo()); // Can be null if not specified
-            } else {
-                l.setSoldTo(null); // Clear soldTo when marking as unsold
-            }
-        } else if (req.getSoldTo() != null) {
-            // If only soldTo is provided (without sold flag), assume marking as sold
-            l.setSold(true);
-            l.setSoldTo(req.getSoldTo());
-        }
-
-        l = listingRepository.save(l);
-        return toDto(l);
-    }
-
     public void delete(UUID id, User currentUser) {
         // Admins can delete any listing, regular users can only delete their own
         Listing l;
@@ -504,6 +471,22 @@ public class ListingService {
             System.err.println("WARNING: Could not extract key from listing image URL: " + url);
             System.err.println("Expected marker: " + marker);
         }
+    }
+
+    public ListingDTO toggleSold(UUID id, User owner) {
+        Listing l = listingRepository.findByListingGUAndUserGU(id, owner.getUserGU())
+                .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
+        
+        // Toggle the sold status
+        l.setSold(!l.getSold());
+        
+        // If unmarking as sold, clear the soldTo field
+        if (!l.getSold()) {
+            l.setSoldTo(null);
+        }
+        
+        l = listingRepository.save(l);
+        return toDto(l);
     }
     
 
