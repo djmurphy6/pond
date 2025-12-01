@@ -362,6 +362,9 @@ export type Review = {
     comment: string;
     timestamp: string;
     updatedAt: string;
+    //need to add on backend
+    reviewerName?: string;
+    reviewerAvatar?: string;  // optional
 }
 
 export type ReviewResponse = Review[];

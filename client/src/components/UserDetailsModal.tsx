@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, X, ImageIcon, UserPlus, UserMinus } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/api/WebService";
-import { CreateListingRequest, ErrorResponse, Listing } from "@/api/WebTypes";
+import { CreateListingRequest, ErrorResponse, GetUserRatingStatsResponse, Listing, Review } from "@/api/WebTypes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Separator } from "./ui/separator";
 import { Skeleton } from "./ui/skeleton";
@@ -24,6 +24,8 @@ import { Card, CardContent } from "./ui/card";
 import ListingCard from "./ListingCard";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
 import { ScrollArea } from "./ui/scroll-area";
+import StarRating from "./StarRating";
+import SellerReviewsCarousel from "./SellerReviewsCarousel";
 
 type UserDetailsModalProps = {
     userGU: string;
@@ -44,24 +46,53 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
     const [followingCount, setFollowingCount] = useState(0);
 
     const [listings, setListings] = useState<Listing[]>([]);
+    const [userStats, setUserStats] = useState<GetUserRatingStatsResponse | undefined>();
+    const [reviews, setReviews] = useState<Review[]>([]);
     const { userInfo } = useUserInfoStore();
 
     // Check if viewing own profile
     const isOwnProfile = userInfo?.userGU === userGU;
 
-    useEffect(() => {
-        async function fetchListings() {
-            setIsLoading(true);
-            const response = await api.GetSpecificUserListings({ userGU: userGU });
-            setIsLoading(false);
-            if (response instanceof ErrorResponse) {
-                toast.error(response.body?.error);
-                return;
-            } else {
-                setListings(response);
-            }
+    async function fetchListings() {
+        setIsLoading(true);
+        const response = await api.GetSpecificUserListings({ userGU: userGU });
+        setIsLoading(false);
+        if (response instanceof ErrorResponse) {
+            toast.error(response.body?.error);
+            return;
+        } else {
+            setListings(response);
         }
+    }
+
+    async function fetchUserStats() {
+        setIsLoading(true);
+        const response = await api.GetUserRatingStats(userGU);
+        setIsLoading(false);
+        if (response instanceof ErrorResponse) {
+            toast.error(response.body?.error);
+            return;
+        } else {
+            setUserStats(response);
+        }
+    }
+
+    async function fetchUserReviews() {
+        setIsLoading(true);
+        const response = await api.GetReviews(userGU);
+        setIsLoading(false);
+        if (response instanceof ErrorResponse) {
+            toast.error(response.body?.error);
+            return;
+        } else {
+            setReviews(response);
+        }
+    }
+
+    useEffect(() => {
         fetchListings();
+        fetchUserStats();
+        fetchUserReviews();
     }, [userGU]);
 
     // Fetch following status and counts when modal opens
@@ -143,7 +174,7 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                 </button>
             </DialogTrigger>
 
-            <DialogContent className="max-w-full  sm:max-w-3xl">
+            <DialogContent className="max-w-full sm:max-w-3xl max-h-screen overflow-y-auto">
                 <div className="flex flex-col md:flex-row items-center gap-6">
                     <div className="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center border-3 border-primary flex-shrink-0">
                         {avatar_url ? (
@@ -194,6 +225,97 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                         )}
                     </div>
                 </div>
+
+                {userStats && ( //userStats?.rating
+                    <>
+                        <Separator className="" />
+                        <DialogTitle className="text-xl">Seller ratings</DialogTitle>
+                        <div className="flex flex-col items-start gap-2">
+                            <StarRating className="-mt-2" value={userStats.rating ?? 0} readOnly max={5} size={35} />
+                            <span className="text-muted-foreground">Based on {userStats.totalReviews} ratings</span>
+                        </div>
+                    </>
+                )}
+
+                {1 && ( //reviews.length > 0
+                    <>
+                        <Separator className="" />
+                        <SellerReviewsCarousel
+                            // reviews={reviews}
+                            reviews={[
+                                {
+                                    reviewGU: "rev-001",
+                                    reviewerGU: "user-101",
+                                    revieweeGU: "seller-001",
+                                    rating: 5,
+                                    comment: "Fantastic experience. Super friendly and very responsive.",
+                                    timestamp: "2025-11-05T14:23:00Z",
+                                    updatedAt: "2025-11-05T14:23:00Z",
+                                    reviewerName: "CJ Martinez",
+                                    reviewerAvatar: "https://i.pravatar.cc/150?img=32",
+                                },
+                                {
+                                    reviewGU: "rev-002",
+                                    reviewerGU: "user-102",
+                                    revieweeGU: "seller-001",
+                                    rating: 4.8,
+                                    comment:
+                                        "Great seller! Item exactly as described. Would absolutely recommend.",
+                                    timestamp: "2025-11-04T11:10:00Z",
+                                    updatedAt: "2025-11-04T11:10:00Z",
+                                    reviewerName: "Brad Thompson",
+                                    reviewerAvatar: "https://i.pravatar.cc/150?img=15",
+                                },
+                                {
+                                    reviewGU: "rev-003",
+                                    reviewerGU: "user-103",
+                                    revieweeGU: "seller-001",
+                                    rating: 4.6,
+                                    comment: "Smooth transaction and quick communication.",
+                                    timestamp: "2025-11-02T09:45:00Z",
+                                    updatedAt: "2025-11-02T09:45:00Z",
+                                    reviewerName: "Ashley Peterson",
+                                    reviewerAvatar: "https://i.pravatar.cc/150?img=47",
+                                },
+                                {
+                                    reviewGU: "rev-004",
+                                    reviewerGU: "user-104",
+                                    revieweeGU: "seller-001",
+                                    rating: 5,
+                                    comment:
+                                        "Couldn't have gone better. Seller was on time and super easy to work with!",
+                                    timestamp: "2025-11-01T16:05:00Z",
+                                    updatedAt: "2025-11-01T16:05:00Z",
+                                    reviewerName: "Michael Chen",
+                                    reviewerAvatar: "https://i.pravatar.cc/150?img=8",
+                                },
+                                {
+                                    reviewGU: "rev-005",
+                                    reviewerGU: "user-105",
+                                    revieweeGU: "seller-001",
+                                    rating: 4.2,
+                                    comment: "Item was good overall. Small scuff but still worth the price.",
+                                    timestamp: "2025-10-29T13:15:00Z",
+                                    updatedAt: "2025-10-29T13:15:00Z",
+                                    reviewerName: "Jessica Lee",
+                                    reviewerAvatar: "https://i.pravatar.cc/150?img=28",
+                                },
+                                {
+                                    reviewGU: "rev-006",
+                                    reviewerGU: "user-106",
+                                    revieweeGU: "seller-001",
+                                    rating: 3.9,
+                                    comment: "Communication could have been faster but still a fair deal.",
+                                    timestamp: "2025-10-27T18:40:00Z",
+                                    updatedAt: "2025-10-27T18:40:00Z",
+                                    reviewerName: "Daniel Reyes",
+                                    reviewerAvatar: "https://i.pravatar.cc/150?img=52",
+                                },
+                            ]}
+                        />
+                    </>
+                )}
+
 
                 <Separator className="" />
 
