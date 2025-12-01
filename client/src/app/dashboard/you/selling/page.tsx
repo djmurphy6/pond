@@ -119,7 +119,7 @@ export default function SellingPage() {
 
     if (!mounted) return null;
     return (
-        <div className={`flex flex-col md:flex-row h-screen ${theme !== "dark" ? "bg-[#ffffff]" : "bg-muted/30"} transition-colors duration-300`}>
+        <div className={`flex flex-col md:flex-row h-screen bg-background transition-colors duration-300`}>
             {/* Sidebar */}
             <div className="hidden md:flex">
                 <SideBar />
