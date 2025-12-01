@@ -78,12 +78,16 @@ public class UserService {
     public void deleteAccount(User user) {
         UUID userGU = user.getUserGU();
         
+        System.out.println("Starting account deletion for user: " + userGU);
+        
         // 1. Delete user's avatar from Supabase storage
         deleteUserAvatar(user);
         
         // 2. Delete all listings owned by the user (this handles Supabase image deletion)
         List<Listing> userListings = listingRepository.findByUserGU(userGU);
+        System.out.println("Found " + userListings.size() + " listings to delete for user: " + userGU);
         for (Listing listing : userListings) {
+            System.out.println("Deleting listing: " + listing.getListingGU());
             listingService.delete(listing.getListingGU(), user);
         }
         
@@ -93,14 +97,19 @@ public class UserService {
         //    - Saved listings (via user_gu foreign key)
         //    - User following relationships (via follower_gu/following_gu foreign keys)
         // Note: Reports are kept for record-keeping purposes
+        System.out.println("Deleting user from database: " + userGU);
         userRepository.delete(user);
+        System.out.println("Account deletion completed for user: " + userGU);
     }
 
     private void deleteUserAvatar(User user) {
         String avatarUrl = user.getAvatar_url();
         if (avatarUrl == null || avatarUrl.isBlank()) {
+            System.out.println("No avatar to delete for user: " + user.getUserGU());
             return;
         }
+        
+        System.out.println("Attempting to delete avatar: " + avatarUrl);
         
         // Extract the key from the avatar URL
         // Format: {storageUrl}/storage/v1/object/public/{bucket}/{userGU}/{uuid}.jpg
@@ -108,12 +117,21 @@ public class UserService {
         int idx = avatarUrl.indexOf(marker);
         if (idx >= 0) {
             String key = avatarUrl.substring(idx + marker.length());
+            System.out.println("Extracted avatar key: " + key + " from bucket: " + pfpBucket);
             try {
                 supabaseStorage.deleteObject(pfpBucket, key);
+                System.out.println("Successfully deleted avatar from storage");
             } catch (Exception e) {
                 // Log but don't fail the entire operation if avatar deletion fails
-                System.err.println("Warning: Failed to delete avatar " + avatarUrl + ": " + e.getMessage());
+                System.err.println("ERROR: Failed to delete avatar " + avatarUrl);
+                System.err.println("Key: " + key);
+                System.err.println("Bucket: " + pfpBucket);
+                System.err.println("Exception: " + e.getMessage());
+                e.printStackTrace();
             }
+        } else {
+            System.err.println("WARNING: Could not extract key from avatar URL: " + avatarUrl);
+            System.err.println("Expected marker: " + marker);
         }
     }
 

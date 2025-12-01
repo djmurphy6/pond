@@ -32,16 +32,21 @@ public class SupabaseStorage {
     }
 
     public void deleteObject(String bucket, String key){
+        String deleteUrl = storageUrl + "/storage/v1/object/" + bucket + "/" + key;
         try {
             HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(storageUrl + "/storage/v1/object/" + bucket + "/" + key))
+                .uri(URI.create(deleteUrl))
                 .header("Authorization", "Bearer " + serviceKey)
                 .DELETE()
                 .build();
             HttpResponse<Void> resp = HttpClient.newHttpClient().send(req, HttpResponse.BodyHandlers.discarding());
-            if (resp.statusCode() >= 300) throw new RuntimeException("Delete failed: " + resp.statusCode());
+            if (resp.statusCode() >= 300) {
+                throw new RuntimeException("Delete failed with status " + resp.statusCode() + " for URL: " + deleteUrl);
+            }
+            System.out.println("Successfully deleted object from Supabase: " + deleteUrl);
         } catch (Exception e) {
-            throw new RuntimeException("Supabase delete failed", e);
+            System.err.println("Supabase delete failed for URL: " + deleteUrl);
+            throw new RuntimeException("Supabase delete failed for bucket=" + bucket + ", key=" + key, e);
         }
     }
 }

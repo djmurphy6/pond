@@ -2,6 +2,8 @@ package com.pond.server.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -74,7 +76,19 @@ public class UserController {
         }
         try {
             userService.deleteAccount(currentUser);
-            return ResponseEntity.ok(java.util.Map.of("message", "Account deleted successfully"));
+            
+            // Clear the refresh token cookie (same as logout)
+            ResponseCookie expiredCookie = ResponseCookie.from("refreshToken", "")
+                    .httpOnly(true)
+                    .secure(true) // for localhost over HTTP use false and sameSite("Lax")
+                    .path("/")
+                    .maxAge(0)
+                    .sameSite("None")
+                    .build();
+            
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, expiredCookie.toString())
+                    .body(java.util.Map.of("message", "Account deleted successfully"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
         }

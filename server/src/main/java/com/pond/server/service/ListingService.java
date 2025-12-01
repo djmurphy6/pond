@@ -462,6 +462,10 @@ public class ListingService {
                     .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
         }
         
+        System.out.println("Deleting listing: " + id);
+        System.out.println("Picture 1 URL: " + l.getPicture1_url());
+        System.out.println("Picture 2 URL: " + l.getPicture2_url());
+        
         // Delete reports and resolved reports before deleting listing
         // (This will be handled by CASCADE DELETE after migration, but keeping it for safety)
         reportRepository.findByListingGU(id).forEach(report -> reportRepository.delete(report));
@@ -470,20 +474,35 @@ public class ListingService {
         deleteListingImage(l.getPicture1_url());
         deleteListingImage(l.getPicture2_url());
         listingRepository.delete(l);
+        System.out.println("Successfully deleted listing: " + id);
     }
 
         private void deleteListingImage(String url){
-        if (url == null || url.isBlank()) return;
+        if (url == null || url.isBlank()) {
+            System.out.println("No image to delete (URL is null or blank)");
+            return;
+        }
 
+        System.out.println("Attempting to delete listing image: " + url);
+        
         String marker = "/storage/v1/object/public/" + listingBucket + "/";
         int idx = url.indexOf(marker);
         if (idx >= 0){
             String key = url.substring(idx + marker.length());
+            System.out.println("Extracted listing image key: " + key + " from bucket: " + listingBucket);
             try {
                 supabaseStorage.deleteObject(listingBucket, key);
+                System.out.println("Successfully deleted listing image from storage");
             } catch (Exception e) {
-                System.err.println("Warning: Failed to delete old image " + url + ": " + e.getMessage());
+                System.err.println("ERROR: Failed to delete listing image " + url);
+                System.err.println("Key: " + key);
+                System.err.println("Bucket: " + listingBucket);
+                System.err.println("Exception: " + e.getMessage());
+                e.printStackTrace();
             }
+        } else {
+            System.err.println("WARNING: Could not extract key from listing image URL: " + url);
+            System.err.println("Expected marker: " + marker);
         }
     }
     
