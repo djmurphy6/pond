@@ -31,74 +31,56 @@ public class ReviewService {
 
     @Transactional
     public ReviewDTO createReview(CreateReviewRequest request, UUID reviewerGu){
-        if (request.getRating() == null || request.getRating() < 1 || request.getRating() > 5){
-            throw new RuntimeException("Rating must be between 1 and 5");
+        if (request.getRating() == null || request.getRating() < 1 || request.getRating() > 5) {
+            throw new RuntimeException("Rating must be between 1 and 5.");
         }
 
-        // Validation: Comment cannot be empty on create
         if (request.getComment() == null || request.getComment().trim().isEmpty()) {
             throw new RuntimeException("Review comment cannot be empty!");
         }
 
-        // Get the listing
-        Listing listing = listingRepository.findById(request.getListingGU())
-                .orElseThrow(() -> new RuntimeException("Listing not found!"));
+        UUID revieweeGu = request.getRevieweeGU();
 
-        // TODO: Need to add this methods for it to work
-        boolean isReviewerSeller = listing.getUserGU().equals(reviewerGu);
-        boolean isReviewerBuyer = listing.getSoldTo() != null && listing.getSoldTo().equals(reviewerGu);
-
-        if (!isReviewerSeller && !isReviewerBuyer) {
-            throw new RuntimeException("You are not authorized to review this transaction");
+        if (reviewerGu.equals(revieweeGu)) {
+            throw new RuntimeException("You cannot review yourself.");
         }
 
-        UUID revieweeGu;
-        if(isReviewerSeller){
-            // Seller reviewing the buyer
-            revieweeGu = listing.getSoldTo();
-            if(revieweeGu == null){
-                throw new RuntimeException("Cannot review: No buyer for this listing.");
-            }
-        } else {
-            // Buyer reviewing the seller
-            revieweeGu = listing.getUserGU();
+        // Dupe Check
+        if (reviewRepository.existsByReviewerGuAndRevieweeGu(reviewerGu, revieweeGu)) {
+            throw new RuntimeException("You have already reviewed this person.");
         }
 
+        // Find a listing where these two users had a transaction
+        // Either: reviewer is seller and reviewee is buyer, OR reviewer is buyer and reviewee is seller
+        List<Listing> sellerToBuyerListings = listingRepository.findByUserGUAndSoldTo(reviewerGu, revieweeGu);
+        List<Listing> buyerToSellerListings = listingRepository.findByUserGUAndSoldTo(revieweeGu, reviewerGu);
 
-        if (reviewerGu.equals(revieweeGu)){
-            throw new RuntimeException("You cannot review yourself");
+        Listing transactionListing = null;
+        if (!sellerToBuyerListings.isEmpty()) {
+            transactionListing = sellerToBuyerListings.get(0); // If theres multiple listings just grab one arbitrarily
+        } else if (!buyerToSellerListings.isEmpty()) {
+            transactionListing = buyerToSellerListings.get(0);
         }
 
-        // Check for dupes
-        if (reviewRepository.existsByReviewerGuAndRevieweeGuAndListingGU(reviewerGu, revieweeGu, request.getListingGU())) {
-            throw new RuntimeException("You have already reviewed this person for this listing");
+        if (transactionListing == null) {
+            throw new RuntimeException("No transaction found between you and this user.");
         }
 
-        ReviewType reviewType;
-        if (listing.getSold() != null && listing.getSold()){
-            // This is a review for a transaction
-            reviewType = ReviewType.TRANSACTION;
-        } else {
-            //TODO: Check for 5+ messages in the chatroom
-            reviewType = ReviewType.CONVERSATION;
-        }
+        // TODO: Add the review type logic later.
+//        // Determine review_type based on whether if listing is sold
+//        ReviewType reviewType = (transactionListing.getSold() != null && transactionListing.getSold())
+//                ? ReviewType.TRANSACTION
+//                : ReviewType.CONVERSATION;
 
-        // Create and populate Review entity
+        // Create review
         Review review = new Review();
         review.setReviewerGu(reviewerGu);
         review.setRevieweeGu(revieweeGu);
-        review.setListingGU(request.getListingGU());
         review.setRating(request.getRating());
         review.setComment(request.getComment());
-        review.setReviewType(reviewType);
         review.setTimestamp(LocalDateTime.now());
-
-        // Save to DB
         review = reviewRepository.save(review);
-
-        // Convert to DTO and return
         return toDto(review);
-
     }
 
     @Transactional
@@ -120,15 +102,14 @@ public class ReviewService {
             existingReview.setRating(request.getRating());
         }
 
-        if (request.getComment() == null){
-            throw new RuntimeException("Review comment cannot be empty!"); // In the DTO length is limited to 500 chars
+        if (request.getComment() != null && !request.getComment().trim().isEmpty()) {
+            existingReview.setComment(request.getComment());
+        } else {
+            throw new RuntimeException("Review comment cannot be empty!");
         }
 
-
-        // Now we just need to update that mf
-        existingReview.setComment(request.getComment());
         existingReview.setUpdatedAt(LocalDateTime.now());
-        Review updatedReview = reviewRepository.save(existingReview); // save it
+        Review updatedReview = reviewRepository.save(existingReview);
         return toDto(updatedReview);
     }
 
@@ -167,16 +148,41 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
+    // Check if a user can review another user
+    public boolean canUserReview(UUID reviewerGu, UUID revieweeGu){
+
+        // Can't review yourself
+        if (reviewerGu.equals(revieweeGu)){
+            return false;
+        }
+
+        // Check if they already reviewed
+        if (reviewRepository.existsByReviewerGuAndRevieweeGu(reviewerGu, revieweeGu)){
+            return false;
+        }
+
+        List<Listing> sellerToBuyerListings = listingRepository.findByUserGUAndSoldTo(reviewerGu, revieweeGu);
+        List<Listing> buyerToSellerListings = listingRepository.findByUserGUAndSoldTo(revieweeGu, reviewerGu);
+
+        return !sellerToBuyerListings.isEmpty() || !buyerToSellerListings.isEmpty();
+    }
+
     // For the front end to display review stats
-    public UserRatingStatsDTO getUserRatingStats(UUID userGu){
+    public UserRatingStatsDTO getUserRatingStats(UUID userGu, UUID currentUserGu) {
         Long totalReviews = reviewRepository.countByRevieweeGu(userGu);
         Double averageRating = reviewRepository.findAverageRatingByRevieweeGu(userGu);
 
-        // Case for when we got no reviews
-        if (averageRating == null){
+        if (averageRating == null) {
             averageRating = 0.0;
         }
-        return new UserRatingStatsDTO(userGu, averageRating, totalReviews);
+
+        // Check if current user can review this user
+        Boolean canReview = null;
+        if (currentUserGu != null) {
+            canReview = canUserReview(currentUserGu, userGu);
+        }
+
+        return new UserRatingStatsDTO(userGu, averageRating, totalReviews, canReview);
     }
 
     private ReviewDTO toDto(Review review) {
@@ -184,14 +190,10 @@ public class ReviewService {
                 review.getId(),
                 review.getReviewerGu(),
                 review.getRevieweeGu(),
-                review.getListingGU(),
                 review.getRating(),
                 review.getComment(),
-                review.getReviewType(),
                 review.getTimestamp(),
                 review.getUpdatedAt()
         );
     }
-
-
 }

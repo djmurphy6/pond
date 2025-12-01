@@ -4,12 +4,12 @@
 
 ### Variables to store tokens and IDs
 # These will be populated automatically by the scripts in the requests below
-@sellerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZWxsZXJfcmV2QHRlc3QuY29tIiwiaWF0IjoxNzYzODc1NTUzLCJleHAiOjE3NjM4NzU4NTN9.4UD7jLsfk8CXAw4X1SJztZwX5OaZKeUowSYmrAgaf-I
-@buyerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllcl9yZXZAdGVzdC5jb20iLCJpYXQiOjE3NjM4NzU1NzgsImV4cCI6MTc2Mzg3NTg3OH0.Egter3Kzd54mCzcUHrL4D8c0OfdDWCRYAv9-7pEzVp4
+@sellerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZWxsZXJfcmV2QHRlc3QuY29tIiwiaWF0IjoxNzY0NTczMDYwLCJleHAiOjE3NjQ1NzMzNjB9.7hi6052axR_pu3sNKrLK9-6Nm4hD1cnkPJG_ctyiR-E
+@buyerToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXllcl9yZXZAdGVzdC5jb20iLCJpYXQiOjE3NjQ1NzMwNzYsImV4cCI6MTc2NDU3MzM3Nn0.NuduMNE_GzhivaqdzkVpF0QLmhvwt4Xe2vlpBzUBJjs
 @sellerGU = aa238d78-b8a4-41e6-b43d-0b47c8c56da9
 @buyerGU = 25ee22e4-8bf6-42b7-8dfa-3a8b625c5ac8
-@listingGU = 854f1497-2e65-4c99-afdd-c5f2a8eab8ce
-@reviewId = 45e67b83-8232-4200-9679-4eccd0dd301b
+@listingGU = 6aa68716-e8f0-411c-a7a4-624938470602
+@reviewId = a6f90d97-580b-4330-a8ab-253b1714f905
 
 ###############################################
 ### 1. SETUP USERS & AUTH
@@ -117,7 +117,7 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{buyerToken}}
 
 {
-  "listingGU": "{{listingGU}}",
+  "revieweeGU": "{{sellerGU}}",
   "rating": 5,
   "comment": "Smooth transaction, item as described!"
 }
@@ -141,7 +141,7 @@ Authorization: Bearer {{buyerToken}}
 
 {
   "rating": 4,
-  "comment": "Actually, shipping was a bit slow, but still good."
+  "comment": "Actually shipping was slow, changing rating."
 }
 
 ### 3.5 Try to Create Duplicate Review (Should Fail)
@@ -150,7 +150,7 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{buyerToken}}
 
 {
-  "listingGU": "{{listingGU}}",
+  "listingGU": "{{sellerGU}}",
   "rating": 1,
   "comment": "Trying to spam reviews"
 }

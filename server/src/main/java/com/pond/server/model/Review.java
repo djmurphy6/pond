@@ -29,20 +29,15 @@ public class Review {
     @Column(name ="reviewee_gu", nullable = false)
     private UUID revieweeGu;
 
-    // This is nullable since later on I want to add functionality
-    // for Profile and conversation reviews
-    @Column(name = "listing_gu", updatable = false, nullable = false)
-    private UUID listingGU;
-
     @Column(name = "rating", nullable = false)
     private Integer rating;
 
     @Column(name = "comment", updatable = true, nullable = false, columnDefinition = "VARCHAR(500)")
     private String comment;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "review_type", nullable = false)
-    private ReviewType reviewType;
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "review_type", nullable = false)
+//    private ReviewType reviewType;
 
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;

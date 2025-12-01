@@ -64,10 +64,19 @@ public class ReviewController {
     }
 
     @GetMapping("/stats/{userGu}")
-    public ResponseEntity<UserRatingStatsDTO> getUserRatingStats(@PathVariable UUID userGu) {
-        return ResponseEntity.ok(reviewService.getUserRatingStats(userGu));
+    public ResponseEntity<UserRatingStatsDTO> getUserRatingStats(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID userGu) {
+        UUID currentUserGu = user != null ? user.getUserGU() : null;
+        return ResponseEntity.ok(reviewService.getUserRatingStats(userGu, currentUserGu));
     }
 
-
-
+    // Dedicated call for just if a user can review
+    @GetMapping("/can-review/{userGu}")
+    public ResponseEntity<Boolean> canReviewUser(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID userGu) {
+        boolean canReview = reviewService.canUserReview(user.getUserGU(), userGu);
+        return ResponseEntity.ok(canReview);
+    }
 }

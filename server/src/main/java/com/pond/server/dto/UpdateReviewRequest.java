@@ -16,6 +16,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UpdateReviewRequest {
 
+    @JsonProperty("reviewGU")
+    private Integer reviewGu;
+
     @JsonProperty("rating")
     private Integer rating;
 

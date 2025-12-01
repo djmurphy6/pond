@@ -16,9 +16,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ReviewDTO {
 
-
-    @JsonProperty("id")
-    private UUID id;
+    @JsonProperty("reviewGU")
+    private UUID reviewGU;
 
     @JsonProperty("reviewerGu")
     private UUID reviewerGu;
@@ -26,17 +25,15 @@ public class ReviewDTO {
     @JsonProperty("revieweeGu")
     private UUID revieweeGu;
 
-    @JsonProperty("listingGU")
-    private UUID listingGU;
-
     @JsonProperty("rating")
     private Integer rating;
 
     @JsonProperty("comment")
     private String comment;
 
-    @JsonProperty("reviewType")
-    private ReviewType reviewType;
+    //TODO: Add the logic for diff types of reviews
+//    @JsonProperty("reviewType")
+//    private ReviewType reviewType;
 
     @JsonProperty("timestamp")
     private LocalDateTime timestamp;

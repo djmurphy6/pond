@@ -108,7 +108,9 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
         @Param("sortOrder") String sortOrder,
         org.springframework.data.domain.Pageable pageable
     );
-    
+
+    List<Listing> findByUserGUAndSoldTo(UUID userGU, UUID soldTo);
+
     // Keep original method for backward compatibility
     default List<Listing> findFollowingFiltered(List<UUID> userIds, List<String> categories, 
                                                  Double minPrice, Double maxPrice, 

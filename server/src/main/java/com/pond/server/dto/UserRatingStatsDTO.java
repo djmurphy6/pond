@@ -22,4 +22,7 @@ public class UserRatingStatsDTO {
 
     @JsonProperty("totalReviews")
     private Long totalReviews;
+
+    @JsonProperty("canReview")
+    private Boolean canReview;
 }

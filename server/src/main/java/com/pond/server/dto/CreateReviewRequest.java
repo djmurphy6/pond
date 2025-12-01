@@ -15,12 +15,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreateReviewRequest {
 
-    @JsonProperty("listingGU")
-    private UUID listingGU;
-
-    @JsonProperty("reviewerGU")
-    private UUID reviewerGU;
-
     @JsonProperty("revieweeGU")
     private UUID revieweeGU;
 
