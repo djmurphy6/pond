@@ -188,7 +188,7 @@ export default function MessagingPage() {
         } else {
             // Update the chat room with the new sold status
             setChatRooms(prev => prev.map(room => 
-                room.roomId === selectedRoom.roomId 
+                room.listingGU === selectedRoom.listingGU 
                     ? { ...room, listingSold: res.sold }
                     : room
             ));
@@ -314,10 +314,10 @@ export default function MessagingPage() {
                     <>
                         {/* Chat Header */}
                         <div
-                            className={`sticky top-0 z-10 p-4 border-b bg-muted/30 backdrop-blur-sm transition-colors duration-300 ${theme !== "dark" && "shadow-sm"
+                            className={`sticky top-0 z-10 border-b bg-muted/30 backdrop-blur-sm transition-colors duration-300 ${theme !== "dark" && "shadow-sm"
                                 }`}
                         >
-                            <div className="flex items-center gap-3">
+                            <div className="p-4 flex items-center gap-3">
                                 <div className="relative h-10 w-10 rounded-full bg-muted overflow-hidden flex-shrink-0">
                                     {selectedRoom.listingImage ? (
                                         <Image
