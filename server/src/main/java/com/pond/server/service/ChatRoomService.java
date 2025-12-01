@@ -96,6 +96,9 @@ public class ChatRoomService {
         User otherUser = userRepository.findById(otherUserGU)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Determine if current user is the seller
+        boolean isSeller = room.getSellerGU().equals(currentUserGU);
+
         return new ChatRoomDetailDTO(
                 room.getRoomId(),
                 listing.getListingGU(),
@@ -106,7 +109,9 @@ public class ChatRoomService {
                 otherUser.getUsername(),
                 otherUser.getAvatar_url(),
                 room.getCreatedAt(),
-                room.getLastMessageAt()
+                room.getLastMessageAt(),
+                listing.getSold(),
+                isSeller
         );
     }
 
@@ -154,7 +159,8 @@ public class ChatRoomService {
                     lastMessage,
                     room.getLastMessageAt(),
                     unreadCount,
-                    isSeller
+                    isSeller,
+                    listing.getSold()
             );
         }).filter(dto -> dto != null).collect(Collectors.toList());
     }

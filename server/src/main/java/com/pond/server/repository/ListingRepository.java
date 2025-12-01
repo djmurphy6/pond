@@ -40,6 +40,7 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
            "l.listingGU, l.userGU, l.title, l.description, l.picture1_url, l.picture2_url, " +
            "l.price, l.condition, l.category, l.createdAt, l.sold, l.soldTo) " +
            "FROM Listing l WHERE " +
+           "l.sold = false AND " +
            "(COALESCE(:categories, NULL) IS NULL OR l.category IN :categories) AND " +
            "(:minPrice IS NULL OR l.price >= :minPrice) AND " +
            "(:maxPrice IS NULL OR l.price <= :maxPrice) " +
@@ -90,6 +91,7 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
            "l.listingGU, l.userGU, l.title, l.description, l.picture1_url, l.picture2_url, " +
            "l.price, l.condition, l.category, l.createdAt, l.sold, l.soldTo) " +
            "FROM Listing l WHERE " +
+           "l.sold = false AND " +
            "l.userGU IN :userIds AND " +
            "(COALESCE(:categories, NULL) IS NULL OR l.category IN :categories) AND " +
            "(:minPrice IS NULL OR l.price >= :minPrice) AND " +

@@ -143,6 +143,10 @@ class API {
         return this.Request<Listing[]>(`/listings/${request.listingGU}`, "DELETE", {}, 'DeleteListing');
     }
 
+    async ToggleSoldListing(listingGU: string): Promise<Listing | ErrorResponse> {
+        return this.Request<Listing>(`/listings/${listingGU}/toggle-sold`, "POST", {}, 'ToggleSoldListing');
+    }
+
     async MarkListingAsSold(request: MarkListingAsSoldRequest): Promise<MarkListingAsSoldResponse | ErrorResponse> {
         return this.Request<MarkListingAsSoldResponse>(`/listings/${request.listingGU}/sold`, "PUT", {
             body: {

@@ -58,6 +58,7 @@ export default function MessagingPage() {
     const { theme } = useTheme();
     const { userInfo } = useUserInfoStore();
     const [showSidebar, setShowSidebar] = useState(false);
+    const [togglingSold, setTogglingSold] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
     const initialMessageSentRef = useRef<string | null>(null); // Track the message content that was sent
@@ -173,6 +174,26 @@ export default function MessagingPage() {
 
     function scrollToBottom() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+
+    async function toggleSoldStatus() {
+        if (!selectedRoom || !selectedRoom.isSeller) return;
+        
+        setTogglingSold(true);
+        const res = await api.ToggleSoldListing(selectedRoom.listingGU);
+        setTogglingSold(false);
+        
+        if (res instanceof ErrorResponse) {
+            toast.error(res.body?.error);
+        } else {
+            // Update the chat room with the new sold status
+            setChatRooms(prev => prev.map(room => 
+                room.listingGU === selectedRoom.listingGU 
+                    ? { ...room, listingSold: res.sold }
+                    : room
+            ));
+            toast.success(res.sold ? "Listing marked as sold" : "Listing marked as available");
+        }
     }
 
 
@@ -293,10 +314,10 @@ export default function MessagingPage() {
                     <>
                         {/* Chat Header */}
                         <div
-                            className={`sticky top-0 z-10 p-4 border-b bg-muted/30 backdrop-blur-sm transition-colors duration-300 ${theme !== "dark" && "shadow-sm"
+                            className={`sticky top-0 z-10 border-b bg-muted/30 backdrop-blur-sm transition-colors duration-300 ${theme !== "dark" && "shadow-sm"
                                 }`}
                         >
-                            <div className="flex items-center gap-3">
+                            <div className="p-4 flex items-center gap-3">
                                 <div className="relative h-10 w-10 rounded-full bg-muted overflow-hidden flex-shrink-0">
                                     {selectedRoom.listingImage ? (
                                         <Image
@@ -317,6 +338,17 @@ export default function MessagingPage() {
                                         {selectedRoom.otherUsername}
                                     </p>
                                 </div>
+                                {selectedRoom.isSeller && (
+                                    <Button
+                                        variant={selectedRoom.listingSold ? "outline" : "default"}
+                                        size="sm"
+                                        onClick={toggleSoldStatus}
+                                        disabled={togglingSold}
+                                        className={`flex-shrink-0 ${!selectedRoom.listingSold ? "bg-uo-green text-white hover:bg-uo-green/90" : ""}`}
+                                    >
+                                        {togglingSold ? "..." : selectedRoom.listingSold ? "Mark Available" : "Mark as Sold"}
+                                    </Button>
+                                )}
                             </div>
                         </div>
 
