@@ -151,7 +151,7 @@ export default function MessagingPage() {
                 // Select first room by default (selling rooms first, then buying)
                 const sellingRooms = res.filter(room => room.isSeller);
                 const buyingRooms = res.filter(room => !room.isSeller);
-                
+
                 if (sellingRooms.length > 0) {
                     setSelectedRoomId(sellingRooms[0].roomId);
                 } else if (buyingRooms.length > 0) {
@@ -178,17 +178,17 @@ export default function MessagingPage() {
 
     async function toggleSoldStatus() {
         if (!selectedRoom || !selectedRoom.isSeller) return;
-        
+
         setTogglingSold(true);
-        const res = await api.ToggleSoldListing(selectedRoom.listingGU);
+        const res = await api.ToggleSoldListing(selectedRoom.listingGU, selectedRoom.otherUserGU);
         setTogglingSold(false);
-        
+
         if (res instanceof ErrorResponse) {
             toast.error(res.body?.error);
         } else {
             // Update the chat room with the new sold status
-            setChatRooms(prev => prev.map(room => 
-                room.listingGU === selectedRoom.listingGU 
+            setChatRooms(prev => prev.map(room =>
+                room.listingGU === selectedRoom.listingGU
                     ? { ...room, listingSold: res.sold }
                     : room
             ));

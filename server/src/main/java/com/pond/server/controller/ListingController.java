@@ -115,13 +115,13 @@ public class ListingController {
 
     }
 
-    @PostMapping("/{id}/toggle-sold")
-    public ResponseEntity<?> toggleSold(@PathVariable("id") UUID id) {
+    @PostMapping("/{id}/sold/{soldToId}")
+    public ResponseEntity<?> toggleSold(@PathVariable("id") UUID id, @PathVariable("soldToId") UUID soldToId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof User currentUser)) {
             return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
         }
-        return ResponseEntity.ok(listingService.toggleSold(id, currentUser));
+        return ResponseEntity.ok(listingService.toggleSold(id, soldToId, currentUser));
     }
 
     @DeleteMapping("/{id}")
