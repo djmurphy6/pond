@@ -347,3 +347,40 @@ export type DeleteAccountRequest = {
 export type DeleteAccountResponse = {
     message: string;
 }
+
+//REVIEWS
+
+export type GetReviewsRequest = {
+    userId: string;
+}
+
+export type Review = {
+    reviewGU: string;
+    reviewerGU: string;
+    revieweeGU: string;
+    rating: number;
+    comment: string;
+    timestamp: string;
+    updatedAt: string;
+}
+
+export type ReviewResponse = Review[];
+
+export type CreateReviewRequest = {
+    revieweeGU: string;
+    rating: number;
+    comment: string; //max len 500
+}
+
+export type UpdateReviewRequest = {
+    reviewGU: string;
+    rating: number;
+    comment: string; //max len 500
+}
+
+export type GetUserRatingStatsResponse = {
+    userGU: string;
+    rating: number;
+    totalReviews: number;
+    canReview: boolean;
+}

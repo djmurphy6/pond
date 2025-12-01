@@ -1,5 +1,5 @@
 import { UserInfo } from "@/stores/UserInfoStore";
-import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse, CreateReportRequest, ReportDTO, ReportsPageResponse, UpdateReportRequest, GetSpecificListingResponse, GetSpecificUserListingsRequest, FollowUserRequest, FollowUserResponse, UnfollowUserRequest, UnfollowUserResponse, CheckFollowingStatusRequest, CheckFollowingStatusResponse, GetFollowingListResponse, GetFollowersListResponse, GetFollowCountsRequest, GetFollowCountsResponse, UnreadCountResponse, MarkListingAsSoldRequest, MarkListingAsSoldResponse, DeleteAccountRequest, DeleteAccountResponse } from "./WebTypes";
+import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, ErrorResponse, GetUserInfoRequest, Listing, RegisterUserRequest, RegisterUserResponse, UpdateListingRequest, ChatRoom, ChatRoomDetail, Message, UpdateUserRequest, UpdateUserResponse, UploadAvatarRequest, UploadAvatarResponse, VerifyUserRequest, VerifyUserResponse, type LoginRequest, type LoginResponse, GetSpecificListingRequest, GetListingsRequest, SaveListingRequest, SaveListingResponse, UnsaveListingRequest, UnsaveListingResponse, CheckSavedStatusRequest, CheckSavedStatusResponse, GetSavedListingsResponse, GetSavedListingIdsResponse, MarkMessagesAsReadResponse, MarkMessagesAsReadRequest, InitChatRoomRequest, InitChatRoomResponse, CreateReportRequest, ReportDTO, ReportsPageResponse, UpdateReportRequest, GetSpecificListingResponse, GetSpecificUserListingsRequest, FollowUserRequest, FollowUserResponse, UnfollowUserRequest, UnfollowUserResponse, CheckFollowingStatusRequest, CheckFollowingStatusResponse, GetFollowingListResponse, GetFollowersListResponse, GetFollowCountsRequest, GetFollowCountsResponse, UnreadCountResponse, MarkListingAsSoldRequest, MarkListingAsSoldResponse, DeleteAccountRequest, DeleteAccountResponse, CreateReviewRequest, UpdateReviewRequest, GetUserRatingStatsResponse, ReviewResponse, GetReviewsRequest, Review } from "./WebTypes";
 
 class AppConfig {
     access_token?: string;
@@ -148,11 +148,11 @@ class API {
     }
 
     async MarkListingAsSold(request: MarkListingAsSoldRequest): Promise<MarkListingAsSoldResponse | ErrorResponse> {
-        return this.Request<MarkListingAsSoldResponse>(`/listings/${request.listingGU}/sold`, "PUT", { 
-            body: { 
-                sold: request.sold, 
-                soldTo: request.soldTo 
-            } 
+        return this.Request<MarkListingAsSoldResponse>(`/listings/${request.listingGU}/sold`, "PUT", {
+            body: {
+                sold: request.sold,
+                soldTo: request.soldTo
+            }
         }, 'MarkListingAsSold');
     }
 
@@ -268,6 +268,32 @@ class API {
     async GetFollowingListings(filters?: GetListingsRequest, page: number = 0, size: number = 20): Promise<Listing[] | ErrorResponse> {
         return this.Request<Listing[]>(`/listings/following?page=${page}&size=${size}`, "POST", { body: filters || {} }, 'GetFollowingListings');
     }
+
+    // Reviews
+    async GetReviews(userId: string): Promise<Review[] | ErrorResponse> {
+        return this.Request<ReviewResponse>(`/reviews/user/${userId}`, "GET", {}, 'GetReviews');
+    }
+
+    async CreateReview(body: CreateReviewRequest): Promise<Review | ErrorResponse> {
+        return this.Request<Review>("/reviews", "POST", { body }, 'CreateReview');
+    }
+
+    async UpdateReview(body: UpdateReviewRequest): Promise<Review | ErrorResponse> {
+        return this.Request<Review>(`/reviews/${body.reviewGU}`, "PUT", { body }, 'UpdateReview');
+    }
+
+    async DeleteReview(reviewGU: string): Promise<{} | ErrorResponse> {
+        return this.Request<{}>(`/reviews/${reviewGU}`, "DELETE", {}, 'DeleteReview');
+    }
+
+    async AdminDeleteReview(reviewGU: string): Promise<{} | ErrorResponse> {
+        return this.Request<{}>(`/reviews/admin/${reviewGU}`, "DELETE", {}, 'AdminDeleteReview');
+    }
+
+    async GetUserRatingStats(userGU: string): Promise<GetUserRatingStatsResponse | ErrorResponse> {
+        return this.Request<GetUserRatingStatsResponse>(`/reviews/stats/${userGU}`, "GET", {}, 'GetUserRatingStats');
+    }
+
 }
 
 async function sendRefreshToken() {
