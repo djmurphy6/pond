@@ -17,7 +17,7 @@ import java.util.UUID;
 public class UpdateReviewRequest {
 
     @JsonProperty("reviewGU")
-    private Integer reviewGu;
+    private UUID reviewGu;
 
     @JsonProperty("rating")
     private Integer rating;
