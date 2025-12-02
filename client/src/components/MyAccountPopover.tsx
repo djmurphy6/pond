@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Popover,
   PopoverTrigger,
@@ -10,9 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Camera, ChevronRight, Loader2, ImageIcon, User, Trash2 } from "lucide-react";
+import { Camera, ChevronRight, Loader2, ImageIcon, User, Trash2, LogOut } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/api/WebService";
+import api, { appConfig } from "@/api/WebService";
 import { ErrorResponse, UpdateUserRequest, UploadAvatarRequest } from "@/api/WebTypes";
 import { Separator } from "@/components/ui/separator";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
@@ -20,6 +21,7 @@ import { DeleteAccountModal } from "./DeleteAccountModal";
 
 
 export function MyAccountPopover(props: { onSuccess?: () => void }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
@@ -129,6 +131,43 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
     toast.success("Profile updated successfully!");
     props.onSuccess?.();
     setOpen(false);
+  };
+
+  const handleLogout = async () => {
+    // Close the popover first
+    setOpen(false);
+    
+    try {
+      // Call backend logout endpoint to clear HTTP-only cookies
+      await api.Logout();
+      
+      // Clear access token
+      appConfig.access_token = undefined;
+      
+      // Clear localStorage
+      localStorage.removeItem("AppConfig");
+      
+      // Clear user info from store
+      setUserInfo(undefined);
+      
+      // Clear session storage (where user-info-store is persisted)
+      sessionStorage.clear();
+      
+      // Show success message
+      toast.success("Logged out successfully");
+      
+      // Redirect to login page
+      router.push("/login");
+    } catch (error) {
+      // Even if logout API fails, clear local state and redirect
+      appConfig.access_token = undefined;
+      localStorage.removeItem("AppConfig");
+      setUserInfo(undefined);
+      sessionStorage.clear();
+      
+      toast.error("Logout failed, but local session cleared");
+      router.push("/login");
+    }
   };
 
   return (
@@ -261,6 +300,16 @@ export function MyAccountPopover(props: { onSuccess?: () => void }) {
         </Button>
 
         <Separator className="my-4 transition-colors duration-300" />
+
+        <Button
+          variant="outline"
+          onClick={handleLogout}
+          className="w-full cursor-pointer"
+          disabled={isLoading}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
 
         <Button
           variant="destructive"

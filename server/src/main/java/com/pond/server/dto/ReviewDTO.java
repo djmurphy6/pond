@@ -1,14 +1,14 @@
 package com.pond.server.dto;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.pond.server.enums.ReviewType;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -40,4 +40,10 @@ public class ReviewDTO {
 
     @JsonProperty("updatedAt")
     private LocalDateTime updatedAt;
+
+    @JsonProperty("reviewerName")
+    private String reviewerName;
+
+    @JsonProperty("reviewerAvatar")
+    private String reviewerAvatar;
 }

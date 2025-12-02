@@ -4,7 +4,6 @@ import com.pond.server.dto.CreateReviewRequest;
 import com.pond.server.dto.ReviewDTO;
 import com.pond.server.dto.UpdateReviewRequest;
 import com.pond.server.dto.UserRatingStatsDTO;
-import com.pond.server.enums.ReviewType;
 import com.pond.server.model.Listing;
 import com.pond.server.model.Review;
 import com.pond.server.model.User;
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class ReviewService {
@@ -80,7 +78,10 @@ public class ReviewService {
         review.setComment(request.getComment());
         review.setTimestamp(LocalDateTime.now());
         review = reviewRepository.save(review);
-        return toDto(review);
+        
+        // Fetch the review with user info in one query
+        return reviewRepository.findReviewWithReviewerInfoById(review.getId())
+                .orElseThrow(() -> new RuntimeException("Failed to retrieve created review"));
     }
 
     @Transactional
@@ -110,7 +111,10 @@ public class ReviewService {
 
         existingReview.setUpdatedAt(LocalDateTime.now());
         Review updatedReview = reviewRepository.save(existingReview);
-        return toDto(updatedReview);
+        
+        // Fetch the review with user info in one query
+        return reviewRepository.findReviewWithReviewerInfoById(updatedReview.getId())
+                .orElseThrow(() -> new RuntimeException("Failed to retrieve updated review"));
     }
 
     @Transactional
@@ -142,10 +146,8 @@ public class ReviewService {
 
     // For the front end to display review stats
     public List<ReviewDTO> getReviewsForUser(UUID userGu){
-        List<Review> reviews = reviewRepository.findReviewByRevieweeGu(userGu);
-        return reviews.stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
+        // Use the optimized query that fetches reviews with reviewer info in a single query
+        return reviewRepository.findReviewsWithReviewerInfoByRevieweeGu(userGu);
     }
 
     // Check if a user can review another user
@@ -183,17 +185,5 @@ public class ReviewService {
         }
 
         return new UserRatingStatsDTO(userGu, averageRating, totalReviews, canReview);
-    }
-
-    private ReviewDTO toDto(Review review) {
-        return new ReviewDTO(
-                review.getId(),
-                review.getReviewerGu(),
-                review.getRevieweeGu(),
-                review.getRating(),
-                review.getComment(),
-                review.getTimestamp(),
-                review.getUpdatedAt()
-        );
     }
 }

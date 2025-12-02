@@ -105,6 +105,10 @@ class API {
         return this.Request<VerifyUserResponse>("/auth/verify", "POST", { body }, 'VerifyUser');
     }
 
+    async Logout(): Promise<{ message: string } | ErrorResponse> {
+        return this.Request<{ message: string }>("/auth/logout", "POST", {}, 'Logout');
+    }
+
     async GetUserInfo(): Promise<UserInfo | ErrorResponse> {
         return this.Request<UserInfo>("/users/me", "GET", {}, 'GetUserInfo');
     }
