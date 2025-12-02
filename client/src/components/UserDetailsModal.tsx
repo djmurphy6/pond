@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     Dialog,
     DialogContent,
@@ -50,6 +50,12 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
     const [reviews, setReviews] = useState<Review[]>([]);
     const { userInfo } = useUserInfoStore();
 
+    //Leaving a review
+    const [userReviewRating, setUserReviewRating] = useState(0);
+    // const [comment, setComment] = useState("");
+    //for performance, dont want to seperate component just to use state
+    const commentRef = useRef<HTMLTextAreaElement>(null);
+
     // Check if viewing own profile
     const isOwnProfile = userInfo?.userGU === userGU;
 
@@ -73,6 +79,7 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
             toast.error(response.body?.error);
             return;
         } else {
+            console.log("USERSTATS:", response);
             setUserStats(response);
         }
     }
@@ -155,6 +162,29 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
         }
     };
 
+    const handleSubmit = async () => {
+        const comment = commentRef.current?.value || "";
+
+        if (userReviewRating === 0 || comment.length === 0) {
+            toast.error("Please select a rating and add a comment");
+            return;
+        }
+
+        setIsLoading(true);
+        const response = await api.CreateReview({
+            revieweeGU: userGU,
+            rating: userReviewRating,
+            comment: comment,
+        });
+        setIsLoading(false);
+        if (response instanceof ErrorResponse) {
+            toast.error(response.body?.error || "Failed to submit review");
+        } else {
+            toast.success("Review submitted successfully");
+            fetchUserReviews();
+        }
+    };
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -170,7 +200,10 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                             <ImageIcon className="h-4 w-4 text-primary transition-colors duration-300" />
                         )}
                     </div>
-                    <span className="px-4 items-center">{username}</span>
+                    <div className="flex flex-col">
+                        <span className="px-4 items-center">{username}</span>
+                        {(userStats && userStats?.totalReviews > 0) && (<StarRating className="px-4 items-center pointer-events-none" value={userStats?.averageRating || 0} readOnly size={15} />)}
+                    </div>
                 </button>
             </DialogTrigger>
 
@@ -226,93 +259,121 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                     </div>
                 </div>
 
-                {userStats && ( //userStats?.rating
+                {(userStats && userStats?.totalReviews > 0) && (
                     <>
                         <Separator className="" />
                         <DialogTitle className="text-xl">Seller ratings</DialogTitle>
                         <div className="flex flex-col items-start gap-2">
-                            <StarRating className="-mt-2" value={userStats.rating ?? 0} readOnly max={5} size={35} />
+                            <StarRating className="-mt-2" value={userStats.averageRating ?? 0} readOnly max={5} size={35} />
                             <span className="text-muted-foreground">Based on {userStats.totalReviews} ratings</span>
                         </div>
                     </>
                 )}
 
-                {1 && ( //reviews.length > 0
+                {reviews.length > 0 && ( //reviews.length > 0
                     <>
                         <Separator className="" />
                         <SellerReviewsCarousel
-                            // reviews={reviews}
-                            reviews={[
-                                {
-                                    reviewGU: "rev-001",
-                                    reviewerGU: "user-101",
-                                    revieweeGU: "seller-001",
-                                    rating: 5,
-                                    comment: "Fantastic experience. Super friendly and very responsive.",
-                                    timestamp: "2025-11-05T14:23:00Z",
-                                    updatedAt: "2025-11-05T14:23:00Z",
-                                    reviewerName: "CJ Martinez",
-                                    reviewerAvatar: "https://i.pravatar.cc/150?img=32",
-                                },
-                                {
-                                    reviewGU: "rev-002",
-                                    reviewerGU: "user-102",
-                                    revieweeGU: "seller-001",
-                                    rating: 4.8,
-                                    comment:
-                                        "Great seller! Item exactly as described. Would absolutely recommend.",
-                                    timestamp: "2025-11-04T11:10:00Z",
-                                    updatedAt: "2025-11-04T11:10:00Z",
-                                    reviewerName: "Brad Thompson",
-                                    reviewerAvatar: "https://i.pravatar.cc/150?img=15",
-                                },
-                                {
-                                    reviewGU: "rev-003",
-                                    reviewerGU: "user-103",
-                                    revieweeGU: "seller-001",
-                                    rating: 4.6,
-                                    comment: "Smooth transaction and quick communication.",
-                                    timestamp: "2025-11-02T09:45:00Z",
-                                    updatedAt: "2025-11-02T09:45:00Z",
-                                    reviewerName: "Ashley Peterson",
-                                    reviewerAvatar: "https://i.pravatar.cc/150?img=47",
-                                },
-                                {
-                                    reviewGU: "rev-004",
-                                    reviewerGU: "user-104",
-                                    revieweeGU: "seller-001",
-                                    rating: 5,
-                                    comment:
-                                        "Couldn't have gone better. Seller was on time and super easy to work with!",
-                                    timestamp: "2025-11-01T16:05:00Z",
-                                    updatedAt: "2025-11-01T16:05:00Z",
-                                    reviewerName: "Michael Chen",
-                                    reviewerAvatar: "https://i.pravatar.cc/150?img=8",
-                                },
-                                {
-                                    reviewGU: "rev-005",
-                                    reviewerGU: "user-105",
-                                    revieweeGU: "seller-001",
-                                    rating: 4.2,
-                                    comment: "Item was good overall. Small scuff but still worth the price.",
-                                    timestamp: "2025-10-29T13:15:00Z",
-                                    updatedAt: "2025-10-29T13:15:00Z",
-                                    reviewerName: "Jessica Lee",
-                                    reviewerAvatar: "https://i.pravatar.cc/150?img=28",
-                                },
-                                {
-                                    reviewGU: "rev-006",
-                                    reviewerGU: "user-106",
-                                    revieweeGU: "seller-001",
-                                    rating: 3.9,
-                                    comment: "Communication could have been faster but still a fair deal.",
-                                    timestamp: "2025-10-27T18:40:00Z",
-                                    updatedAt: "2025-10-27T18:40:00Z",
-                                    reviewerName: "Daniel Reyes",
-                                    reviewerAvatar: "https://i.pravatar.cc/150?img=52",
-                                },
-                            ]}
+                            reviews={reviews}
+                        // reviews={[
+                        //     {
+                        //         reviewGU: "rev-001",
+                        //         reviewerGU: "user-101",
+                        //         revieweeGU: "seller-001",
+                        //         rating: 5,
+                        //         comment: "Fantastic experience. Super friendly and very responsive.",
+                        //         timestamp: "2025-11-05T14:23:00Z",
+                        //         updatedAt: "2025-11-05T14:23:00Z",
+                        //         reviewerName: "CJ Martinez",
+                        //         reviewerAvatar: "https://i.pravatar.cc/150?img=32",
+                        //     },
+                        //     {
+                        //         reviewGU: "rev-002",
+                        //         reviewerGU: "user-102",
+                        //         revieweeGU: "seller-001",
+                        //         rating: 4.8,
+                        //         comment:
+                        //             "Great seller! Item exactly as described. Would absolutely recommend.",
+                        //         timestamp: "2025-11-04T11:10:00Z",
+                        //         updatedAt: "2025-11-04T11:10:00Z",
+                        //         reviewerName: "Brad Thompson",
+                        //         reviewerAvatar: "https://i.pravatar.cc/150?img=15",
+                        //     },
+                        //     {
+                        //         reviewGU: "rev-003",
+                        //         reviewerGU: "user-103",
+                        //         revieweeGU: "seller-001",
+                        //         rating: 4.6,
+                        //         comment: "Smooth transaction and quick communication.",
+                        //         timestamp: "2025-11-02T09:45:00Z",
+                        //         updatedAt: "2025-11-02T09:45:00Z",
+                        //         reviewerName: "Ashley Peterson",
+                        //         reviewerAvatar: "https://i.pravatar.cc/150?img=47",
+                        //     },
+                        //     {
+                        //         reviewGU: "rev-004",
+                        //         reviewerGU: "user-104",
+                        //         revieweeGU: "seller-001",
+                        //         rating: 5,
+                        //         comment:
+                        //             "Couldn't have gone better. Seller was on time and super easy to work with!",
+                        //         timestamp: "2025-11-01T16:05:00Z",
+                        //         updatedAt: "2025-11-01T16:05:00Z",
+                        //         reviewerName: "Michael Chen",
+                        //         reviewerAvatar: "https://i.pravatar.cc/150?img=8",
+                        //     },
+                        //     {
+                        //         reviewGU: "rev-005",
+                        //         reviewerGU: "user-105",
+                        //         revieweeGU: "seller-001",
+                        //         rating: 4.2,
+                        //         comment: "Item was good overall. Small scuff but still worth the price.",
+                        //         timestamp: "2025-10-29T13:15:00Z",
+                        //         updatedAt: "2025-10-29T13:15:00Z",
+                        //         reviewerName: "Jessica Lee",
+                        //         reviewerAvatar: "https://i.pravatar.cc/150?img=28",
+                        //     },
+                        //     {
+                        //         reviewGU: "rev-006",
+                        //         reviewerGU: "user-106",
+                        //         revieweeGU: "seller-001",
+                        //         rating: 3.9,
+                        //         comment: "Communication could have been faster but still a fair deal.",
+                        //         timestamp: "2025-10-27T18:40:00Z",
+                        //         updatedAt: "2025-10-27T18:40:00Z",
+                        //         reviewerName: "Daniel Reyes",
+                        //         reviewerAvatar: "https://i.pravatar.cc/150?img=52",
+                        //     },
+                        // ]}
                         />
+                    </>
+                )}
+
+                {userStats?.canReview && ( //userStats?.canReview
+                    <>
+                        <Separator className="" />
+                        <span className="text-xl font-semibold">Leave a review</span>
+                        <StarRating size={30} max={5} value={userReviewRating} onChange={setUserReviewRating} />
+                        <Textarea
+                            ref={commentRef}
+                            className="resize-none min-h-[15vh]"
+                            id="comment"
+                            maxLength={500}
+                            onChange={(e) => {
+                                console.log(commentRef.current?.value)
+                            }}
+                            placeholder="Type your review comment here..."
+                        />
+                        <Button onClick={handleSubmit} style={{ color: 'white', cursor: 'pointer' }} type="submit" className="w-full bg-[var(--uo-green)] hover:bg-[var(--uo-green)]/70" disabled={isLoading}>
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Submitting...
+                                </>
+                            ) : (
+                                "Submit"
+                            )}
+                        </Button>
                     </>
                 )}
 

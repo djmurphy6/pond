@@ -27,9 +27,9 @@ export default function SellerReviewsCarousel({
 }: Props) {
     return (
         <section className="space-y-3 overflow-hidden">
-            <h2 className="text-lg font-semibold">
+            <h2 className="text-xl font-semibold">
                 {title}{" "}
-                <span className="text-lg text-muted-foreground">({reviews.length})</span>
+                <span className="text-xl text-muted-foreground">({reviews.length})</span>
             </h2>
 
             <ScrollArea className="w-full">

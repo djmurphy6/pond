@@ -473,16 +473,18 @@ public class ListingService {
         }
     }
 
-    public ListingDTO toggleSold(UUID id, User owner) {
+    public ListingDTO toggleSold(UUID id, UUID soldToId, User owner) {
         Listing l = listingRepository.findByListingGUAndUserGU(id, owner.getUserGU())
                 .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));
-        
+
         // Toggle the sold status
         l.setSold(!l.getSold());
-        
+
         // If unmarking as sold, clear the soldTo field
         if (!l.getSold()) {
             l.setSoldTo(null);
+        } else {
+            l.setSoldTo(soldToId);
         }
         
         l = listingRepository.save(l);

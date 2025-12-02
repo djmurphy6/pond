@@ -383,7 +383,7 @@ export type UpdateReviewRequest = {
 
 export type GetUserRatingStatsResponse = {
     userGU: string;
-    rating: number;
+    averageRating: number;
     totalReviews: number;
     canReview: boolean;
 }

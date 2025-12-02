@@ -113,6 +113,21 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
 
     List<Listing> findByUserGUAndSoldTo(UUID userGU, UUID soldTo);
 
+    @Query("""
+    SELECT CASE WHEN COUNT(l) > 0 THEN TRUE ELSE FALSE END
+    FROM Listing l
+    WHERE l.soldTo IS NOT NULL
+      AND (
+            (l.userGU = :reviewerGu AND l.soldTo = :revieweeGu)
+         OR (l.userGU = :revieweeGu AND l.soldTo = :reviewerGu)
+      )
+    """)
+    boolean didTransactionOccur(
+            @Param("reviewerGu") UUID reviewerGu,
+            @Param("revieweeGu") UUID revieweeGu
+    );
+
+
     // Keep original method for backward compatibility
     default List<Listing> findFollowingFiltered(List<UUID> userIds, List<String> categories, 
                                                  Double minPrice, Double maxPrice, 

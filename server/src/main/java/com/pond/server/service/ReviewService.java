@@ -161,10 +161,10 @@ public class ReviewService {
             return false;
         }
 
-        List<Listing> sellerToBuyerListings = listingRepository.findByUserGUAndSoldTo(reviewerGu, revieweeGu);
-        List<Listing> buyerToSellerListings = listingRepository.findByUserGUAndSoldTo(revieweeGu, reviewerGu);
 
-        return !sellerToBuyerListings.isEmpty() || !buyerToSellerListings.isEmpty();
+        boolean canReview = listingRepository.didTransactionOccur(reviewerGu, revieweeGu);
+
+        return canReview;
     }
 
     // For the front end to display review stats
