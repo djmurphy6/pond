@@ -4,10 +4,8 @@ import { ReactElement, ReactNode, useEffect, useRef, useState } from "react";
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
     DialogTitle,
     DialogTrigger,
-    DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,6 +24,16 @@ import { useUserInfoStore } from "@/stores/UserInfoStore";
 import { ScrollArea } from "./ui/scroll-area";
 import StarRating from "./StarRating";
 import SellerReviewsCarousel from "./SellerReviewsCarousel";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type UserDetailsModalProps = {
     userGU: string;
@@ -53,6 +61,11 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
 
     //Leaving a review
     const [userReviewRating, setUserReviewRating] = useState(0);
+
+    // Edit/Delete review modal
+    const [reviewToEdit, setReviewToEdit] = useState<Review | undefined>();
+    const [reviewToDelete, setReviewToDelete] = useState<Review | undefined>();
+
     // const [comment, setComment] = useState("");
     //for performance, dont want to seperate component just to use state
     const commentRef = useRef<HTMLTextAreaElement>(null);
@@ -96,6 +109,10 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
             setReviews(response);
         }
     }
+
+    const refreshReviewData = async () => {
+        await Promise.all([fetchUserStats(), fetchUserReviews()]);
+    };
 
     useEffect(() => {
         fetchListings();
@@ -182,14 +199,42 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
             toast.error(response.body?.error || "Failed to submit review");
         } else {
             toast.success("Review submitted successfully");
-            fetchUserReviews();
+            if (commentRef.current) commentRef.current.value = "";
+            setUserReviewRating(0);
+            refreshReviewData();
+            // fetchUserReviews();
         }
+    };
+
+    const handleDeleteReview = async () => {
+        if (!reviewToDelete) return;
+
+        // Check ownership using the flexible check
+        const reviewerID = (reviewToDelete as any).reviewerGu || reviewToDelete.reviewerGU;
+        const isOwner = userInfo?.userGU === reviewerID;
+        const isAdmin = userInfo?.admin;
+
+        let res;
+        // Use Admin endpoint only if user is admin but NOT the owner
+        if (isAdmin && !isOwner) {
+            res = await api.AdminDeleteReview(reviewToDelete.reviewGU);
+        } else {
+            res = await api.DeleteReview(reviewToDelete.reviewGU);
+        }
+
+        if (res instanceof ErrorResponse) {
+            toast.error(res.body?.error || "Failed to delete review");
+        } else {
+            toast.success("Review deleted");
+            refreshReviewData(); // Ensure UI updates
+        }
+        setReviewToDelete(undefined);
     };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                {children ? 
+                {children ?
                 (
                     children
                 )
@@ -419,3 +464,4 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
         </Dialog>
     );
 }
+
