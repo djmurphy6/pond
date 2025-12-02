@@ -347,7 +347,7 @@ export default function MessagingPage() {
                                     <Button
                                     variant={selectedRoom.listingSold ? "outline" : "default"}
                                     size="sm"
-                                    onClick={toggleSoldStatus}
+                                    onClick={(e) => {e.stopPropagation(); toggleSoldStatus();}}
                                     disabled={togglingSold}
                                     className={`flex-shrink-0 cursor-pointer ${!selectedRoom.listingSold ? "bg-uo-green text-white hover:bg-uo-green/90" : ""}`}
                                     >
