@@ -13,6 +13,8 @@ export const mockChatRooms: ChatRoom[] = [
         lastMessage: "Is it still available?",
         lastMessageAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(), // 5 minutes ago
         unreadCount: 2,
+        isSeller: false,
+        listingSold: false,
     },
     {
         roomId: "room-2",
@@ -25,6 +27,8 @@ export const mockChatRooms: ChatRoom[] = [
         lastMessage: "Great! When can we meet?",
         lastMessageAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
         unreadCount: 0,
+        isSeller: false,
+        listingSold: false,
     },
     {
         roomId: "room-3",
@@ -37,6 +41,8 @@ export const mockChatRooms: ChatRoom[] = [
         lastMessage: "Thanks for your interest!",
         lastMessageAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
         unreadCount: 1,
+        isSeller: false,
+        listingSold: false,
     },
     {
         roomId: "room-4",
@@ -49,6 +55,8 @@ export const mockChatRooms: ChatRoom[] = [
         lastMessage: "They look great in the photos!",
         lastMessageAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
         unreadCount: 0,
+        isSeller: false,
+        listingSold: false,
     },
     {
         roomId: "room-5",
@@ -61,6 +69,8 @@ export const mockChatRooms: ChatRoom[] = [
         lastMessage: "Can you do $20?",
         lastMessageAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
         unreadCount: 0,
+        isSeller: false,
+        listingSold: false,
     },
 ];
 
