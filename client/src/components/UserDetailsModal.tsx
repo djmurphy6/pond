@@ -1,21 +1,18 @@
 "use client";
 
-import { ReactElement, ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import {
     Dialog,
     DialogContent,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader2, X, ImageIcon, UserPlus, UserMinus } from "lucide-react";
+import { Loader2, ImageIcon, UserPlus, UserMinus } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/api/WebService";
-import { CreateListingRequest, ErrorResponse, GetUserRatingStatsResponse, Listing, Review } from "@/api/WebTypes";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { ErrorResponse, GetUserRatingStatsResponse, Listing, Review } from "@/api/WebTypes";
 import { Separator } from "./ui/separator";
 import { Skeleton } from "./ui/skeleton";
 import { Card, CardContent } from "./ui/card";
@@ -24,6 +21,7 @@ import { useUserInfoStore } from "@/stores/UserInfoStore";
 import { ScrollArea } from "./ui/scroll-area";
 import StarRating from "./StarRating";
 import SellerReviewsCarousel from "./SellerReviewsCarousel";
+import EditReviewModal from "./EditReviewModal";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -47,10 +45,15 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
     const { userGU, username, avatar_url, onSuccess, children } = props;
 
     const [open, setOpen] = useState(false);
+
+    // isLoading controls the LISTINGS skeleton state only
     const [isLoading, setIsLoading] = useState(false);
-    const [isFollowing, setIsFollowing] = useState(false);
-    const [isFollowLoading, setIsFollowLoading] = useState(false);
+
+    // Separate loading state for reviews actions if needed, or rely on toast
     const [isStatusLoading, setIsStatusLoading] = useState(true);
+    const [isFollowLoading, setIsFollowLoading] = useState(false);
+
+    const [isFollowing, setIsFollowing] = useState(false);
     const [followerCount, setFollowerCount] = useState(0);
     const [followingCount, setFollowingCount] = useState(0);
 
@@ -59,19 +62,18 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
     const [reviews, setReviews] = useState<Review[]>([]);
     const { userInfo } = useUserInfoStore();
 
-    //Leaving a review
+    // Leaving a review
     const [userReviewRating, setUserReviewRating] = useState(0);
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+    const commentRef = useRef<HTMLTextAreaElement>(null);
 
-    // Edit/Delete review modal
+    // Edit/Delete State
     const [reviewToEdit, setReviewToEdit] = useState<Review | undefined>();
     const [reviewToDelete, setReviewToDelete] = useState<Review | undefined>();
 
-    // const [comment, setComment] = useState("");
-    //for performance, dont want to seperate component just to use state
-    const commentRef = useRef<HTMLTextAreaElement>(null);
-
-    // Check if viewing own profile
     const isOwnProfile = userInfo?.userGU === userGU;
+
+    // --- DATA FETCHING ---
 
     async function fetchListings() {
         setIsLoading(true);
@@ -79,48 +81,48 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
         setIsLoading(false);
         if (response instanceof ErrorResponse) {
             toast.error(response.body?.error);
-            return;
         } else {
             setListings(response);
         }
     }
 
     async function fetchUserStats() {
-        setIsLoading(true);
+        // Do NOT set isLoading here to avoid flickering listings
         const response = await api.GetUserRatingStats(userGU);
-        setIsLoading(false);
         if (response instanceof ErrorResponse) {
-            toast.error(response.body?.error);
-            return;
+            console.error("Failed to fetch user stats");
         } else {
-            console.log("USERSTATS:", response);
             setUserStats(response);
         }
     }
 
     async function fetchUserReviews() {
-        setIsLoading(true);
+        // Do NOT set isLoading here
         const response = await api.GetReviews(userGU);
-        setIsLoading(false);
         if (response instanceof ErrorResponse) {
-            toast.error(response.body?.error);
-            return;
+            console.error("Failed to fetch reviews");
         } else {
             setReviews(response);
         }
     }
 
     const refreshReviewData = async () => {
+        // Run both in parallel and wait for them
         await Promise.all([fetchUserStats(), fetchUserReviews()]);
+        // Trigger parent refresh if provided
+        if (onSuccess) onSuccess();
     };
 
+    // Initial Load
     useEffect(() => {
-        fetchListings();
-        fetchUserStats();
-        fetchUserReviews();
-    }, [userGU]);
+        if (open) {
+            fetchListings();
+            fetchUserStats();
+            fetchUserReviews();
+        }
+    }, [userGU, open]);
 
-    // Fetch following status and counts when modal opens
+    // Following Status
     useEffect(() => {
         if (open && !isOwnProfile) {
             setIsStatusLoading(true);
@@ -133,11 +135,11 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
             }
             fetchFollowingStatus();
         } else if (open && isOwnProfile) {
-            // If viewing own profile, no need to check following status
             setIsStatusLoading(false);
         }
     }, [open, userGU, isOwnProfile]);
 
+    // Follow Counts
     useEffect(() => {
         if (open) {
             async function fetchFollowCounts() {
@@ -151,6 +153,8 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
         }
     }, [open, userGU]);
 
+    // --- HANDLERS ---
+
     const handleFollowToggle = async () => {
         setIsFollowLoading(true);
         try {
@@ -162,6 +166,7 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                     setIsFollowing(false);
                     setFollowerCount(prev => Math.max(0, prev - 1));
                     toast.success(`Unfollowed ${username}`);
+                    if (onSuccess) onSuccess();
                 }
             } else {
                 const response = await api.FollowUser({ userId: userGU });
@@ -171,6 +176,7 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                     setIsFollowing(true);
                     setFollowerCount(prev => prev + 1);
                     toast.success(`Now following ${username}`);
+                    if (onSuccess) onSuccess();
                 }
             }
         } catch (error) {
@@ -180,7 +186,7 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
         }
     };
 
-    const handleSubmit = async () => {
+    const handleSubmitReview = async () => {
         const comment = commentRef.current?.value || "";
 
         if (userReviewRating === 0 || comment.length === 0) {
@@ -188,13 +194,14 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
             return;
         }
 
-        setIsLoading(true);
+        setIsSubmittingReview(true);
         const response = await api.CreateReview({
             revieweeGU: userGU,
             rating: userReviewRating,
             comment: comment,
         });
-        setIsLoading(false);
+        setIsSubmittingReview(false);
+
         if (response instanceof ErrorResponse) {
             toast.error(response.body?.error || "Failed to submit review");
         } else {
@@ -202,20 +209,18 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
             if (commentRef.current) commentRef.current.value = "";
             setUserReviewRating(0);
             refreshReviewData();
-            // fetchUserReviews();
         }
     };
 
     const handleDeleteReview = async () => {
         if (!reviewToDelete) return;
 
-        // Check ownership using the flexible check
+        // Determine deletion endpoint (Admin vs Owner)
         const reviewerID = (reviewToDelete as any).reviewerGu || reviewToDelete.reviewerGU;
         const isOwner = userInfo?.userGU === reviewerID;
         const isAdmin = userInfo?.admin;
 
         let res;
-        // Use Admin endpoint only if user is admin but NOT the owner
         if (isAdmin && !isOwner) {
             res = await api.AdminDeleteReview(reviewToDelete.reviewGU);
         } else {
@@ -226,7 +231,9 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
             toast.error(res.body?.error || "Failed to delete review");
         } else {
             toast.success("Review deleted");
-            refreshReviewData(); // Ensure UI updates
+            // Important: Await the refresh before clearing the modal state
+            // this ensures the UI doesn't flash old data
+            await refreshReviewData();
         }
         setReviewToDelete(undefined);
     };
@@ -234,28 +241,27 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                {children ?
-                (
+                {children ? (
                     children
-                )
-                :
-                (<button onClick={() => { }} className="flex flex-row w-full items-center hover:underline cursor-pointer">
-                    <div className="h-10 w-10 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
-                        {avatar_url ? (
-                            <img
-                                src={avatar_url}
-                                alt="Profile"
-                                className="w-full h-full object-cover rounded-full"
-                            />
-                        ) : (
-                            <ImageIcon className="h-4 w-4 text-primary transition-colors duration-300" />
-                        )}
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="px-4 items-center">{username}</span>
-                        {(userStats && userStats?.totalReviews > 0) && (<StarRating className="px-4 items-center pointer-events-none" value={userStats?.averageRating || 0} readOnly size={15} />)}
-                    </div>
-                </button>)}
+                ) : (
+                    <button onClick={() => { }} className="flex flex-row w-full items-center hover:underline cursor-pointer">
+                        <div className="h-10 w-10 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
+                            {avatar_url ? (
+                                <img
+                                    src={avatar_url}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover rounded-full"
+                                />
+                            ) : (
+                                <ImageIcon className="h-4 w-4 text-primary transition-colors duration-300" />
+                            )}
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="px-4 items-center">{username}</span>
+                            {(userStats && userStats?.totalReviews > 0) && (<StarRating className="px-4 items-center pointer-events-none" value={userStats?.averageRating || 0} readOnly size={15} />)}
+                        </div>
+                    </button>
+                )}
             </DialogTrigger>
 
             <DialogContent className="max-w-full sm:max-w-3xl [&::-webkit-scrollbar]:hidden max-h-[90vh] overflow-y-auto">
@@ -321,86 +327,18 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                     </>
                 )}
 
-                {reviews.length > 0 && ( //reviews.length > 0
+                {reviews.length > 0 && (
                     <>
                         <Separator className="" />
                         <SellerReviewsCarousel
                             reviews={reviews}
-                        // reviews={[
-                        //     {
-                        //         reviewGU: "rev-001",
-                        //         reviewerGU: "user-101",
-                        //         revieweeGU: "seller-001",
-                        //         rating: 5,
-                        //         comment: "Fantastic experience. Super friendly and very responsive.",
-                        //         timestamp: "2025-11-05T14:23:00Z",
-                        //         updatedAt: "2025-11-05T14:23:00Z",
-                        //         reviewerName: "CJ Martinez",
-                        //         reviewerAvatar: "https://i.pravatar.cc/150?img=32",
-                        //     },
-                        //     {
-                        //         reviewGU: "rev-002",
-                        //         reviewerGU: "user-102",
-                        //         revieweeGU: "seller-001",
-                        //         rating: 4.8,
-                        //         comment:
-                        //             "Great seller! Item exactly as described. Would absolutely recommend.",
-                        //         timestamp: "2025-11-04T11:10:00Z",
-                        //         updatedAt: "2025-11-04T11:10:00Z",
-                        //         reviewerName: "Brad Thompson",
-                        //         reviewerAvatar: "https://i.pravatar.cc/150?img=15",
-                        //     },
-                        //     {
-                        //         reviewGU: "rev-003",
-                        //         reviewerGU: "user-103",
-                        //         revieweeGU: "seller-001",
-                        //         rating: 4.6,
-                        //         comment: "Smooth transaction and quick communication.",
-                        //         timestamp: "2025-11-02T09:45:00Z",
-                        //         updatedAt: "2025-11-02T09:45:00Z",
-                        //         reviewerName: "Ashley Peterson",
-                        //         reviewerAvatar: "https://i.pravatar.cc/150?img=47",
-                        //     },
-                        //     {
-                        //         reviewGU: "rev-004",
-                        //         reviewerGU: "user-104",
-                        //         revieweeGU: "seller-001",
-                        //         rating: 5,
-                        //         comment:
-                        //             "Couldn't have gone better. Seller was on time and super easy to work with!",
-                        //         timestamp: "2025-11-01T16:05:00Z",
-                        //         updatedAt: "2025-11-01T16:05:00Z",
-                        //         reviewerName: "Michael Chen",
-                        //         reviewerAvatar: "https://i.pravatar.cc/150?img=8",
-                        //     },
-                        //     {
-                        //         reviewGU: "rev-005",
-                        //         reviewerGU: "user-105",
-                        //         revieweeGU: "seller-001",
-                        //         rating: 4.2,
-                        //         comment: "Item was good overall. Small scuff but still worth the price.",
-                        //         timestamp: "2025-10-29T13:15:00Z",
-                        //         updatedAt: "2025-10-29T13:15:00Z",
-                        //         reviewerName: "Jessica Lee",
-                        //         reviewerAvatar: "https://i.pravatar.cc/150?img=28",
-                        //     },
-                        //     {
-                        //         reviewGU: "rev-006",
-                        //         reviewerGU: "user-106",
-                        //         revieweeGU: "seller-001",
-                        //         rating: 3.9,
-                        //         comment: "Communication could have been faster but still a fair deal.",
-                        //         timestamp: "2025-10-27T18:40:00Z",
-                        //         updatedAt: "2025-10-27T18:40:00Z",
-                        //         reviewerName: "Daniel Reyes",
-                        //         reviewerAvatar: "https://i.pravatar.cc/150?img=52",
-                        //     },
-                        // ]}
+                            onEdit={setReviewToEdit}
+                            onDelete={setReviewToDelete}
                         />
                     </>
                 )}
 
-                {userStats?.canReview && ( //userStats?.canReview
+                {userStats?.canReview && (
                     <>
                         <Separator className="" />
                         <span className="text-xl font-semibold">Leave a review</span>
@@ -410,13 +348,16 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                             className="resize-none min-h-[15vh]"
                             id="comment"
                             maxLength={500}
-                            onChange={(e) => {
-                                console.log(commentRef.current?.value)
-                            }}
                             placeholder="Type your review comment here..."
                         />
-                        <Button onClick={handleSubmit} style={{ color: 'white', cursor: 'pointer' }} type="submit" className="w-full bg-[var(--uo-green)] hover:bg-[var(--uo-green)]/70" disabled={isLoading}>
-                            {isLoading ? (
+                        <Button
+                            onClick={handleSubmitReview}
+                            style={{ color: 'white', cursor: 'pointer' }}
+                            type="submit"
+                            className="w-full bg-[var(--uo-green)] hover:bg-[var(--uo-green)]/70"
+                            disabled={isSubmittingReview}
+                        >
+                            {isSubmittingReview ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Submitting...
@@ -427,7 +368,6 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                         </Button>
                     </>
                 )}
-
 
                 <Separator className="" />
 
@@ -460,8 +400,35 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                     </ScrollArea>
                 )}
 
+                {/* Edit Modal */}
+                <EditReviewModal
+                    review={reviewToEdit}
+                    onClose={() => setReviewToEdit(undefined)}
+                    onSave={refreshReviewData}
+                />
+
+                {/* Delete Confirmation Alert */}
+                <AlertDialog open={!!reviewToDelete} onOpenChange={() => setReviewToDelete(undefined)}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Review?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Are you sure you want to delete this review? This action cannot be undone.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={handleDeleteReview}
+                                className="bg-destructive text-white hover:bg-destructive/90 cursor-pointer"
+                            >
+                                Delete
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
             </DialogContent>
         </Dialog>
     );
 }
-
