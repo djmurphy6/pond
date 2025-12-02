@@ -1,7 +1,7 @@
 "use client";
 
 //React
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { useTheme } from "next-themes";
 
 //Icons
@@ -43,8 +43,7 @@ import MobileHeader from "@/components/MobileHeader";
 import { SideBarAside } from "@/components/SideBarAside";
 import { UserDetailsModal } from "@/components/UserDetailsModal";
 
-export default function MessagingPage() {
-
+function MessagingContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const roomId = searchParams.get("roomId");
@@ -547,6 +546,14 @@ function MessageBubble({ message, isOwn }: { message: Message; isOwn: boolean })
                 </p>
             </div>
         </div>
+    );
+}
+
+export default function MessagingPage() {
+    return (
+        <Suspense fallback={<FullScreenSpinner />}>
+            <MessagingContent />
+        </Suspense>
     );
 }
 
