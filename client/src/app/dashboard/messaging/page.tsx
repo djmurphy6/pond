@@ -41,6 +41,7 @@ import FullScreenSpinner from "@/components/FullScreenSpiner";
 import { useUnreadCount } from "@/stores/UnreadCountStore";
 import MobileHeader from "@/components/MobileHeader";
 import { SideBarAside } from "@/components/SideBarAside";
+import { UserDetailsModal } from "@/components/UserDetailsModal";
 
 export default function MessagingPage() {
 
@@ -317,14 +318,18 @@ export default function MessagingPage() {
                             className={`sticky top-0 z-10 border-b bg-muted/30 backdrop-blur-sm transition-colors duration-300 ${theme !== "dark" && "shadow-sm"
                                 }`}
                         >
-                            <div className="p-4 flex items-center gap-3">
+                            <UserDetailsModal
+                                userGU={selectedRoom.otherUserGU}
+                                username={selectedRoom.otherUsername}
+                            >
+                            <div className="group p-4 flex items-center gap-3 cursor-pointer">
                                 <div className="relative h-10 w-10 rounded-full bg-muted overflow-hidden flex-shrink-0">
                                     {selectedRoom.listingImage ? (
                                         <Image
-                                            src={selectedRoom.listingImage}
-                                            alt={selectedRoom.listingTitle}
-                                            fill
-                                            className="object-cover"
+                                        src={selectedRoom.listingImage}
+                                        alt={selectedRoom.listingTitle}
+                                        fill
+                                        className="object-cover"
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
@@ -334,23 +339,23 @@ export default function MessagingPage() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <h3 className="font-semibold truncate">{selectedRoom.listingTitle}</h3>
-                                    
-                                    <p className="text-sm text-muted-foreground truncate">
+                                    <p className="text-sm text-muted-foreground group-hover:underline truncate">
                                         {selectedRoom.otherUsername}
                                     </p>
                                 </div>
                                 {selectedRoom.isSeller && (
                                     <Button
-                                        variant={selectedRoom.listingSold ? "outline" : "default"}
-                                        size="sm"
-                                        onClick={toggleSoldStatus}
-                                        disabled={togglingSold}
-                                        className={`flex-shrink-0 ${!selectedRoom.listingSold ? "bg-uo-green text-white hover:bg-uo-green/90" : ""}`}
+                                    variant={selectedRoom.listingSold ? "outline" : "default"}
+                                    size="sm"
+                                    onClick={toggleSoldStatus}
+                                    disabled={togglingSold}
+                                    className={`flex-shrink-0 cursor-pointer ${!selectedRoom.listingSold ? "bg-uo-green text-white hover:bg-uo-green/90" : ""}`}
                                     >
                                         {togglingSold ? "..." : selectedRoom.listingSold ? "Mark Available" : "Mark as Sold"}
                                     </Button>
                                 )}
                             </div>
+                                </UserDetailsModal>
                             
                             {!selectedRoom.isSeller && selectedRoom.listingSold && (
                                 <div className="px-4 pb-3">

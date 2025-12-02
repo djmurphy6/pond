@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { ReactElement, ReactNode, useEffect, useRef, useState } from "react";
 import {
     Dialog,
     DialogContent,
@@ -31,11 +31,12 @@ type UserDetailsModalProps = {
     userGU: string;
     username: string,
     avatar_url?: string,
-    onSuccess?: () => void
+    onSuccess?: () => void,
+    children?: ReactNode,
 }
 
 export function UserDetailsModal(props: UserDetailsModalProps) {
-    const { userGU, username, avatar_url, onSuccess } = props;
+    const { userGU, username, avatar_url, onSuccess, children } = props;
 
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -188,7 +189,12 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <button onClick={() => { }} className="flex flex-row w-full items-center hover:underline cursor-pointer">
+                {children ? 
+                (
+                    children
+                )
+                :
+                (<button onClick={() => { }} className="flex flex-row w-full items-center hover:underline cursor-pointer">
                     <div className="h-10 w-10 bg-primary/20 rounded-full flex items-center justify-center transition-colors duration-300">
                         {avatar_url ? (
                             <img
@@ -204,10 +210,10 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                         <span className="px-4 items-center">{username}</span>
                         {(userStats && userStats?.totalReviews > 0) && (<StarRating className="px-4 items-center pointer-events-none" value={userStats?.averageRating || 0} readOnly size={15} />)}
                     </div>
-                </button>
+                </button>)}
             </DialogTrigger>
 
-            <DialogContent className="max-w-full sm:max-w-3xl max-h-screen overflow-y-auto">
+            <DialogContent className="max-w-full sm:max-w-3xl [&::-webkit-scrollbar]:hidden max-h-[90vh] overflow-y-auto">
                 <div className="flex flex-col md:flex-row items-center gap-6">
                     <div className="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center border-3 border-primary flex-shrink-0">
                         {avatar_url ? (
