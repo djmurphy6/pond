@@ -1,17 +1,26 @@
 package com.pond.server.controller;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.pond.server.dto.CreateReviewRequest;
 import com.pond.server.dto.ReviewDTO;
 import com.pond.server.dto.UpdateReviewRequest;
 import com.pond.server.dto.UserRatingStatsDTO;
 import com.pond.server.model.User;
 import com.pond.server.service.ReviewService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/reviews")
@@ -39,15 +48,15 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<Void> deleteReview(
+    public ResponseEntity<Map<String, String>> deleteReview(
             @AuthenticationPrincipal User user,
             @PathVariable UUID reviewId) {
         reviewService.userDeleteReview(reviewId, user.getUserGU());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(Map.of("message", "Review deleted successfully"));
     }
 
     @DeleteMapping("/admin/{reviewId}")
-    public ResponseEntity<Void> adminDeleteReview(
+    public ResponseEntity<Map<String, String>> adminDeleteReview(
             @AuthenticationPrincipal User user,
             @PathVariable UUID reviewId) {
         // Explicit admin check
@@ -55,7 +64,7 @@ public class ReviewController {
             return ResponseEntity.status(403).build();
         }
         reviewService.adminDeleteReview(reviewId, user);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(Map.of("message", "Review deleted successfully"));
     }
 
     @GetMapping("/user/{userGu}")

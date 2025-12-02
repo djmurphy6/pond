@@ -277,12 +277,12 @@ class API {
         return this.Request<Review>(`/reviews/${body.reviewGU}`, "PUT", { body }, 'UpdateReview');
     }
 
-    async DeleteReview(reviewGU: string): Promise<{} | ErrorResponse> {
-        return this.Request<{}>(`/reviews/${reviewGU}`, "DELETE", {}, 'DeleteReview');
+    async DeleteReview(reviewGU: string): Promise<string | ErrorResponse> {
+        return this.Request<string>(`/reviews/${reviewGU}`, "DELETE", {}, 'DeleteReview');
     }
 
-    async AdminDeleteReview(reviewGU: string): Promise<{} | ErrorResponse> {
-        return this.Request<{}>(`/reviews/admin/${reviewGU}`, "DELETE", {}, 'AdminDeleteReview');
+    async AdminDeleteReview(reviewGU: string): Promise<string | ErrorResponse> {
+        return this.Request<string>(`/reviews/admin/${reviewGU}`, "DELETE", {}, 'AdminDeleteReview');
     }
 
     async GetUserRatingStats(userGU: string): Promise<GetUserRatingStatsResponse | ErrorResponse> {

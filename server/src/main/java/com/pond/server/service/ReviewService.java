@@ -1,5 +1,12 @@
 package com.pond.server.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.pond.server.dto.CreateReviewRequest;
 import com.pond.server.dto.ReviewDTO;
 import com.pond.server.dto.UpdateReviewRequest;
@@ -9,11 +16,6 @@ import com.pond.server.model.Review;
 import com.pond.server.model.User;
 import com.pond.server.repository.ListingRepository;
 import com.pond.server.repository.ReviewRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class ReviewService {
@@ -117,7 +119,7 @@ public class ReviewService {
     }
 
     @Transactional
-    public void userDeleteReview(UUID reviewId, UUID reviewerGu){
+    public String userDeleteReview(UUID reviewId, UUID reviewerGu){
 
         Review reviewToDelete = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found."));
@@ -127,10 +129,12 @@ public class ReviewService {
             throw new RuntimeException("Not authorized to delete a review you do not own.");
         }
         reviewRepository.deleteById(reviewId);
+
+        return "Review deleted successfully";
     }
 
     @Transactional
-    public void adminDeleteReview(UUID reviewId, User currentUser){
+    public String adminDeleteReview(UUID reviewId, User currentUser){
         Review reviewToDelete;
 
         if (currentUser.getAdmin()){
@@ -141,6 +145,8 @@ public class ReviewService {
         }
 
         reviewRepository.deleteById(reviewId);
+
+        return "Review deleted successfully";
     }
 
     // For the front end to display review stats
