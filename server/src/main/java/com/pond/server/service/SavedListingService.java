@@ -60,6 +60,7 @@ public class SavedListingService {
     /**
      * Check if a listing is saved by a user
      */
+    @Transactional(readOnly = true)
     public boolean isListingSaved(UUID listingGU, User user) {
         return savedListingRepository.existsByUserGUAndListingGU(user.getUserGU(), listingGU);
     }
@@ -68,6 +69,7 @@ public class SavedListingService {
      * Get all saved listings for a user (returns full listing details)
      * OPTIMIZED: Uses single JOIN query instead of fetching separately and filtering
      */
+    @Transactional(readOnly = true)
     public List<ListingDTO> getSavedListings(User user) {
         // Single query with JOIN - much faster than fetching separately
         List<Listing> listings = savedListingRepository
@@ -82,6 +84,7 @@ public class SavedListingService {
     /**
      * Get list of listing IDs that user has saved (lightweight, for checking status)
      */
+    @Transactional(readOnly = true)
     public List<UUID> getSavedListingIds(User user) {
         return savedListingRepository.findListingGUsByUserGU(user.getUserGU());
     }

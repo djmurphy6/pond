@@ -62,6 +62,7 @@ public class UserFollowingService {
     /**
      * Check if user A follows user B
      */
+    @Transactional(readOnly = true)
     public boolean isFollowing(UUID followerGU, UUID followingGU) {
         return userFollowingRepository.existsByFollowerGUAndFollowingGU(followerGU, followingGU);
     }
@@ -69,6 +70,7 @@ public class UserFollowingService {
     /**
      * Get list of user GUIDs that this user follows
      */
+    @Transactional(readOnly = true)
     public List<UUID> getFollowingList(UUID userGU) {
         return userFollowingRepository.findByFollowerGU(userGU).stream()
             .map(UserFollowing::getFollowingGU)
@@ -78,6 +80,7 @@ public class UserFollowingService {
     /**
      * Get list of user GUIDs who follow this user
      */
+    @Transactional(readOnly = true)
     public List<UUID> getFollowersList(UUID userGU) {
         return userFollowingRepository.findByFollowingGU(userGU).stream()
             .map(UserFollowing::getFollowerGU)
@@ -87,6 +90,7 @@ public class UserFollowingService {
     /**
      * Get follower count
      */
+    @Transactional(readOnly = true)
     public long getFollowerCount(UUID userGU) {
         return userFollowingRepository.countFollowers(userGU);
     }
@@ -94,6 +98,7 @@ public class UserFollowingService {
     /**
      * Get following count
      */
+    @Transactional(readOnly = true)
     public long getFollowingCount(UUID userGU) {
         return userFollowingRepository.countFollowing(userGU);
     }

@@ -1,18 +1,19 @@
 package com.pond.server.service;
 
-import com.pond.server.dto.MessageResponseDTO;
-import com.pond.server.model.Message;
-import com.pond.server.repository.MessageRepository;
-import com.pond.server.repository.ChatRoomRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.pond.server.dto.MessageResponseDTO;
+import com.pond.server.model.Message;
+import com.pond.server.repository.ChatRoomRepository;
+import com.pond.server.repository.MessageRepository;
 
 @Service
 public class MessageService {
@@ -35,6 +36,7 @@ public class MessageService {
         return convertToResponseDTO(savedMessage);
     }
 
+    @Transactional(readOnly = true)
     public List<MessageResponseDTO> getRoomMessages(String roomId) {
         // Just verify room exists
         chatRoomRepository.findByRoomId(roomId)
@@ -47,6 +49,7 @@ public class MessageService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<MessageResponseDTO> getRoomMessagesPaginated(String roomId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
@@ -64,11 +67,13 @@ public class MessageService {
         return messageRepository.markRoomMessagesAsRead(roomId, userGU);
     }
 
+    @Transactional(readOnly = true)
     public long getUnreadMessageCount(String roomId, UUID userGU) {
         return messageRepository.countUnreadMessages(roomId, userGU);
     }
 
 
+    @Transactional(readOnly = true)
     public long getTotalUnreadCount(UUID userGU) {
         return messageRepository.countUnreadMessagesByUser(userGU);
     }
@@ -96,6 +101,7 @@ public class MessageService {
     }
 
 
+    @Transactional(readOnly = true)
     public MessageResponseDTO getLastMessage(String roomId) {
         return messageRepository.findByRoomIdOrderByTimestampAsc(
                         roomId,

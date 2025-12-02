@@ -15,34 +15,26 @@ import com.pond.server.dto.NotificationDTO;
 import com.pond.server.model.ChatRoom;
 import com.pond.server.model.Message;
 import com.pond.server.model.User;
-import com.pond.server.repository.ChatRoomRepository;
-import com.pond.server.repository.ListingRepository;
-import com.pond.server.repository.UserRepository;
 import com.pond.server.service.ChatRoomService;
 import com.pond.server.service.MessageService;
+import com.pond.server.service.UserService;
 
 @Controller
 public class MessageController {
 
-    private final ChatRoomRepository chatRoomRepository;
-    private final ListingRepository listingRepository;
-    private final UserRepository userRepository;
     private final MessageService messageService;
     private final ChatRoomService chatRoomService;
+    private final UserService userService;
     private final SimpMessagingTemplate messagingTemplate;
 
     public MessageController(
-            ChatRoomRepository chatRoomRepository,
-            ListingRepository listingRepository,
-            UserRepository userRepository,
             MessageService messageService,
             ChatRoomService chatRoomService,
+            UserService userService,
             SimpMessagingTemplate messagingTemplate) {
-        this.chatRoomRepository = chatRoomRepository;
-        this.listingRepository = listingRepository;
-        this.userRepository = userRepository;
         this.messageService = messageService;
         this.chatRoomService = chatRoomService;
+        this.userService = userService;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -58,8 +50,7 @@ public class MessageController {
             System.out.println("✅ 2. Sender identifier: " + senderIdentifier);
 
             // Try to find by username first, then by email as fallback
-            User sender = userRepository.findByUsername(senderIdentifier)
-                    .or(() -> userRepository.findByEmail(senderIdentifier))
+            User sender = userService.findByUsernameOrEmail(senderIdentifier)
                     .orElseThrow(() -> new RuntimeException("Sender not found"));
 
             UUID senderGU = sender.getUserGU();
@@ -101,7 +92,7 @@ public class MessageController {
                     room.getBuyerGU() : room.getSellerGU();
 
             // Get recipient's username for WebSocket routing (Spring uses username, not UUID)
-            User recipient = userRepository.findById(recipientGU)
+            User recipient = userService.findById(recipientGU)
                     .orElseThrow(() -> new RuntimeException("Recipient not found"));
 
             long recipientUnreadCount = messageService.getTotalUnreadCount(recipientGU);
