@@ -3,7 +3,7 @@ import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, Erro
 
 class AppConfig {
     access_token?: string;
-    url: string = "http://localhost:8080";
+    url: string = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 }
 export const appConfig = new AppConfig();
 
