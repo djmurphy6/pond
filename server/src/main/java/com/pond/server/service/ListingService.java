@@ -9,6 +9,7 @@ import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.pond.server.dto.CreateListingRequest;
 import com.pond.server.dto.ListingDTO;
@@ -52,6 +53,7 @@ public class ListingService {
         this.resolvedReportRepository = resolvedReportRepository;
     }
 
+    @Transactional
     public ListingDTO create(CreateListingRequest req, User owner) {
         Listing l = new Listing();
         l.setUserGU(owner.getUserGU());
@@ -98,6 +100,7 @@ public class ListingService {
         return java.util.Base64.getDecoder().decode(payload);
     }
 
+    @Transactional(readOnly = true)
     public ListingDetailDTO get(UUID id) {
         String username = null;
         String avatar_url = null;
@@ -126,10 +129,12 @@ public class ListingService {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<ListingDTO> all() {
         return listingRepository.findAll().stream().map(this::toDto).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ListingDTO> getFiltered(List<String> categories, Double minPrice, Double maxPrice, String sortBy, String sortOrder, String searchQuery) {
         // Default sort parameters if not provided
         String effectiveSortBy = (sortBy == null || sortBy.isEmpty()) ? "date" : sortBy;
@@ -155,6 +160,7 @@ public class ListingService {
     }
 
     // Paginated variant for filtered listings
+    @Transactional(readOnly = true)
     public List<ListingDTO> getFilteredPaged(List<String> categories, Double minPrice, Double maxPrice, String sortBy, String sortOrder, String searchQuery, int page, int size) {
         String effectiveSortBy = (sortBy == null || sortBy.isEmpty()) ? "date" : sortBy;
         String effectiveSortOrder = (sortOrder == null || sortOrder.isEmpty()) ? "desc" : sortOrder;
@@ -250,10 +256,12 @@ public class ListingService {
     }
     
 
+    @Transactional(readOnly = true)
     public List<ListingDTO> mine(User owner) {
         return listingRepository.findByUserGU(owner.getUserGU()).stream().map(this::toDto).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ListingDTO> getUserListings(UUID gu) {
         return listingRepository.findByUserGU(gu).stream().map(this::toDto).toList();
     }
@@ -263,6 +271,7 @@ public class ListingService {
      * Supports filtering and sorting just like getFiltered()
      * OPTIMIZED: Uses database query instead of loading all listings into memory
      */
+    @Transactional(readOnly = true)
     public List<ListingDTO> getFollowingListings(User currentUser, List<String> categories, 
                                                   Double minPrice, Double maxPrice, 
                                                   String sortBy, String sortOrder, String searchQuery) {
@@ -314,6 +323,7 @@ public class ListingService {
     }
 
     // Paginated variant for following listings
+    @Transactional(readOnly = true)
     public List<ListingDTO> getFollowingListingsPaged(User currentUser, List<String> categories,
                                                       Double minPrice, Double maxPrice,
                                                       String sortBy, String sortOrder, String searchQuery,
@@ -354,6 +364,7 @@ public class ListingService {
         );
     }
 
+    @Transactional
     public ListingDTO update(UUID id, UpdateListingRequest req, User currentUser) {
         // Admins can edit any listing, regular users can only edit their own
         Listing l;
@@ -418,6 +429,7 @@ public class ListingService {
                 return toDto(l);
     }
 
+    @Transactional
     public void delete(UUID id, User currentUser) {
         // Admins can delete any listing, regular users can only delete their own
         Listing l;
@@ -473,6 +485,7 @@ public class ListingService {
         }
     }
 
+    @Transactional
     public ListingDTO toggleSold(UUID id, UUID soldToId, User owner) {
         Listing l = listingRepository.findByListingGUAndUserGU(id, owner.getUserGU())
                 .orElseThrow(() -> new RuntimeException("Listing not found or not owned by user"));

@@ -10,6 +10,7 @@ import java.util.stream.StreamSupport;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.pond.server.dto.CreateReportRequest;
 import com.pond.server.dto.ReportDTO;
@@ -44,6 +45,7 @@ public class ReportService {
     }
     
     // Create a new report
+    @Transactional
     public ReportDTO createReport(UUID userGU, CreateReportRequest request) {
         // Check if user already reported this listing
         if (reportRepository.findByUserGUAndListingGU(userGU, 
@@ -63,6 +65,7 @@ public class ReportService {
     
     // Get all reports with pagination (admin only)
     // OPTIMIZED: Batch fetches users and listings to prevent N+1 queries
+    @Transactional(readOnly = true)
     public Page<ReportDTO> getAllReports(Pageable pageable) {
         Page<Report> reports = reportRepository.findAllByOrderByCreatedAtDesc(pageable);
         return mapToDTOWithBatchFetch(reports);
@@ -70,12 +73,14 @@ public class ReportService {
     
     // Get reports by status (admin only)
     // OPTIMIZED: Batch fetches users and listings to prevent N+1 queries
+    @Transactional(readOnly = true)
     public Page<ReportDTO> getReportsByStatus(ReportStatus status, Pageable pageable) {
         Page<Report> reports = reportRepository.findByStatus(status, pageable);
         return mapToDTOWithBatchFetch(reports);
     }
     
     // Update report status (admin only)
+    @Transactional
     public ReportDTO updateReportStatus(UUID reportGU, UUID adminGU, 
                                         UpdateReportRequest request) {
         Report report = reportRepository.findById(reportGU)
@@ -90,12 +95,14 @@ public class ReportService {
     }
     
     // Get count of pending reports (for notification badge)
+    @Transactional(readOnly = true)
     public long getPendingReportCount() {
         return reportRepository.countByStatus(ReportStatus.PENDING);
     }
     
     // Get reports filed by a user (outgoing reports)
     // OPTIMIZED: Batch fetches users and listings to prevent N+1 queries
+    @Transactional(readOnly = true)
     public Page<ReportDTO> getUserOutgoingReports(UUID userGU, Pageable pageable) {
         Page<Report> reports = reportRepository.findByUserGUOrderByCreatedAtDesc(userGU, pageable);
         return mapToDTOWithBatchFetch(reports);
@@ -104,6 +111,7 @@ public class ReportService {
     // Get reports made against a user's listings (incoming reports)
     // OPTIMIZED: Uses single JOIN query instead of fetching all listings first
     // OPTIMIZED: Batch fetches users and listings to prevent N+1 queries
+    @Transactional(readOnly = true)
     public Page<ReportDTO> getUserIncomingReports(UUID userGU, Pageable pageable) {
         // Single query with JOIN - filters reports by listing ownership in database
         Page<Report> reports = reportRepository.findReportsByListingOwner(userGU, pageable);
@@ -112,16 +120,19 @@ public class ReportService {
     
     // Get all resolved (archived) reports - admin only
     // OPTIMIZED: Batch fetches users and listings to prevent N+1 queries
+    @Transactional(readOnly = true)
     public Page<ReportDTO> getAllResolvedReports(Pageable pageable) {
         Page<ResolvedReport> resolvedReports = resolvedReportRepository.findAll(pageable);
         return mapResolvedToDTOWithBatchFetch(resolvedReports);
     }
     
     // Get count of reports (for admin dashboard statistics)
+    @Transactional(readOnly = true)
     public long getTotalReportCount() {
         return reportRepository.count();
     }
     
+    @Transactional(readOnly = true)
     public long getTotalResolvedReportCount() {
         return resolvedReportRepository.count();
     }

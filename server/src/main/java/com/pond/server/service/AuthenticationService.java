@@ -9,6 +9,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.pond.server.dto.LoginUserDTO;
 import com.pond.server.dto.RegisterUserDTO;
@@ -35,6 +36,7 @@ public class AuthenticationService {
         this.emailService = emailService;
     }
 
+    @Transactional
     public User signup(RegisterUserDTO input){
         Optional<User> existingUser = userRepository.findByEmail(input.getEmail()) ;
         if (existingUser.isPresent()){
@@ -53,6 +55,7 @@ public class AuthenticationService {
         return savedUser;
     }
 
+    @Transactional(readOnly = true)
     public User authentication(LoginUserDTO input){
         User user =userRepository.findByEmail(input.getEmail()).orElseThrow(()->new RuntimeException("User not found: invalid email"));
         if (!user.isEnabled()){
@@ -71,6 +74,7 @@ public class AuthenticationService {
         return user;
     }
 
+    @Transactional
     public void verifyUser(VerifyUserDTO input){
         Optional<User> optionalUser = userRepository.findByEmail(input.getEmail());
         if (optionalUser.isPresent()){

@@ -14,19 +14,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pond.server.dto.UploadAvatarRequest;
 import com.pond.server.model.User;
-import com.pond.server.repository.UserRepository;
 import com.pond.server.service.ImageService;
 import com.pond.server.service.SupabaseStorage;
+import com.pond.server.service.UserService;
 
 @RequestMapping("/uploads")
 @RestController
 public class ImageController {
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ImageService imageService;
     private final SupabaseStorage supabaseStorage;
 
-    public ImageController(UserRepository userRepository, ImageService imageService, SupabaseStorage supabaseStorage) {
-        this.userRepository = userRepository;
+    public ImageController(UserService userService, ImageService imageService, SupabaseStorage supabaseStorage) {
+        this.userService = userService;
         this.imageService = imageService;
         this.supabaseStorage = supabaseStorage;
     }
@@ -65,8 +65,7 @@ public class ImageController {
         String key = "%s/%s.jpg".formatted(currentUser.getUserGU(), UUID.randomUUID());
         String url = supabaseStorage.uploadPublic(pfpBucket, key, img.bytes(), img.contentType());
 
-        currentUser.setAvatar_url(url);
-        userRepository.save(currentUser);
+        userService.updateAvatar(currentUser, url);
 
         // Best-effort delete of the previous object
         if (oldKey != null && !oldKey.isBlank()) {

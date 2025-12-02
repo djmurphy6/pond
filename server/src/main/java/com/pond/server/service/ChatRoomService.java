@@ -71,11 +71,13 @@ public class ChatRoomService {
         return chatRoomRepository.findBySellerGUOrBuyersGU(userGU, userGU);
     }
 
+    @Transactional(readOnly = true)
     public ChatRoom getChatRoom(String roomId){
         return chatRoomRepository.findByRoomId(roomId)
                 .orElseThrow(()-> new RuntimeException("Chat room not found"));
     }
 
+    @Transactional(readOnly = true)
     public ChatRoomDetailDTO getChatRoomWithDetails(String roomId, UUID currentUserGU) {
         ChatRoom room = chatRoomRepository.findByRoomId(roomId)
                 .orElseThrow(() -> new RuntimeException("Chat room not found"));
@@ -115,6 +117,7 @@ public class ChatRoomService {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<ChatRoomListDTO> getRoomListItems(UUID currentUserGU){
         List<ChatRoom> rooms = getUserChatRooms(currentUserGU);
 
@@ -171,6 +174,8 @@ public class ChatRoomService {
         room.setLastMessageAt(LocalDateTime.now());
         chatRoomRepository.save(room);
     }
+    
+    @Transactional(readOnly = true)
     public void verifyChatRoomAccess(String roomId, UUID userGU) {
         ChatRoom room = getChatRoom(roomId);
         if (!room.getSellerGU().equals(userGU) && !room.getBuyerGU().equals(userGU)) {

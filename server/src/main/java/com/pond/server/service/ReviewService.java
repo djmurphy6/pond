@@ -150,12 +150,14 @@ public class ReviewService {
     }
 
     // For the front end to display review stats
+    @Transactional(readOnly = true)
     public List<ReviewDTO> getReviewsForUser(UUID userGu){
         // Use the optimized query that fetches reviews with reviewer info in a single query
         return reviewRepository.findReviewsWithReviewerInfoByRevieweeGu(userGu);
     }
 
     // Check if a user can review another user
+    @Transactional(readOnly = true)
     public boolean canUserReview(UUID reviewerGu, UUID revieweeGu){
 
         // Can't review yourself
@@ -175,6 +177,7 @@ public class ReviewService {
     }
 
     // For the front end to display review stats
+    @Transactional(readOnly = true)
     public UserRatingStatsDTO getUserRatingStats(UUID userGu, UUID currentUserGu) {
         Long totalReviews = reviewRepository.countByRevieweeGu(userGu);
         Double averageRating = reviewRepository.findAverageRatingByRevieweeGu(userGu);

@@ -38,15 +38,36 @@ public class UserService {
         this.supabaseStorage = supabaseStorage;
     }
 
+    @Transactional(readOnly = true)
     public List<User> allUsers(){
         List<User> users = new ArrayList<>();
         userRepository.findAll().forEach(users::add);
         return users;
     }
+    
+    @Transactional(readOnly = true)
     public Optional<UserProfileDTO> getProfileByUsername(String username){
         return userRepository.findByUsername(username).map(u -> new UserProfileDTO(u.getUserGU(), u.getUsername(), u.getEmail(), u.getAvatar_url(), u.getBio(), u.getAdmin()));
     }
+    
+    /**
+     * Find user by username or email (for authentication/WebSocket)
+     */
+    @Transactional(readOnly = true)
+    public Optional<User> findByUsernameOrEmail(String identifier) {
+        return userRepository.findByUsername(identifier)
+                .or(() -> userRepository.findByEmail(identifier));
+    }
+    
+    /**
+     * Find user by ID
+     */
+    @Transactional(readOnly = true)
+    public Optional<User> findById(UUID userGU) {
+        return userRepository.findById(userGU);
+    }
 
+    @Transactional
     public UserProfileDTO updateUserProfile(User user, UpdateUserRequest updateRequest) {
         // Update username if provided and not blank
         if (updateRequest.getUsername() != null && !updateRequest.getUsername().isBlank()) {
@@ -72,6 +93,15 @@ public class UserService {
             savedUser.getBio(), 
             savedUser.getAdmin()
         );
+    }
+    
+    /**
+     * Update user avatar URL
+     */
+    @Transactional
+    public User updateAvatar(User user, String avatarUrl) {
+        user.setAvatar_url(avatarUrl);
+        return userRepository.save(user);
     }
 
     @Transactional
