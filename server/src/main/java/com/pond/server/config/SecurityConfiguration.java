@@ -1,7 +1,9 @@
 package com.pond.server.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -74,11 +76,46 @@ public class SecurityConfiguration {
     }
 
     // Configures CORS to allow requests from the frontend
+    // Set FRONTEND_URL environment variable for production (set in Render)
+    // Set ADDITIONAL_ORIGINS for comma-separated list of extra origins to allow
+    @Value("${FRONTEND_URL:}")
+    private String frontendUrl;
+    
+    @Value("${ADDITIONAL_ORIGINS:}")
+    private String additionalOrigins;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("CHANGE TO HOSTED BACKEND URL", "http://localhost:8080",
-                "http://localhost:5173", "http://localhost:3000")); // TODO: CHANGE THIS TO THE CORRECT FRONTEND ENDPOINT TO WORK
+        
+        // Build allowed origins list
+        List<String> allowedOrigins = new ArrayList<>();
+        
+        // Add production frontend URL if provided
+        if (frontendUrl != null && !frontendUrl.isEmpty() && !frontendUrl.equals("http://localhost:3000")) {
+            allowedOrigins.add(frontendUrl);
+        }
+        
+        // Add additional origins from environment variable (comma-separated)
+        if (additionalOrigins != null && !additionalOrigins.isEmpty()) {
+            String[] origins = additionalOrigins.split(",");
+            for (String origin : origins) {
+                String trimmed = origin.trim();
+                if (!trimmed.isEmpty()) {
+                    allowedOrigins.add(trimmed);
+                }
+            }
+        }
+        
+        // Always allow localhost for development/testing
+        allowedOrigins.add("http://localhost:3000");
+        allowedOrigins.add("http://localhost:5173");
+        allowedOrigins.add("http://localhost:8080");
+        
+        // You can add test URLs here if needed:
+        // allowedOrigins.add("https://test.example.com");
+        
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
