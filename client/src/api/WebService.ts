@@ -3,7 +3,7 @@ import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, Erro
 
 class AppConfig {
     access_token?: string;
-    url: string = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    url: string = "https://pond-dsi0.onrender.com";
 }
 export const appConfig = new AppConfig();
 
