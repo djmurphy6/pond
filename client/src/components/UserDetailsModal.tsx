@@ -374,16 +374,18 @@ export function UserDetailsModal(props: UserDetailsModalProps) {
                 <span className="text-primary">{username}'s Listings</span>
 
                 {isLoading ? (
-                    <ScrollArea className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                            <Card key={i} className="transition-colors duration-300">
-                                <Skeleton className="h-40 w-full rounded-t-md transition-colors duration-300" />
-                                <CardContent className="p-3">
-                                    <Skeleton className="h-4 w-3/4 mb-2 transition-colors duration-300" />
-                                    <Skeleton className="h-4 w-1/2 transition-colors duration-300" />
-                                </CardContent>
-                            </Card>
-                        ))}
+                    <ScrollArea className="max-h-[50vh] w-full">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <Card key={i} className="transition-colors duration-300">
+                                    <Skeleton className="h-40 w-full rounded-t-md transition-colors duration-300" />
+                                    <CardContent className="p-3">
+                                        <Skeleton className="h-4 w-3/4 mb-2 transition-colors duration-300" />
+                                        <Skeleton className="h-4 w-1/2 transition-colors duration-300" />
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
                     </ScrollArea>
                 ) : listings.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
