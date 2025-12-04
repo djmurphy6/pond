@@ -175,6 +175,8 @@ export function CreateListingModal(props: { onSuccess?: () => void }) {
                             <SelectItem value="Housing">Housing</SelectItem>
                             <SelectItem value="Tech">Tech</SelectItem>
                             <SelectItem value="School">School</SelectItem>
+                            <SelectItem value="Vehicles">Vehicles</SelectItem>
+                            <SelectItem value="Misc">Misc</SelectItem>
                         </SelectContent>
                     </Select>
 

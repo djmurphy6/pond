@@ -22,6 +22,8 @@ import {
     Shield,
     AlertCircle,
     Menu,
+    Car,
+    Package,
 } from "lucide-react";
 
 // API
@@ -476,6 +478,8 @@ const SideBar = (props: SideBarProps) => {
                                     { name: "Housing", icon: Home },
                                     { name: "Tech", icon: Laptop },
                                     { name: "School", icon: GraduationCap },
+                                    { name: "Vehicles", icon: Car },
+                                    { name: "Misc", icon: Package },
                                 ].map(({ name, icon: Icon }) => {
                                     const isSelected = selectedCategories.includes(name);
                                     return (
