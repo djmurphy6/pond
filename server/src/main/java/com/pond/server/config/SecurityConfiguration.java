@@ -112,8 +112,8 @@ public class SecurityConfiguration {
         allowedOrigins.add("http://localhost:5173");
         allowedOrigins.add("http://localhost:8080");
         
-        // You can add test URLs here if needed:
-        // allowedOrigins.add("https://test.example.com");
+        // Production/test URLs
+        allowedOrigins.add("https://pond-kohl.vercel.app");
         
         configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
