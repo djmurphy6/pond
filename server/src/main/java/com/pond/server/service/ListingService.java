@@ -24,6 +24,10 @@ import com.pond.server.repository.ResolvedReportRepository;
 import com.pond.server.repository.UserFollowingRepository;
 import com.pond.server.repository.UserRepository;
 
+/**
+ * Service class for managing marketplace listings.
+ * Handles CRUD operations, image management, filtering, search, and sold status tracking.
+ */
 @Service
 public class ListingService {
     private final ListingRepository listingRepository;
@@ -37,6 +41,17 @@ public class ListingService {
     @Value("${supabase.listing-bucket}")
     private String listingBucket;
 
+    /**
+     * Constructs a new ListingService with required dependencies.
+     *
+     * @param listingRepository the repository for listing data access
+     * @param imageService the service for image processing
+     * @param supabaseStorage the service for Supabase storage operations
+     * @param userRepository the repository for user data access
+     * @param userFollowingRepository the repository for user following relationships
+     * @param reportRepository the repository for report data access
+     * @param resolvedReportRepository the repository for resolved report data access
+     */
     public ListingService(ListingRepository listingRepository,
                           ImageService imageService,
                           SupabaseStorage supabaseStorage,
@@ -53,6 +68,14 @@ public class ListingService {
         this.resolvedReportRepository = resolvedReportRepository;
     }
 
+    /**
+     * Creates a new listing with optional images.
+     * Processes and uploads base64 images if provided, or uses provided URLs.
+     *
+     * @param req the create listing request containing listing details and optional images
+     * @param owner the user creating the listing
+     * @return the created ListingDTO
+     */
     @Transactional
     public ListingDTO create(CreateListingRequest req, User owner) {
         Listing l = new Listing();
@@ -86,6 +109,16 @@ public class ListingService {
         return toDto(l);
     }
 
+    /**
+     * Uploads a listing image to Supabase storage.
+     * Processes the image (resize and compress) before uploading.
+     *
+     * @param userGU the UUID of the user who owns the listing
+     * @param listingGU the UUID of the listing
+     * @param index the image index (1 or 2)
+     * @param base64OrDataUrl the base64 encoded image data (with or without data URL prefix)
+     * @return the public URL of the uploaded image
+     */
     private String uploadListingImage(UUID userGU, UUID listingGU, int index, String base64OrDataUrl) {
         byte[] raw = decodeBase64Image(base64OrDataUrl);
         ImageService.ImageResult img = imageService.process(raw, 2048, 2048, 0.88f);
@@ -93,6 +126,13 @@ public class ListingService {
         return supabaseStorage.uploadPublic(listingBucket, key, img.bytes(), img.contentType());
     }
 
+    /**
+     * Decodes a base64 image string to bytes.
+     * Handles both data URLs (with prefix) and raw base64 strings.
+     *
+     * @param s the base64 string (with or without data URL prefix)
+     * @return the decoded image bytes, or null if input is null
+     */
     private byte[] decodeBase64Image(String s) {
         if (s == null) return null;
         int comma = s.indexOf(',');
@@ -100,6 +140,14 @@ public class ListingService {
         return java.util.Base64.getDecoder().decode(payload);
     }
 
+    /**
+     * Retrieves detailed information about a specific listing.
+     * Includes seller username and avatar information.
+     *
+     * @param id the UUID of the listing
+     * @return the detailed listing information
+     * @throws RuntimeException if listing not found
+     */
     @Transactional(readOnly = true)
     public ListingDetailDTO get(UUID id) {
         String username = null;
@@ -129,11 +177,28 @@ public class ListingService {
         );
     }
 
+    /**
+     * Retrieves all listings in the system.
+     *
+     * @return a list of all listings
+     */
     @Transactional(readOnly = true)
     public List<ListingDTO> all() {
         return listingRepository.findAll().stream().map(this::toDto).toList();
     }
 
+    /**
+     * Retrieves listings with filtering, sorting, and fuzzy search capabilities.
+     * Applies Levenshtein distance algorithm for fuzzy text matching when search query is provided.
+     *
+     * @param categories list of categories to filter by (null/empty for all)
+     * @param minPrice minimum price filter (null for no minimum)
+     * @param maxPrice maximum price filter (null for no maximum)
+     * @param sortBy field to sort by ("date" or "price", defaults to "date")
+     * @param sortOrder sort order ("asc" or "desc", defaults to "desc")
+     * @param searchQuery fuzzy search query for listing titles (null/empty for no search)
+     * @return a list of filtered and sorted listings (limited to 500 results)
+     */
     @Transactional(readOnly = true)
     public List<ListingDTO> getFiltered(List<String> categories, Double minPrice, Double maxPrice, String sortBy, String sortOrder, String searchQuery) {
         // Default sort parameters if not provided
@@ -159,7 +224,20 @@ public class ListingService {
         );
     }
 
-    // Paginated variant for filtered listings
+    /**
+     * Retrieves listings with filtering, sorting, search, and pagination.
+     * Paginated variant of getFiltered method.
+     *
+     * @param categories list of categories to filter by (null/empty for all)
+     * @param minPrice minimum price filter (null for no minimum)
+     * @param maxPrice maximum price filter (null for no maximum)
+     * @param sortBy field to sort by ("date" or "price", defaults to "date")
+     * @param sortOrder sort order ("asc" or "desc", defaults to "desc")
+     * @param searchQuery fuzzy search query for listing titles (null/empty for no search)
+     * @param page the page number (zero-based)
+     * @param size the page size
+     * @return a page of filtered and sorted listings
+     */
     @Transactional(readOnly = true)
     public List<ListingDTO> getFilteredPaged(List<String> categories, Double minPrice, Double maxPrice, String sortBy, String sortOrder, String searchQuery, int page, int size) {
         String effectiveSortBy = (sortBy == null || sortBy.isEmpty()) ? "date" : sortBy;
@@ -182,6 +260,16 @@ public class ListingService {
         );
     }
     
+    /**
+     * Applies fuzzy search to a list of listings using Levenshtein distance algorithm.
+     * Scores listings based on similarity to search query and filters by 50% similarity threshold.
+     *
+     * @param listings the list of listings to search through
+     * @param searchQuery the search query (already lowercase and trimmed)
+     * @param sortBy field to sort by after filtering ("date" or "price")
+     * @param sortOrder sort order after filtering ("asc" or "desc")
+     * @return a list of listings matching the search query, sorted as specified
+     */
     private List<ListingDTO> applyFuzzySearch(List<Listing> listings, String searchQuery, String sortBy, String sortOrder) {
         //Calculator that calculates the similarity between two strings by the number of character replacements required to make the strings the same
         LevenshteinDistance levenshtein = new LevenshteinDistance();
@@ -241,7 +329,13 @@ public class ListingService {
                 .collect(Collectors.toList());
     }
     
-    // Helper method to get the appropriate comparator based on sort parameters
+    /**
+     * Creates a comparator for sorting listings based on specified criteria.
+     *
+     * @param sortBy field to sort by ("price" or "date")
+     * @param sortOrder sort order ("asc" for ascending, anything else for descending)
+     * @return a comparator for sorting Listing objects
+     */
     private Comparator<Listing> getComparator(String sortBy, String sortOrder) {
         boolean ascending = "asc".equalsIgnoreCase(sortOrder);
         
@@ -255,21 +349,41 @@ public class ListingService {
         return ascending ? comparator : comparator.reversed();
     }
     
-
+    /**
+     * Retrieves all listings owned by a specific user.
+     *
+     * @param owner the user whose listings to retrieve
+     * @return a list of the user's listings
+     */
     @Transactional(readOnly = true)
     public List<ListingDTO> mine(User owner) {
         return listingRepository.findByUserGU(owner.getUserGU()).stream().map(this::toDto).toList();
     }
 
+    /**
+     * Retrieves all listings owned by a user identified by UUID.
+     *
+     * @param gu the UUID of the user
+     * @return a list of the user's listings
+     */
     @Transactional(readOnly = true)
     public List<ListingDTO> getUserListings(UUID gu) {
         return listingRepository.findByUserGU(gu).stream().map(this::toDto).toList();
     }
 
     /**
-     * Get listings from users that the current user follows
-     * Supports filtering and sorting just like getFiltered()
-     * OPTIMIZED: Uses database query instead of loading all listings into memory
+     * Retrieves listings from users that the current user follows.
+     * Supports filtering, sorting, and search just like getFiltered().
+     * OPTIMIZED: Uses database query instead of loading all listings into memory.
+     *
+     * @param currentUser the user requesting the listings
+     * @param categories list of categories to filter by (null/empty for all)
+     * @param minPrice minimum price filter (null for no minimum)
+     * @param maxPrice maximum price filter (null for no maximum)
+     * @param sortBy field to sort by ("date" or "price", defaults to "date")
+     * @param sortOrder sort order ("asc" or "desc", defaults to "desc")
+     * @param searchQuery fuzzy search query for listing titles (null/empty for no search)
+     * @return a list of listings from followed users (limited to 500 results)
      */
     @Transactional(readOnly = true)
     public List<ListingDTO> getFollowingListings(User currentUser, List<String> categories, 
@@ -322,7 +436,21 @@ public class ListingService {
         );
     }
 
-    // Paginated variant for following listings
+    /**
+     * Retrieves listings from followed users with pagination.
+     * Paginated variant of getFollowingListings method.
+     *
+     * @param currentUser the user requesting the listings
+     * @param categories list of categories to filter by (null/empty for all)
+     * @param minPrice minimum price filter (null for no minimum)
+     * @param maxPrice maximum price filter (null for no maximum)
+     * @param sortBy field to sort by ("date" or "price", defaults to "date")
+     * @param sortOrder sort order ("asc" or "desc", defaults to "desc")
+     * @param searchQuery fuzzy search query for listing titles (null/empty for no search)
+     * @param page the page number (zero-based)
+     * @param size the page size
+     * @return a page of listings from followed users
+     */
     @Transactional(readOnly = true)
     public List<ListingDTO> getFollowingListingsPaged(User currentUser, List<String> categories,
                                                       Double minPrice, Double maxPrice,
@@ -364,6 +492,17 @@ public class ListingService {
         );
     }
 
+    /**
+     * Updates an existing listing.
+     * Admins can edit any listing, regular users can only edit their own.
+     * Handles image updates including deletion of old images when replaced.
+     *
+     * @param id the UUID of the listing to update
+     * @param req the update request containing fields to update
+     * @param currentUser the user performing the update
+     * @return the updated ListingDTO
+     * @throws RuntimeException if listing not found or user not authorized
+     */
     @Transactional
     public ListingDTO update(UUID id, UpdateListingRequest req, User currentUser) {
         // Admins can edit any listing, regular users can only edit their own
@@ -429,6 +568,15 @@ public class ListingService {
                 return toDto(l);
     }
 
+    /**
+     * Deletes a listing and all associated data.
+     * Admins can delete any listing, regular users can only delete their own.
+     * Deletes listing images from storage and associated reports from database.
+     *
+     * @param id the UUID of the listing to delete
+     * @param currentUser the user performing the deletion
+     * @throws RuntimeException if listing not found or user not authorized
+     */
     @Transactional
     public void delete(UUID id, User currentUser) {
         // Admins can delete any listing, regular users can only delete their own
@@ -456,7 +604,14 @@ public class ListingService {
         System.out.println("Successfully deleted listing: " + id);
     }
 
-        private void deleteListingImage(String url){
+    /**
+     * Deletes a listing image from Supabase storage.
+     * Extracts the storage key from the URL and performs deletion.
+     * Logs warnings/errors but does not throw exceptions.
+     *
+     * @param url the full URL of the image to delete
+     */
+    private void deleteListingImage(String url){
         if (url == null || url.isBlank()) {
             System.out.println("No image to delete (URL is null or blank)");
             return;
@@ -485,6 +640,16 @@ public class ListingService {
         }
     }
 
+    /**
+     * Toggles the sold status of a listing.
+     * Marks listing as sold (with buyer ID) or unsold (clears buyer ID).
+     *
+     * @param id the UUID of the listing
+     * @param soldToId the UUID of the buyer (used when marking as sold)
+     * @param owner the user who owns the listing
+     * @return the updated ListingDTO
+     * @throws RuntimeException if listing not found or not owned by user
+     */
     @Transactional
     public ListingDTO toggleSold(UUID id, UUID soldToId, User owner) {
         Listing l = listingRepository.findByListingGUAndUserGU(id, owner.getUserGU())
@@ -504,7 +669,12 @@ public class ListingService {
         return toDto(l);
     }
     
-
+    /**
+     * Converts a Listing entity to a ListingDTO.
+     *
+     * @param l the listing entity to convert
+     * @return the ListingDTO representation
+     */
     private ListingDTO toDto(Listing l) {
         return new ListingDTO(
             l.getListingGU(),

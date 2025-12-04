@@ -8,12 +8,24 @@ import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+/**
+ * Service class for sending email notifications.
+ * Currently handles verification emails for new user registrations.
+ */
 @Service
 public class EmailService {
 
     @Autowired
     private JavaMailSender emailSender;
 
+    /**
+     * Sends a verification email with a 6-digit code to a new user.
+     * The email is formatted with HTML and includes branding.
+     *
+     * @param to the recipient's email address
+     * @param verificationCode the 6-digit verification code
+     * @throws RuntimeException if email sending fails
+     */
     public void sendVerificationEmail(String to, String verificationCode) {
         try {
             MimeMessage message = emailSender.createMimeMessage();
@@ -31,6 +43,13 @@ public class EmailService {
         }
     }
 
+    /**
+     * Builds the HTML content for a verification email.
+     * Includes styling and formatting for a professional appearance.
+     *
+     * @param verificationCode the 6-digit verification code to include
+     * @return the formatted HTML email content
+     */
     private String buildVerificationEmailHtml(String verificationCode) {
         return """
             <!DOCTYPE html>

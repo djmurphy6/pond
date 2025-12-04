@@ -17,17 +17,37 @@ import com.pond.server.model.User;
 import com.pond.server.repository.ListingRepository;
 import com.pond.server.repository.ReviewRepository;
 
+/**
+ * Service class for managing user reviews.
+ * Handles creation, updating, deletion, and retrieval of reviews between users who have completed transactions.
+ */
 @Service
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final ListingRepository listingRepository;
 
+    /**
+     * Constructs a new ReviewService with required dependencies.
+     *
+     * @param reviewRepository the repository for review data access
+     * @param listingRepository the repository for listing data access
+     */
     public ReviewService(ReviewRepository reviewRepository, ListingRepository listingRepository){
         this.reviewRepository = reviewRepository;
         this.listingRepository = listingRepository;
     }
 
+    /**
+     * Creates a new review between two users who have completed a transaction.
+     * Validates rating range, comment presence, prevents self-reviews and duplicate reviews,
+     * and verifies a transaction occurred between the users.
+     *
+     * @param request the create review request containing rating, comment, and reviewee ID
+     * @param reviewerGu the UUID of the user creating the review
+     * @return the created ReviewDTO with reviewer information
+     * @throws RuntimeException if validation fails or no transaction exists between users
+     */
     @Transactional
     public ReviewDTO createReview(CreateReviewRequest request, UUID reviewerGu){
         if (request.getRating() == null || request.getRating() < 1 || request.getRating() > 5) {
@@ -85,6 +105,16 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Failed to retrieve created review"));
     }
 
+    /**
+     * Updates an existing review.
+     * Validates ownership, rating range, and comment presence.
+     *
+     * @param reviewId the UUID of the review to update
+     * @param request the update request containing new rating and/or comment
+     * @param reviewerGu the UUID of the user updating the review
+     * @return the updated ReviewDTO with reviewer information
+     * @throws RuntimeException if review not found, user not authorized, or validation fails
+     */
     @Transactional
     public ReviewDTO updateReview(UUID reviewId, UpdateReviewRequest request, UUID reviewerGu) {
 
@@ -118,6 +148,15 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Failed to retrieve updated review"));
     }
 
+    /**
+     * Deletes a review owned by the user.
+     * Verifies ownership before deletion.
+     *
+     * @param reviewId the UUID of the review to delete
+     * @param reviewerGu the UUID of the user deleting the review
+     * @return success message
+     * @throws RuntimeException if review not found or user not authorized
+     */
     @Transactional
     public String userDeleteReview(UUID reviewId, UUID reviewerGu){
 
@@ -133,6 +172,15 @@ public class ReviewService {
         return "Review deleted successfully";
     }
 
+    /**
+     * Deletes a review as an admin (can delete any review).
+     * Verifies admin privileges before deletion.
+     *
+     * @param reviewId the UUID of the review to delete
+     * @param currentUser the admin user performing the deletion
+     * @return success message
+     * @throws RuntimeException if review not found or user not authorized as admin
+     */
     @Transactional
     public String adminDeleteReview(UUID reviewId, User currentUser){
         Review reviewToDelete;
@@ -149,14 +197,28 @@ public class ReviewService {
         return "Review deleted successfully";
     }
 
-    // For the front end to display review stats
+    /**
+     * Retrieves all reviews for a specific user.
+     * Uses optimized query that fetches reviews with reviewer info in a single query.
+     *
+     * @param userGu the UUID of the user (reviewee) whose reviews to retrieve
+     * @return a list of reviews for the user
+     */
     @Transactional(readOnly = true)
     public List<ReviewDTO> getReviewsForUser(UUID userGu){
         // Use the optimized query that fetches reviews with reviewer info in a single query
         return reviewRepository.findReviewsWithReviewerInfoByRevieweeGu(userGu);
     }
 
-    // Check if a user can review another user
+    /**
+     * Checks if a user can review another user.
+     * User can review if they haven't reviewed the user before, it's not a self-review,
+     * and a transaction occurred between them.
+     *
+     * @param reviewerGu the UUID of the potential reviewer
+     * @param revieweeGu the UUID of the potential reviewee
+     * @return true if the user can review, false otherwise
+     */
     @Transactional(readOnly = true)
     public boolean canUserReview(UUID reviewerGu, UUID revieweeGu){
 
@@ -176,7 +238,14 @@ public class ReviewService {
         return canReview;
     }
 
-    // For the front end to display review stats
+    /**
+     * Retrieves rating statistics for a user.
+     * Includes average rating, total review count, and whether current user can review them.
+     *
+     * @param userGu the UUID of the user whose stats to retrieve
+     * @param currentUserGu the UUID of the current user (null if not logged in)
+     * @return the user rating statistics
+     */
     @Transactional(readOnly = true)
     public UserRatingStatsDTO getUserRatingStats(UUID userGu, UUID currentUserGu) {
         Long totalReviews = reviewRepository.countByRevieweeGu(userGu);

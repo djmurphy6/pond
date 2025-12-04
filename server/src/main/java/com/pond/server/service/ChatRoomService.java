@@ -19,6 +19,10 @@ import com.pond.server.repository.ListingRepository;
 import com.pond.server.repository.MessageRepository;
 import com.pond.server.repository.UserRepository;
 
+/**
+ * Service class for managing chat rooms.
+ * Handles chat room creation, retrieval, access verification, and room list generation.
+ */
 @Service
 public class ChatRoomService {
 
@@ -27,6 +31,14 @@ public class ChatRoomService {
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
 
+    /**
+     * Constructs a new ChatRoomService with required dependencies.
+     *
+     * @param chatRoomRepository the repository for chat room data access
+     * @param listingRepository the repository for listing data access
+     * @param userRepository the repository for user data access
+     * @param messageRepository the repository for message data access
+     */
     public ChatRoomService(
             ChatRoomRepository chatRoomRepository,
             ListingRepository listingRepository,
@@ -38,6 +50,15 @@ public class ChatRoomService {
         this.messageRepository = messageRepository;
     }
 
+    /**
+     * Gets an existing chat room or creates a new one for a listing and buyer.
+     * Prevents sellers from messaging themselves.
+     *
+     * @param listingGU the UUID of the listing
+     * @param buyerGU the UUID of the buyer (potential buyer)
+     * @return the existing or newly created ChatRoom
+     * @throws RuntimeException if listing not found or seller tries to message themselves
+     */
     @Transactional
     public ChatRoom getOrCreateChatRoom(UUID listingGU, UUID buyerGU){
         Listing listing = listingRepository.findById(listingGU)
@@ -63,20 +84,51 @@ public class ChatRoomService {
                 });
     }
 
+    /**
+     * Generates a unique room ID for a listing and buyer combination.
+     * Format: "listing_{listingGU}_buyer_{buyerGU}"
+     *
+     * @param listingGU the UUID of the listing
+     * @param buyerGU the UUID of the buyer
+     * @return the generated room ID string
+     */
     private String generateRoomId(UUID listingGU, UUID buyerGU){
         return String.format("listing_%s_buyer_%s", listingGU.toString(), buyerGU.toString());
     }
 
+    /**
+     * Retrieves all chat rooms where the user is either a seller or buyer.
+     *
+     * @param userGU the UUID of the user
+     * @return a list of chat rooms involving the user
+     */
     private List<ChatRoom> getUserChatRooms(UUID userGU){
         return chatRoomRepository.findBySellerGUOrBuyersGU(userGU, userGU);
     }
 
+    /**
+     * Retrieves a chat room by its room ID.
+     *
+     * @param roomId the ID of the chat room
+     * @return the ChatRoom entity
+     * @throws RuntimeException if chat room not found
+     */
     @Transactional(readOnly = true)
     public ChatRoom getChatRoom(String roomId){
         return chatRoomRepository.findByRoomId(roomId)
                 .orElseThrow(()-> new RuntimeException("Chat room not found"));
     }
 
+    /**
+     * Retrieves detailed information about a chat room.
+     * Includes listing details, other user information, and seller/buyer role.
+     * Verifies user is part of the conversation.
+     *
+     * @param roomId the ID of the chat room
+     * @param currentUserGU the UUID of the current user
+     * @return the detailed chat room information
+     * @throws RuntimeException if chat room/listing/user not found or user not authorized
+     */
     @Transactional(readOnly = true)
     public ChatRoomDetailDTO getChatRoomWithDetails(String roomId, UUID currentUserGU) {
         ChatRoom room = chatRoomRepository.findByRoomId(roomId)
@@ -117,6 +169,14 @@ public class ChatRoomService {
         );
     }
 
+    /**
+     * Retrieves a list of all chat rooms for a user with summary information.
+     * Includes listing details, other user info, last message, and unread count.
+     * Filters out rooms with missing listings or users.
+     *
+     * @param currentUserGU the UUID of the current user
+     * @return a list of chat room summaries for display in the room list
+     */
     @Transactional(readOnly = true)
     public List<ChatRoomListDTO> getRoomListItems(UUID currentUserGU){
         List<ChatRoom> rooms = getUserChatRooms(currentUserGU);
@@ -168,6 +228,12 @@ public class ChatRoomService {
         }).filter(dto -> dto != null).collect(Collectors.toList());
     }
 
+    /**
+     * Updates the last message timestamp for a chat room.
+     * Called when a new message is sent to track conversation activity.
+     *
+     * @param roomId the ID of the chat room to update
+     */
     @Transactional
     public void updateLastMessageTime(String roomId) {
         ChatRoom room = getChatRoom(roomId);
@@ -175,6 +241,14 @@ public class ChatRoomService {
         chatRoomRepository.save(room);
     }
     
+    /**
+     * Verifies that a user has access to a specific chat room.
+     * User must be either the seller or buyer in the chat room.
+     *
+     * @param roomId the ID of the chat room
+     * @param userGU the UUID of the user to verify
+     * @throws RuntimeException if user not authorized to access the chat room
+     */
     @Transactional(readOnly = true)
     public void verifyChatRoomAccess(String roomId, UUID userGU) {
         ChatRoom room = getChatRoom(roomId);

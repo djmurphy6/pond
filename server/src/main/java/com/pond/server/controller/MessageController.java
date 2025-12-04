@@ -19,6 +19,10 @@ import com.pond.server.service.ChatRoomService;
 import com.pond.server.service.MessageService;
 import com.pond.server.service.UserService;
 
+/**
+ * WebSocket controller for real-time messaging.
+ * Handles message sending, broadcasting, and unread count notifications via STOMP/WebSocket.
+ */
 @Controller
 public class MessageController {
 
@@ -27,6 +31,14 @@ public class MessageController {
     private final UserService userService;
     private final SimpMessagingTemplate messagingTemplate;
 
+    /**
+     * Constructs a new MessageController with required dependencies.
+     *
+     * @param messageService the service for message operations
+     * @param chatRoomService the service for chat room operations
+     * @param userService the service for user operations
+     * @param messagingTemplate the Spring STOMP messaging template for WebSocket communication
+     */
     public MessageController(
             MessageService messageService,
             ChatRoomService chatRoomService,
@@ -38,6 +50,14 @@ public class MessageController {
         this.messagingTemplate = messagingTemplate;
     }
 
+    /**
+     * Handles incoming chat messages via WebSocket.
+     * Verifies user authorization, saves the message, broadcasts to room subscribers,
+     * and sends unread count notifications to the recipient.
+     *
+     * @param messageDTO the message DTO containing room ID and content
+     * @param principal the authenticated user's principal
+     */
     @MessageMapping("/chat/send")
     public void sendMessage(@Payload MessageDTO messageDTO, Principal principal) {
         try {

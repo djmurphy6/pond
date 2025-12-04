@@ -16,6 +16,10 @@ import com.pond.server.model.User;
 import com.pond.server.repository.ListingRepository;
 import com.pond.server.repository.UserRepository;
 
+/**
+ * Service class for managing user-related operations.
+ * Handles user profile management, account updates, and account deletion with cascade cleanup.
+ */
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -26,6 +30,14 @@ public class UserService {
     @Value("${supabase.pfp-bucket}")
     private String pfpBucket;
     
+    /**
+     * Constructs a new UserService with required dependencies.
+     *
+     * @param userRepository the repository for user data access
+     * @param listingRepository the repository for listing data access
+     * @param listingService the service for listing operations
+     * @param supabaseStorage the service for Supabase storage operations
+     */
     public UserService(
             UserRepository userRepository,
             ListingRepository listingRepository,
@@ -38,6 +50,11 @@ public class UserService {
         this.supabaseStorage = supabaseStorage;
     }
 
+    /**
+     * Retrieves all users from the database.
+     *
+     * @return a list of all users
+     */
     @Transactional(readOnly = true)
     public List<User> allUsers(){
         List<User> users = new ArrayList<>();
@@ -45,13 +62,23 @@ public class UserService {
         return users;
     }
     
+    /**
+     * Retrieves a user profile by username.
+     *
+     * @param username the username to search for
+     * @return an Optional containing the UserProfileDTO if found, empty otherwise
+     */
     @Transactional(readOnly = true)
     public Optional<UserProfileDTO> getProfileByUsername(String username){
         return userRepository.findByUsername(username).map(u -> new UserProfileDTO(u.getUserGU(), u.getUsername(), u.getEmail(), u.getAvatar_url(), u.getBio(), u.getAdmin()));
     }
     
     /**
-     * Find user by username or email (for authentication/WebSocket)
+     * Finds a user by username or email identifier.
+     * This method is primarily used for authentication and WebSocket connection establishment.
+     *
+     * @param identifier the username or email to search for
+     * @return an Optional containing the User if found, empty otherwise
      */
     @Transactional(readOnly = true)
     public Optional<User> findByUsernameOrEmail(String identifier) {
@@ -60,13 +87,25 @@ public class UserService {
     }
     
     /**
-     * Find user by ID
+     * Finds a user by their unique identifier.
+     *
+     * @param userGU the unique UUID of the user
+     * @return an Optional containing the User if found, empty otherwise
      */
     @Transactional(readOnly = true)
     public Optional<User> findById(UUID userGU) {
         return userRepository.findById(userGU);
     }
 
+    /**
+     * Updates a user's profile with the provided information.
+     * Validates username uniqueness and updates username and bio if provided.
+     *
+     * @param user the user entity to update
+     * @param updateRequest the update request containing new username and/or bio
+     * @return the updated UserProfileDTO
+     * @throws RuntimeException if the requested username is already taken by another user
+     */
     @Transactional
     public UserProfileDTO updateUserProfile(User user, UpdateUserRequest updateRequest) {
         // Update username if provided and not blank
@@ -96,7 +135,11 @@ public class UserService {
     }
     
     /**
-     * Update user avatar URL
+     * Updates the user's avatar URL in the database.
+     *
+     * @param user the user entity to update
+     * @param avatarUrl the new avatar URL
+     * @return the updated User entity
      */
     @Transactional
     public User updateAvatar(User user, String avatarUrl) {
@@ -104,6 +147,16 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    /**
+     * Deletes a user account and all associated data.
+     * This includes:
+     * - User's avatar from Supabase storage
+     * - All listings owned by the user (with their images)
+     * - Chat rooms, messages, saved listings, and following relationships (via database CASCADE)
+     * Note: Reports are preserved for record-keeping purposes.
+     *
+     * @param user the user entity to delete
+     */
     @Transactional
     public void deleteAccount(User user) {
         UUID userGU = user.getUserGU();
@@ -132,6 +185,13 @@ public class UserService {
         System.out.println("Account deletion completed for user: " + userGU);
     }
 
+    /**
+     * Deletes a user's avatar from Supabase storage.
+     * Extracts the storage key from the avatar URL and performs deletion.
+     * Failure to delete the avatar does not prevent the rest of the account deletion.
+     *
+     * @param user the user whose avatar should be deleted
+     */
     private void deleteUserAvatar(User user) {
         String avatarUrl = user.getAvatar_url();
         if (avatarUrl == null || avatarUrl.isBlank()) {

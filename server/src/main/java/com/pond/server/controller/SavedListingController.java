@@ -19,19 +19,30 @@ import com.pond.server.dto.SavedListingRequest;
 import com.pond.server.model.User;
 import com.pond.server.service.SavedListingService;
 
+/**
+ * REST controller for saved listing (favorites) management.
+ * Handles saving, unsaving, and retrieving user's saved listings.
+ */
 @RestController
 @RequestMapping("/saved-listings")
 public class SavedListingController {
     
     private final SavedListingService savedListingService;
     
+    /**
+     * Constructs a new SavedListingController with required dependencies.
+     *
+     * @param savedListingService the service for saved listing operations
+     */
     public SavedListingController(SavedListingService savedListingService) {
         this.savedListingService = savedListingService;
     }
     
     /**
-     * Save a listing
-     * POST /saved-listings
+     * Saves a listing to the authenticated user's favorites.
+     *
+     * @param request the request containing listing UUID to save
+     * @return ResponseEntity with success message or error
      */
     @PostMapping
     public ResponseEntity<?> saveListing(@RequestBody SavedListingRequest request) {
@@ -49,8 +60,10 @@ public class SavedListingController {
     }
     
     /**
-     * Unsave a listing
-     * DELETE /saved-listings
+     * Removes a listing from the authenticated user's favorites.
+     *
+     * @param request the request containing listing UUID to unsave
+     * @return ResponseEntity with success message or error
      */
     @DeleteMapping
     public ResponseEntity<?> unsaveListing(@RequestBody SavedListingRequest request) {
@@ -68,8 +81,10 @@ public class SavedListingController {
     }
     
     /**
-     * Check if a listing is saved
-     * POST /saved-listings/status
+     * Checks if a specific listing is saved by the authenticated user.
+     *
+     * @param request the request containing listing UUID to check
+     * @return ResponseEntity with saved status or 401 if unauthorized
      */
     @PostMapping("/status")
     public ResponseEntity<?> checkSavedStatus(@RequestBody SavedListingRequest request) {
@@ -83,8 +98,9 @@ public class SavedListingController {
     }
     
     /**
-     * Get all saved listings for the current user
-     * GET /saved-listings
+     * Retrieves all saved listings for the authenticated user with full details.
+     *
+     * @return ResponseEntity with list of saved listings or 401 if unauthorized
      */
     @GetMapping
     public ResponseEntity<?> getSavedListings() {
@@ -98,8 +114,10 @@ public class SavedListingController {
     }
     
     /**
-     * Get list of saved listing IDs (lightweight endpoint for checking multiple listings)
-     * GET /saved-listings/ids
+     * Retrieves a list of saved listing IDs (lightweight endpoint).
+     * Useful for checking save status of multiple listings at once.
+     *
+     * @return ResponseEntity with list of UUIDs or 401 if unauthorized
      */
     @GetMapping("/ids")
     public ResponseEntity<?> getSavedListingIds() {

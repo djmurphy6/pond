@@ -16,6 +16,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entity representing an archived report that has been resolved.
+ * 
+ * <p>When a {@link Report} is reviewed and resolved (approved or rejected),
+ * it is moved from the active reports table to this archive table. This
+ * keeps the active reports queue clean while maintaining a complete history
+ * of all reports for auditing purposes.</p>
+ * 
+ * <p>The structure mirrors the {@link Report} entity with an additional
+ * {@link #archivedAt} timestamp to track when the report was archived.</p>
+ * 
+ * @author Pond Team
+ * @see Report
+ */
 @Entity
 @Table(name = "resolved_reports")
 @Getter
@@ -23,43 +37,85 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ResolvedReport {
     
+    /**
+     * Unique identifier for the report (UUID).
+     * Uses the same ID as the original Report entity.
+     */
     @Id
     @Column(name = "report_gu", updatable = false, nullable = false)
     private UUID reportGU;
 
+    /**
+     * UUID of the user who filed the original report.
+     */
     @Column(name = "user_gu", nullable = false)
-    private UUID userGU;  // User who filed the report
+    private UUID userGU;
 
+    /**
+     * UUID of the listing that was reported.
+     */
     @Column(name = "listing_gu", nullable = false)
-    private UUID listingGU;  // Listing being reported
+    private UUID listingGU;
 
+    /**
+     * Categorized reason for the report.
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "reason", nullable = false)
     private ReportReason reason;
 
+    /**
+     * Optional detailed message explaining the report.
+     * Maximum length of 1000 characters.
+     */
     @Column(name = "message", length = 1000)
-    private String message;  // Optional additional details
+    private String message;
 
+    /**
+     * Final status of the report (APPROVED or REJECTED).
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ReportStatus status;
 
+    /**
+     * Timestamp when the original report was created.
+     */
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * UUID of the administrator who reviewed the report.
+     */
     @Column(name = "reviewed_by_admin_gu")
-    private UUID reviewedByAdminGU;  // Admin who reviewed it
+    private UUID reviewedByAdminGU;
 
+    /**
+     * Timestamp when the report was reviewed.
+     */
     @Column(name = "reviewed_at")
     private LocalDateTime reviewedAt;
 
+    /**
+     * Notes added by the administrator during review.
+     * Maximum length of 1000 characters.
+     */
     @Column(name = "admin_notes", length = 1000)
-    private String adminNotes;  // Admin can add notes when reviewing
+    private String adminNotes;
     
+    /**
+     * Timestamp when the report was moved to the resolved_reports table.
+     * Set automatically in the constructor.
+     */
     @Column(name = "archived_at", nullable = false)
-    private LocalDateTime archivedAt;  // When it was moved to resolved_reports table
+    private LocalDateTime archivedAt;
 
-    // Constructor to create from a Report
+    /**
+     * Constructs a ResolvedReport from an existing Report.
+     * Copies all fields from the report and sets archivedAt to current time.
+     * 
+     * @param report the original report to archive
+     */
     public ResolvedReport(Report report) {
         this.reportGU = report.getReportGU();
         this.userGU = report.getUserGU();

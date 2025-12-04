@@ -14,12 +14,22 @@ import com.pond.server.model.User;
 import com.pond.server.repository.ListingRepository;
 import com.pond.server.repository.SavedListingRepository;
 
+/**
+ * Service class for managing saved listings.
+ * Handles saving/unsaving listings and retrieving user's saved listings.
+ */
 @Service
 public class SavedListingService {
     
     private final SavedListingRepository savedListingRepository;
     private final ListingRepository listingRepository;
     
+    /**
+     * Constructs a new SavedListingService with required dependencies.
+     *
+     * @param savedListingRepository the repository for saved listing data access
+     * @param listingRepository the repository for listing data access
+     */
     public SavedListingService(SavedListingRepository savedListingRepository, 
                                ListingRepository listingRepository) {
         this.savedListingRepository = savedListingRepository;
@@ -27,7 +37,12 @@ public class SavedListingService {
     }
     
     /**
-     * Save a listing for a user
+     * Saves a listing for a user (adds to favorites).
+     * Prevents duplicate saves.
+     *
+     * @param listingGU the UUID of the listing to save
+     * @param user the user saving the listing
+     * @throws RuntimeException if listing not found or already saved
      */
     @Transactional
     public void saveListing(UUID listingGU, User user) {
@@ -46,7 +61,11 @@ public class SavedListingService {
     }
     
     /**
-     * Unsave a listing for a user
+     * Removes a listing from user's saved listings (removes from favorites).
+     *
+     * @param listingGU the UUID of the listing to unsave
+     * @param user the user unsaving the listing
+     * @throws RuntimeException if saved listing relationship not found
      */
     @Transactional
     public void unsaveListing(UUID listingGU, User user) {
@@ -58,7 +77,11 @@ public class SavedListingService {
     }
     
     /**
-     * Check if a listing is saved by a user
+     * Checks if a specific listing is saved by a user.
+     *
+     * @param listingGU the UUID of the listing to check
+     * @param user the user to check for
+     * @return true if the listing is saved by the user, false otherwise
      */
     @Transactional(readOnly = true)
     public boolean isListingSaved(UUID listingGU, User user) {
@@ -66,8 +89,11 @@ public class SavedListingService {
     }
     
     /**
-     * Get all saved listings for a user (returns full listing details)
-     * OPTIMIZED: Uses single JOIN query instead of fetching separately and filtering
+     * Retrieves all saved listings for a user with full listing details.
+     * OPTIMIZED: Uses single JOIN query instead of fetching separately and filtering.
+     *
+     * @param user the user whose saved listings to retrieve
+     * @return a list of saved listings as ListingDTOs (sorted by save date, newest first)
      */
     @Transactional(readOnly = true)
     public List<ListingDTO> getSavedListings(User user) {
@@ -82,13 +108,23 @@ public class SavedListingService {
     }
     
     /**
-     * Get list of listing IDs that user has saved (lightweight, for checking status)
+     * Retrieves a list of listing IDs that a user has saved.
+     * Lightweight method for checking save status of multiple listings.
+     *
+     * @param user the user whose saved listing IDs to retrieve
+     * @return a list of UUIDs of saved listings
      */
     @Transactional(readOnly = true)
     public List<UUID> getSavedListingIds(User user) {
         return savedListingRepository.findListingGUsByUserGU(user.getUserGU());
     }
     
+    /**
+     * Converts a Listing entity to a ListingDTO.
+     *
+     * @param l the listing entity to convert
+     * @return the ListingDTO representation
+     */
     private ListingDTO toDto(Listing l) {
         return new ListingDTO(
             l.getListingGU(),

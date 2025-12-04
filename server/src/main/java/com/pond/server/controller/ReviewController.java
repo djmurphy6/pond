@@ -22,16 +22,33 @@ import com.pond.server.dto.UserRatingStatsDTO;
 import com.pond.server.model.User;
 import com.pond.server.service.ReviewService;
 
+/**
+ * REST controller for review management operations.
+ * Handles creation, updating, deletion, and retrieval of user reviews.
+ */
 @RestController
 @RequestMapping("/reviews")
 public class ReviewController {
 
     private final ReviewService reviewService;
 
+    /**
+     * Constructs a new ReviewController with required dependencies.
+     *
+     * @param reviewService the service for review operations
+     */
     public ReviewController(ReviewService reviewService){
         this.reviewService = reviewService;
     }
 
+    /**
+     * Creates a new review for another user.
+     * Requires a transaction between the users.
+     *
+     * @param user the authenticated user creating the review
+     * @param request the create review request with rating and comment
+     * @return ResponseEntity with the created review
+     */
     @PostMapping
     public ResponseEntity<ReviewDTO> createReview(
             @AuthenticationPrincipal User user,
@@ -39,6 +56,14 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.createReview(request, user.getUserGU()));
     }
 
+    /**
+     * Updates an existing review owned by the authenticated user.
+     *
+     * @param user the authenticated user
+     * @param reviewId the UUID of the review to update
+     * @param request the update request with new rating and/or comment
+     * @return ResponseEntity with the updated review
+     */
     @PutMapping("/{reviewId}")
     public ResponseEntity<ReviewDTO> updateReview(
             @AuthenticationPrincipal User user,
@@ -47,6 +72,13 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.updateReview(reviewId, request, user.getUserGU()));
     }
 
+    /**
+     * Deletes a review owned by the authenticated user.
+     *
+     * @param user the authenticated user
+     * @param reviewId the UUID of the review to delete
+     * @return ResponseEntity with success message
+     */
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<Map<String, String>> deleteReview(
             @AuthenticationPrincipal User user,
@@ -55,6 +87,13 @@ public class ReviewController {
         return ResponseEntity.ok(Map.of("message", "Review deleted successfully"));
     }
 
+    /**
+     * Deletes any review (admin only).
+     *
+     * @param user the authenticated admin user
+     * @param reviewId the UUID of the review to delete
+     * @return ResponseEntity with success message or 403 if not admin
+     */
     @DeleteMapping("/admin/{reviewId}")
     public ResponseEntity<Map<String, String>> adminDeleteReview(
             @AuthenticationPrincipal User user,
@@ -67,11 +106,25 @@ public class ReviewController {
         return ResponseEntity.ok(Map.of("message", "Review deleted successfully"));
     }
 
+    /**
+     * Retrieves all reviews for a specific user.
+     *
+     * @param userGu the UUID of the user (reviewee)
+     * @return ResponseEntity with list of reviews
+     */
     @GetMapping("/user/{userGu}")
     public ResponseEntity<List<ReviewDTO>> getReviewsForUser(@PathVariable UUID userGu) {
         return ResponseEntity.ok(reviewService.getReviewsForUser(userGu));
     }
 
+    /**
+     * Retrieves rating statistics for a user.
+     * Includes average rating, total reviews, and whether current user can review them.
+     *
+     * @param user the authenticated user (optional)
+     * @param userGu the UUID of the user whose stats to retrieve
+     * @return ResponseEntity with rating statistics
+     */
     @GetMapping("/stats/{userGu}")
     public ResponseEntity<UserRatingStatsDTO> getUserRatingStats(
             @AuthenticationPrincipal User user,
@@ -80,7 +133,13 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getUserRatingStats(userGu, currentUserGu));
     }
 
-    // Dedicated call for just if a user can review
+    /**
+     * Checks if the authenticated user can review another user.
+     *
+     * @param user the authenticated user
+     * @param userGu the UUID of the potential reviewee
+     * @return ResponseEntity with boolean indicating if review is allowed
+     */
     @GetMapping("/can-review/{userGu}")
     public ResponseEntity<Boolean> canReviewUser(
             @AuthenticationPrincipal User user,

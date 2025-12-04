@@ -15,9 +15,24 @@ import javax.imageio.ImageWriter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Service class for image processing operations.
+ * Handles image resizing, compression, and conversion to JPEG format.
+ */
 @Service
 public class ImageService {
 
+    /**
+     * Processes an uploaded image file by resizing and compressing it.
+     * Maintains aspect ratio and converts to JPEG format.
+     *
+     * @param file the uploaded image file
+     * @param maxW the maximum width in pixels
+     * @param maxH the maximum height in pixels
+     * @param quality the JPEG compression quality (0.0-1.0)
+     * @return ImageResult containing the processed image bytes and content type
+     * @throws RuntimeException if image processing fails or file is invalid
+     */
     public ImageResult process(MultipartFile file, int maxW, int maxH, float quality)  {
         try (InputStream in = file.getInputStream()) {
             BufferedImage src = ImageIO.read(in);
@@ -51,6 +66,17 @@ public class ImageService {
         }
     }
 
+    /**
+     * Processes raw image bytes by resizing and compressing them.
+     * Maintains aspect ratio and converts to JPEG format.
+     *
+     * @param data the raw image bytes
+     * @param maxW the maximum width in pixels
+     * @param maxH the maximum height in pixels
+     * @param quality the JPEG compression quality (0.0-1.0)
+     * @return ImageResult containing the processed image bytes and content type
+     * @throws RuntimeException if image processing fails or data is invalid
+     */
     public ImageResult process(byte[] data, int maxW, int maxH, float quality)  {
         try (InputStream in = new java.io.ByteArrayInputStream(data)) {
             java.awt.image.BufferedImage src = javax.imageio.ImageIO.read(in);
@@ -84,5 +110,11 @@ public class ImageService {
         }
     }
 
+    /**
+     * Record representing the result of image processing.
+     *
+     * @param bytes the processed image bytes
+     * @param contentType the MIME type of the processed image
+     */
     public record ImageResult(byte[] bytes, String contentType) {}
 }

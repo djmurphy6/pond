@@ -8,12 +8,27 @@ import java.net.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class for interacting with Supabase Storage API.
+ * Handles file uploads and deletions in Supabase storage buckets.
+ */
 @Service
 public class SupabaseStorage {
     @Value("${supabase.url}") private String supabaseUrl;
-    @Value("${supabase.storage-url}") private String storageUrl;  // Add this line
+    @Value("${supabase.storage-url}") private String storageUrl;
     @Value("${supabase.service-role-key}") private String serviceKey;
 
+    /**
+     * Uploads a file to a public Supabase storage bucket.
+     * Sets appropriate caching headers for optimal performance.
+     *
+     * @param bucket the name of the storage bucket
+     * @param key the file path/key within the bucket
+     * @param bytes the file content as bytes
+     * @param contentType the MIME type of the file
+     * @return the public URL of the uploaded file
+     * @throws RuntimeException if upload fails
+     */
     public String uploadPublic(String bucket, String key, byte[] bytes, String contentType) {
         try {
             HttpRequest req = HttpRequest.newBuilder()
@@ -31,6 +46,14 @@ public class SupabaseStorage {
         }
     }
 
+    /**
+     * Deletes a file from a Supabase storage bucket.
+     * Logs success/failure for debugging purposes.
+     *
+     * @param bucket the name of the storage bucket
+     * @param key the file path/key within the bucket
+     * @throws RuntimeException if deletion fails
+     */
     public void deleteObject(String bucket, String key){
         String deleteUrl = storageUrl + "/storage/v1/object/" + bucket + "/" + key;
         try {

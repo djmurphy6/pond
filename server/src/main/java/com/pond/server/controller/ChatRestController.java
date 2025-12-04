@@ -23,6 +23,11 @@ import com.pond.server.model.User;
 import com.pond.server.service.ChatRoomService;
 import com.pond.server.service.MessageService;
 
+/**
+ * REST controller for chat room and message operations.
+ * Provides HTTP endpoints for chat room management, message retrieval, and read status tracking.
+ * Works in conjunction with MessageController (WebSocket) for real-time messaging.
+ */
 @RestController
 @RequestMapping("/chat")
 public class ChatRestController {
@@ -30,12 +35,25 @@ public class ChatRestController {
     private final ChatRoomService chatRoomService;
     private final MessageService messageService;
 
+    /**
+     * Constructs a new ChatRestController with required dependencies.
+     *
+     * @param chatRoomService the service for chat room operations
+     * @param messageService the service for message operations
+     */
     public ChatRestController(ChatRoomService chatRoomService, MessageService messageService) {
         this.chatRoomService = chatRoomService;
         this.messageService = messageService;
     }
 
-    // Initialize or get chat room for a listing
+    /**
+     * Initializes or retrieves an existing chat room for a listing.
+     * Creates a new chat room if one doesn't exist between the buyer and seller.
+     *
+     * @param listingGU the UUID of the listing
+     * @param buyerGU the UUID of the buyer
+     * @return ResponseEntity with chat room details
+     */
     @PostMapping("/rooms/init")
     public ResponseEntity<?> initializeChatRoom(
             @RequestParam UUID listingGU,
@@ -46,7 +64,12 @@ public class ChatRestController {
         return ResponseEntity.ok(dto);
     }
 
-    // Get all chat rooms for the authenticated user
+    /**
+     * Retrieves all chat rooms for the authenticated user.
+     * Returns a summary list including last message and unread counts.
+     *
+     * @return ResponseEntity with list of chat room summaries or 401 if unauthorized
+     */
     @GetMapping("/rooms")
     public ResponseEntity<?> getUserChatRooms() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -58,7 +81,13 @@ public class ChatRestController {
         return ResponseEntity.ok(rooms);
     }
 
-    // Get specific chat room details
+    /**
+     * Retrieves detailed information about a specific chat room.
+     * Includes listing details, other user info, and conversation metadata.
+     *
+     * @param roomId the ID of the chat room
+     * @return ResponseEntity with chat room details or 401 if unauthorized
+     */
     @GetMapping("/rooms/{roomId}")
     public ResponseEntity<?> getChatRoomDetails(@PathVariable String roomId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -70,7 +99,15 @@ public class ChatRestController {
         return ResponseEntity.ok(dto);
     }
 
-    // Get messages for a chat room with pagination
+    /**
+     * Retrieves messages for a chat room with pagination.
+     * Verifies user has access to the chat room before retrieving messages.
+     *
+     * @param roomId the ID of the chat room
+     * @param page the page number (default 0)
+     * @param size the page size (default 50)
+     * @return ResponseEntity with paginated messages or 401 if unauthorized
+     */
     @GetMapping("/rooms/{roomId}/messages")
     public ResponseEntity<?> getRoomMessages(
             @PathVariable String roomId,
@@ -89,7 +126,13 @@ public class ChatRestController {
         return ResponseEntity.ok(messages);
     }
 
-    // Mark messages as read
+    /**
+     * Marks all unread messages in a chat room as read for the authenticated user.
+     * Verifies user has access to the chat room before marking messages.
+     *
+     * @param roomId the ID of the chat room
+     * @return ResponseEntity with success message or 401 if unauthorized
+     */
     @PostMapping("/rooms/{roomId}/mark-read")
     public ResponseEntity<?> markMessagesAsRead(@PathVariable String roomId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -103,7 +146,12 @@ public class ChatRestController {
         return ResponseEntity.ok(Map.of("result", "Success"));
     }
 
-    // Get total unread message count for the authenticated user
+    /**
+     * Retrieves the total unread message count across all chat rooms for the authenticated user.
+     * Used for notification badges.
+     *
+     * @return ResponseEntity with unread count or 401 if unauthorized
+     */
     @GetMapping("/unread-count")
     public ResponseEntity<?> getUnreadMessageCount() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

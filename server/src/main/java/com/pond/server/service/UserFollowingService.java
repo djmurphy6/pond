@@ -11,12 +11,22 @@ import com.pond.server.model.UserFollowing;
 import com.pond.server.repository.UserFollowingRepository;
 import com.pond.server.repository.UserRepository;
 
+/**
+ * Service class for managing user following relationships.
+ * Handles follow/unfollow operations, relationship checks, and follower/following counts.
+ */
 @Service
 public class UserFollowingService {
     
     private final UserFollowingRepository userFollowingRepository;
     private final UserRepository userRepository;
     
+    /**
+     * Constructs a new UserFollowingService with required dependencies.
+     *
+     * @param userFollowingRepository the repository for user following data access
+     * @param userRepository the repository for user data access
+     */
     public UserFollowingService(UserFollowingRepository userFollowingRepository,
                                UserRepository userRepository) {
         this.userFollowingRepository = userFollowingRepository;
@@ -24,7 +34,12 @@ public class UserFollowingService {
     }
     
     /**
-     * Follow a user
+     * Creates a following relationship between two users.
+     * Prevents self-following, following non-existent users, and duplicate follows.
+     *
+     * @param followerGU the UUID of the user initiating the follow
+     * @param followingGU the UUID of the user being followed
+     * @throws IllegalArgumentException if validation fails
      */
     @Transactional
     public void followUser(UUID followerGU, UUID followingGU) {
@@ -48,7 +63,11 @@ public class UserFollowingService {
     }
     
     /**
-     * Unfollow a user
+     * Removes a following relationship between two users.
+     *
+     * @param followerGU the UUID of the user unfollowing
+     * @param followingGU the UUID of the user being unfollowed
+     * @throws IllegalArgumentException if following relationship doesn't exist
      */
     @Transactional
     public void unfollowUser(UUID followerGU, UUID followingGU) {
@@ -60,7 +79,11 @@ public class UserFollowingService {
     }
     
     /**
-     * Check if user A follows user B
+     * Checks if one user follows another user.
+     *
+     * @param followerGU the UUID of the potential follower
+     * @param followingGU the UUID of the potential followee
+     * @return true if follower follows followee, false otherwise
      */
     @Transactional(readOnly = true)
     public boolean isFollowing(UUID followerGU, UUID followingGU) {
@@ -68,7 +91,10 @@ public class UserFollowingService {
     }
     
     /**
-     * Get list of user GUIDs that this user follows
+     * Retrieves a list of user UUIDs that a specific user follows.
+     *
+     * @param userGU the UUID of the user
+     * @return a list of UUIDs of users being followed
      */
     @Transactional(readOnly = true)
     public List<UUID> getFollowingList(UUID userGU) {
@@ -78,7 +104,10 @@ public class UserFollowingService {
     }
     
     /**
-     * Get list of user GUIDs who follow this user
+     * Retrieves a list of user UUIDs who follow a specific user.
+     *
+     * @param userGU the UUID of the user
+     * @return a list of UUIDs of followers
      */
     @Transactional(readOnly = true)
     public List<UUID> getFollowersList(UUID userGU) {
@@ -88,7 +117,10 @@ public class UserFollowingService {
     }
     
     /**
-     * Get follower count
+     * Gets the count of followers for a user.
+     *
+     * @param userGU the UUID of the user
+     * @return the number of followers
      */
     @Transactional(readOnly = true)
     public long getFollowerCount(UUID userGU) {
@@ -96,7 +128,10 @@ public class UserFollowingService {
     }
     
     /**
-     * Get following count
+     * Gets the count of users that a specific user is following.
+     *
+     * @param userGU the UUID of the user
+     * @return the number of users being followed
      */
     @Transactional(readOnly = true)
     public long getFollowingCount(UUID userGU) {

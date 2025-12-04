@@ -17,6 +17,11 @@ import com.pond.server.model.ResolvedReport;
 import com.pond.server.repository.ReportRepository;
 import com.pond.server.repository.ResolvedReportRepository;
 
+/**
+ * Service class for automatically archiving resolved reports.
+ * Runs scheduled tasks to move resolved reports older than 24 hours to an archive table.
+ * Also runs on application startup to catch up on any missed archiving.
+ */
 @Service
 public class ReportArchiveService {
     
@@ -25,15 +30,21 @@ public class ReportArchiveService {
     private final ReportRepository reportRepository;
     private final ResolvedReportRepository resolvedReportRepository;
 
+    /**
+     * Constructs a new ReportArchiveService with required dependencies.
+     *
+     * @param reportRepository the repository for active report data access
+     * @param resolvedReportRepository the repository for archived report data access
+     */
     public ReportArchiveService(ReportRepository reportRepository, 
                                 ResolvedReportRepository resolvedReportRepository) {
         this.reportRepository = reportRepository;
         this.resolvedReportRepository = resolvedReportRepository;
     }
     
-    /*
-     * Runs when the application starts to catch up on any reports
-     * that should have been archived while the server was down.
+    /**
+     * Runs on application startup to catch up on reports that should have been archived.
+     * Archives any resolved reports that have been resolved for 24+ hours.
      */
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
@@ -42,9 +53,9 @@ public class ReportArchiveService {
         performArchiving();
     }
     
-    /*
-     * Runs every hour to check for resolved reports that have been 
-     * in resolved status for 24+ hours and archives them.
+    /**
+     * Scheduled task that runs every hour to archive old resolved reports.
+     * Archives reports that have been in resolved status for 24+ hours.
      * Cron expression: "0 0 * * * *" = every hour at minute 0
      */
     @Scheduled(cron = "0 0 * * * *")
@@ -55,7 +66,10 @@ public class ReportArchiveService {
     }
     
     /**
-     * Core archiving logic - must be called from a @Transactional method
+     * Core archiving logic that moves resolved reports to the archive table.
+     * Finds all resolved reports older than 24 hours, copies them to resolved_reports table,
+     * and deletes them from the reports table.
+     * Must be called from a @Transactional method for proper transaction management.
      */
     private void performArchiving() {
         try {
@@ -113,8 +127,10 @@ public class ReportArchiveService {
     }
     
     /**
-     * Manual method to archive a specific report immediately
-     * Can be called by admins if needed
+     * Manually archives a specific report immediately, bypassing the 24-hour wait.
+     * Can be called by admins if needed for immediate archiving.
+     *
+     * @param report the report to archive
      */
     @Transactional
     public void archiveReportManually(Report report) {

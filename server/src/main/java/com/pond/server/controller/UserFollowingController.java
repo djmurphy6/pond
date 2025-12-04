@@ -16,19 +16,30 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pond.server.model.User;
 import com.pond.server.service.UserFollowingService;
 
+/**
+ * REST controller for user following relationship management.
+ * Handles follow/unfollow operations and retrieval of followers/following lists.
+ */
 @RestController
 @RequestMapping("/following")
 public class UserFollowingController {
     
     private final UserFollowingService userFollowingService;
     
+    /**
+     * Constructs a new UserFollowingController with required dependencies.
+     *
+     * @param userFollowingService the service for user following operations
+     */
     public UserFollowingController(UserFollowingService userFollowingService) {
         this.userFollowingService = userFollowingService;
     }
     
     /**
-     * Follow a user
-     * POST /following/{userId}
+     * Creates a following relationship between the authenticated user and another user.
+     *
+     * @param userIdToFollow the UUID of the user to follow
+     * @return ResponseEntity with success message or error
      */
     @PostMapping("/{userId}")
     public ResponseEntity<?> followUser(@PathVariable("userId") UUID userIdToFollow) {
@@ -48,8 +59,10 @@ public class UserFollowingController {
     }
     
     /**
-     * Unfollow a user
-     * DELETE /following/{userId}
+     * Removes a following relationship between the authenticated user and another user.
+     *
+     * @param userIdToUnfollow the UUID of the user to unfollow
+     * @return ResponseEntity with success message or error
      */
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> unfollowUser(@PathVariable("userId") UUID userIdToUnfollow) {
@@ -69,8 +82,10 @@ public class UserFollowingController {
     }
     
     /**
-     * Check if current user follows another user
-     * GET /following/{userId}/status
+     * Checks if the authenticated user follows another user.
+     *
+     * @param userId the UUID of the user to check
+     * @return ResponseEntity with following status
      */
     @GetMapping("/{userId}/status")
     public ResponseEntity<?> checkFollowingStatus(@PathVariable("userId") UUID userId) {
@@ -83,8 +98,9 @@ public class UserFollowingController {
     }
     
     /**
-     * Get list of users that current user follows
-     * GET /following/me
+     * Retrieves a list of users that the authenticated user follows.
+     *
+     * @return ResponseEntity with list of following user UUIDs
      */
     @GetMapping("/me")
     public ResponseEntity<?> getMyFollowing() {
@@ -97,8 +113,9 @@ public class UserFollowingController {
     }
     
     /**
-     * Get list of users following the current user
-     * GET /following/me/followers
+     * Retrieves a list of users following the authenticated user.
+     *
+     * @return ResponseEntity with list of follower user UUIDs
      */
     @GetMapping("/me/followers")
     public ResponseEntity<?> getMyFollowers() {
@@ -111,8 +128,10 @@ public class UserFollowingController {
     }
     
     /**
-     * Get follower/following counts for a user
-     * GET /following/{userId}/counts
+     * Retrieves follower and following counts for a specific user.
+     *
+     * @param userId the UUID of the user
+     * @return ResponseEntity with follower and following counts
      */
     @GetMapping("/{userId}/counts")
     public ResponseEntity<?> getUserCounts(@PathVariable("userId") UUID userId) {
