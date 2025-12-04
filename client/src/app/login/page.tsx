@@ -41,7 +41,10 @@ export default function LoginPage() {
                 console.log(JSON.stringify(res));
                 appConfig.access_token = res.accessToken;
                 SaveAppConfig();
+                // Small delay to ensure localStorage is written
+                setTimeout(() => {
                 router.replace("/dashboard");
+                }, 100);
             } else {
                 toast.error("Login failed: " + "Unknown Error");
             }

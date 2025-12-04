@@ -112,7 +112,7 @@ public class SecurityConfiguration {
         allowedOrigins.add("http://localhost:5173");
         allowedOrigins.add("http://localhost:8080");
         
-        //Production/test URLs
+        // Production/test URLs
         allowedOrigins.add("https://pond-kohl.vercel.app");
         
         configuration.setAllowedOrigins(allowedOrigins);
