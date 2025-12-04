@@ -18,9 +18,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     useEffect(() => {
         const getUserInfo = async () => {
+            // Small delay to ensure LoadAppConfig has run and token is loaded from localStorage
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
             const userInfo = await api.GetUserInfo();
             console.log("GetUserInfo:", JSON.stringify(userInfo));
             if (userInfo instanceof ErrorResponse) {
+                console.error("Auth failed, redirecting to login");
                 router.push("/login?error=unauthorized");
                 return;
             } else {
