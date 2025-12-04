@@ -63,6 +63,12 @@ public class AuthenticationService {
         if (existingUser.isPresent()){
             throw new RuntimeException("User already exists");
         }
+        
+        // Validate that email is from University of Oregon
+        if (!input.getEmail().toLowerCase().endsWith("@uoregon.edu")) {
+            throw new RuntimeException("Only @uoregon.edu email addresses are allowed");
+        }
+        
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
         String verificationCode = generateVerificationCode();
         user.setVerificationCode(verificationCode);
