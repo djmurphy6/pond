@@ -3,7 +3,8 @@ import { CreateListingRequest, CreateListingResponse, DeleteListingRequest, Erro
 
 class AppConfig {
     access_token?: string;
-    url: string = "https://pond-dsi0.onrender.com";
+    url: string = "http://localhost:8080";
+    // https://pond-dsi0.onrender.com"
 }
 export const appConfig = new AppConfig();
 

@@ -50,6 +50,7 @@ import { useUnreadCount } from "@/stores/UnreadCountStore";
 import { appConfig } from "@/api/WebService";
 import MobileHeader from "@/components/MobileHeader";
 import { SideBarAside } from "@/components/SideBarAside";
+import { SavedListingsModal } from "@/components/SavedListingsModal";
 
 export default function DashboardPage() {
     const [listings, setListings] = useState<Listing[]>([]);
@@ -74,6 +75,9 @@ export default function DashboardPage() {
     //Mobile
     const [showSidebar, setShowSidebar] = useState<boolean>(false);
 
+    // View mode: 'explore' or 'following'
+    const [viewMode, setViewMode] = useState<'explore' | 'following'>('explore');
+
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -88,7 +92,7 @@ export default function DashboardPage() {
         }, 300); // 300ms debounce
 
         return () => clearTimeout(timeoutId);
-    }, [selectedCategories, sortOption, minPrice, maxPrice, searchQuery, mounted]);
+    }, [selectedCategories, sortOption, minPrice, maxPrice, searchQuery, mounted, viewMode]);
 
     async function GetListings(nextPage?: number) {
         try {
@@ -114,7 +118,9 @@ export default function DashboardPage() {
             };
 
             const targetPage = nextPage ?? 0;
-            let res = await api.GetListings(filters, targetPage, PAGE_SIZE);
+            let res = viewMode === 'explore' 
+                ? await api.GetListings(filters, targetPage, PAGE_SIZE)
+                : await api.GetFollowingListings(filters, targetPage, PAGE_SIZE);
             if (isInitial) setLoading(false); else setIsLoadingMore(false);
             if (res instanceof ErrorResponse) {
                 toast.error(res.body?.error);
@@ -215,6 +221,34 @@ export default function DashboardPage() {
 
             {/* Main content */}
             <main ref={scrollContainerRef} className="flex-1 overflow-y-auto p-6 transition-colors duration-300">
+                {/* View Mode Tabs */}
+                <div className="flex gap-2 mb-6">
+                    <Button
+                        variant="outline"
+                        onClick={() => setViewMode('explore')}
+                        style={viewMode === 'explore' ? {
+                            backgroundColor: 'var(--uo-green)',
+                            borderColor: 'var(--uo-green)',
+                            color: 'white'
+                        } : {}}
+                        className="transition-colors duration-300"
+                    >
+                        Explore
+                    </Button>
+                    <Button
+                        variant="outline"
+                        onClick={() => setViewMode('following')}
+                        style={viewMode === 'following' ? {
+                            backgroundColor: 'var(--uo-green)',
+                            borderColor: 'var(--uo-green)',
+                            color: 'white'
+                        } : {}}
+                        className="transition-colors duration-300"
+                    >
+                        Following
+                    </Button>
+                </div>
+
                 {loading ? (
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                         {Array.from({ length: 12 }).map((_, i) => (
@@ -306,6 +340,8 @@ const SideBar = (props: SideBarProps) => {
                     />
 
                     <MyAccountPopover />
+
+                    <SavedListingsModal />
 
                     <Link href="/dashboard/you/selling" className="w-full">
                         <Button
