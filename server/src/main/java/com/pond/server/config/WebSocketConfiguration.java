@@ -1,7 +1,8 @@
 package com.pond.server.config;
 
-import com.pond.server.interceptors.JwtHandshakeInterceptor;
-import com.pond.server.interceptors.WebSocketChannelInterceptor;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -10,8 +11,8 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.pond.server.interceptors.JwtHandshakeInterceptor;
+import com.pond.server.interceptors.WebSocketChannelInterceptor;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -66,8 +67,8 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
         allowedOrigins.add("http://localhost:3000");
         allowedOrigins.add("http://localhost:5173");
         
-        // You can add test URLs here if needed:
-        // allowedOrigins.add("https://test.example.com");
+        // Production/test URLs
+        allowedOrigins.add("https://pond-kohl.vercel.app");
         
         registry.addEndpoint("/ws")
                 .setAllowedOrigins(allowedOrigins.toArray(new String[0]))
